@@ -10,7 +10,14 @@ import {
   Image, 
   Settings,
   FileText,
-  Globe
+  Globe,
+  Calendar,
+  Camera,
+  DollarSign,
+  Building,
+  Wrench,
+  Phone,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,15 +30,51 @@ const adminNavItems = [
   },
   {
     href: '/admin/history',
-    label: 'इतिहास कार्ड',
+    label: 'इतिहास',
     icon: History,
     description: 'गावाचा इतिहास आणि परंपरा'
+  },
+  {
+    href: '/admin/programs',
+    label: 'कार्यक्रम',
+    icon: Calendar,
+    description: 'कार्यक्रम आणि उत्सव व्यवस्थापन'
+  },
+  {
+    href: '/admin/gallery',
+    label: 'गॅलरी',
+    icon: Camera,
+    description: 'प्रतिमा गॅलरी व्यवस्थापन'
+  },
+  {
+    href: '/admin/income-expense',
+    label: 'जमा-खर्च',
+    icon: DollarSign,
+    description: 'आर्थिक माहिती व्यवस्थापन'
   },
   {
     href: '/admin/announcements',
     label: 'सूचना',
     icon: Megaphone,
     description: 'सूचना आणि जाहीराती व्यवस्थापन'
+  },
+  {
+    href: '/admin/government-schemes',
+    label: 'शासकीय योजना',
+    icon: Building,
+    description: 'सरकारी योजना व्यवस्थापन'
+  },
+  {
+    href: '/admin/departments',
+    label: 'विभाग',
+    icon: BookOpen,
+    description: 'विभागीय माहिती व्यवस्थापन'
+  },
+  {
+    href: '/admin/facilities',
+    label: 'सोई-सुविधा',
+    icon: Wrench,
+    description: 'सुविधा व्यवस्थापन'
   },
   {
     href: '/admin/cultural-heritage',
@@ -44,6 +87,12 @@ const adminNavItems = [
     label: 'मुख्य प्रतिमा',
     icon: Image,
     description: 'होमपेज मुख्य प्रतिमा व्यवस्थापन'
+  },
+  {
+    href: '/admin/contact',
+    label: 'संपर्क',
+    icon: Phone,
+    description: 'संपर्क माहिती व्यवस्थापन'
   },
   {
     href: '/admin/settings',

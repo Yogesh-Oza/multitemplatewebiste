@@ -1,0 +1,575 @@
+'use client';
+
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { 
+  BookOpen, 
+  Edit, 
+  Trash2, 
+  Plus,
+  ArrowLeft,
+  Save,
+  Upload,
+  Users,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Building
+} from 'lucide-react';
+import Link from 'next/link';
+import { toast } from 'sonner';
+
+interface Department {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  descriptionEn: string;
+  headName: string;
+  headNameEn: string;
+  designation: string;
+  designationEn: string;
+  phone: string;
+  email: string;
+  address: string;
+  addressEn: string;
+  workingHours: string;
+  workingHoursEn: string;
+  services: string[];
+  servicesEn: string[];
+  imageUrl: string;
+  isActive: boolean;
+}
+
+const mockDepartments: Department[] = [
+  {
+    id: '1',
+    name: 'आरोग्य विभाग',
+    nameEn: 'Health Department',
+    description: 'गावातील आरोग्य सेवा आणि उपचार सुविधा',
+    descriptionEn: 'Village health services and treatment facilities',
+    headName: 'डॉ. प्रिया शर्मा',
+    headNameEn: 'Dr. Priya Sharma',
+    designation: 'आरोग्य अधिकारी',
+    designationEn: 'Health Officer',
+    phone: '+91 98765 43210',
+    email: 'health@grampanchayat.com',
+    address: 'आरोग्य केंद्र, गाव, तालुका, जिल्हा',
+    addressEn: 'Health Center, Village, Taluka, District',
+    workingHours: 'सकाळी ८:०० ते संध्याकाळी ४:००',
+    workingHoursEn: '8:00 AM to 4:00 PM',
+    services: ['उपचार', 'लसीकरण', 'आरोग्य तपासणी', 'दवाखाना'],
+    servicesEn: ['Treatment', 'Vaccination', 'Health Checkup', 'Pharmacy'],
+    imageUrl: '/images/dept-1.jpg',
+    isActive: true
+  },
+  {
+    id: '2',
+    name: 'शिक्षण विभाग',
+    nameEn: 'Education Department',
+    description: 'गावातील शिक्षण सुविधा आणि शाळा व्यवस्थापन',
+    descriptionEn: 'Village education facilities and school management',
+    headName: 'श्री. रवींद्र जाधव',
+    headNameEn: 'Mr. Ravindra Jadhav',
+    designation: 'शिक्षण अधिकारी',
+    designationEn: 'Education Officer',
+    phone: '+91 87654 32109',
+    email: 'education@grampanchayat.com',
+    address: 'शाळा कार्यालय, गाव, तालुका, जिल्हा',
+    addressEn: 'School Office, Village, Taluka, District',
+    workingHours: 'सकाळी ९:०० ते संध्याकाळी ५:००',
+    workingHoursEn: '9:00 AM to 5:00 PM',
+    services: ['शाळा व्यवस्थापन', 'शिक्षक नियुक्ती', 'पुस्तके वाटप', 'शिष्यवृत्ती'],
+    servicesEn: ['School Management', 'Teacher Recruitment', 'Book Distribution', 'Scholarships'],
+    imageUrl: '/images/dept-2.jpg',
+    isActive: true
+  },
+  {
+    id: '3',
+    name: 'कृषी विभाग',
+    nameEn: 'Agriculture Department',
+    description: 'शेती संबंधित सुविधा आणि मार्गदर्शन',
+    descriptionEn: 'Agricultural facilities and guidance',
+    headName: 'श्री. सुनील पाटील',
+    headNameEn: 'Mr. Sunil Patil',
+    designation: 'कृषी अधिकारी',
+    designationEn: 'Agriculture Officer',
+    phone: '+91 76543 21098',
+    email: 'agriculture@grampanchayat.com',
+    address: 'कृषी केंद्र, गाव, तालुका, जिल्हा',
+    addressEn: 'Agriculture Center, Village, Taluka, District',
+    workingHours: 'सकाळी १०:०० ते संध्याकाळी ६:००',
+    workingHoursEn: '10:00 AM to 6:00 PM',
+    services: ['बियाणे वाटप', 'खत सबसिडी', 'शेती मार्गदर्शन', 'कर्ज मदत'],
+    servicesEn: ['Seed Distribution', 'Fertilizer Subsidy', 'Farming Guidance', 'Loan Assistance'],
+    imageUrl: '/images/dept-3.jpg',
+    isActive: true
+  }
+];
+
+const serviceOptions = [
+  'उपचार', 'लसीकरण', 'आरोग्य तपासणी', 'दवाखाना',
+  'शाळा व्यवस्थापन', 'शिक्षक नियुक्ती', 'पुस्तके वाटप', 'शिष्यवृत्ती',
+  'बियाणे वाटप', 'खत सबसिडी', 'शेती मार्गदर्शन', 'कर्ज मदत',
+  'पाणीपुरवठा', 'वीज कनेक्शन', 'रस्ते दुरुस्ती', 'स्वच्छता'
+];
+
+const serviceOptionsEn = [
+  'Treatment', 'Vaccination', 'Health Checkup', 'Pharmacy',
+  'School Management', 'Teacher Recruitment', 'Book Distribution', 'Scholarships',
+  'Seed Distribution', 'Fertilizer Subsidy', 'Farming Guidance', 'Loan Assistance',
+  'Water Supply', 'Electricity Connection', 'Road Repair', 'Sanitation'
+];
+
+export default function DepartmentsPage() {
+  const [departments, setDepartments] = useState<Department[]>(mockDepartments);
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleEdit = (department: Department) => {
+    setEditingDepartment(department);
+    setIsAdding(false);
+  };
+
+  const handleAdd = () => {
+    setEditingDepartment({
+      id: '',
+      name: '',
+      nameEn: '',
+      description: '',
+      descriptionEn: '',
+      headName: '',
+      headNameEn: '',
+      designation: '',
+      designationEn: '',
+      phone: '',
+      email: '',
+      address: '',
+      addressEn: '',
+      workingHours: '',
+      workingHoursEn: '',
+      services: [],
+      servicesEn: [],
+      imageUrl: '',
+      isActive: true
+    });
+    setIsAdding(true);
+  };
+
+  const handleSave = () => {
+    if (!editingDepartment) return;
+
+    if (isAdding) {
+      const newDepartment = { ...editingDepartment, id: Date.now().toString() };
+      setDepartments(prev => [...prev, newDepartment]);
+      toast.success('नवीन विभाग जोडला');
+    } else {
+      setDepartments(prev => prev.map(dept => 
+        dept.id === editingDepartment.id ? editingDepartment : dept
+      ));
+      toast.success('विभाग अपडेट केला');
+    }
+
+    setEditingDepartment(null);
+    setIsAdding(false);
+  };
+
+  const handleDelete = (id: string) => {
+    setDepartments(prev => prev.filter(dept => dept.id !== id));
+    toast.success('विभाग हटवला');
+  };
+
+  const handleCancel = () => {
+    setEditingDepartment(null);
+    setIsAdding(false);
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    setEditingDepartment(prev => prev ? { ...prev, imageUrl } : null);
+    toast.success('प्रतिमा अपलोड केली');
+  };
+
+  const handleToggleActive = (id: string) => {
+    setDepartments(prev => prev.map(dept => 
+      dept.id === id ? { ...dept, isActive: !dept.isActive } : dept
+    ));
+    toast.success('विभाग स्थिती अपडेट केली');
+  };
+
+  const handleServiceToggle = (service: string, serviceEn: string) => {
+    if (!editingDepartment) return;
+
+    const isSelected = editingDepartment.services.includes(service);
+    const newServices = isSelected 
+      ? editingDepartment.services.filter(s => s !== service)
+      : [...editingDepartment.services, service];
+    
+    const newServicesEn = isSelected 
+      ? editingDepartment.servicesEn.filter(s => s !== serviceEn)
+      : [...editingDepartment.servicesEn, serviceEn];
+
+    setEditingDepartment({
+      ...editingDepartment,
+      services: newServices,
+      servicesEn: newServicesEn
+    });
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/admin">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              मुख्यपृष्ठ
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">विभाग</h1>
+            <p className="text-gray-600 mt-1">विभागीय माहिती व्यवस्थापन</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            {departments.length} विभाग
+          </Badge>
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            {departments.filter(d => d.isActive).length} सक्रिय
+          </Badge>
+          <Button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            नवीन विभाग
+          </Button>
+        </div>
+      </div>
+
+      {/* Departments Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {departments.map((department) => (
+          <Card key={department.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+            <div className="relative">
+              <img
+                src={department.imageUrl}
+                alt={department.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute top-2 right-2">
+                <Badge className={department.isActive ? 'bg-green-500' : 'bg-gray-500'}>
+                  {department.isActive ? 'सक्रिय' : 'निष्क्रिय'}
+                </Badge>
+              </div>
+            </div>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-2">{department.name}</h3>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{department.description}</p>
+              
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center text-sm text-gray-500">
+                  <Users className="h-4 w-4 mr-2" />
+                  {department.headName}
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <Phone className="h-4 w-4 mr-2" />
+                  {department.phone}
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <Clock className="h-4 w-4 mr-2" />
+                  {department.workingHours}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-xs font-medium text-gray-700 mb-2">सेवा:</p>
+                <div className="flex flex-wrap gap-1">
+                  {department.services.slice(0, 3).map((service, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {service}
+                    </Badge>
+                  ))}
+                  {department.services.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{department.services.length - 3} अधिक
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEdit(department)}
+                  className="flex-1"
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  संपादन
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleToggleActive(department.id)}
+                  className={department.isActive ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}
+                >
+                  {department.isActive ? 'निष्क्रिय' : 'सक्रिय'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Edit Modal */}
+      {editingDepartment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Edit className="h-5 w-5" />
+                <span>{isAdding ? 'नवीन विभाग जोडा' : 'विभाग संपादित करा'}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">नाव (मराठी)</Label>
+                  <Input
+                    id="name"
+                    value={editingDepartment.name}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, name: e.target.value})}
+                    placeholder="आरोग्य विभाग"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="nameEn">नाव (इंग्रजी)</Label>
+                  <Input
+                    id="nameEn"
+                    value={editingDepartment.nameEn}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, nameEn: e.target.value})}
+                    placeholder="Health Department"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="description">वर्णन (मराठी)</Label>
+                  <Textarea
+                    id="description"
+                    value={editingDepartment.description}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, description: e.target.value})}
+                    placeholder="विभागाचे तपशील"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="descriptionEn">वर्णन (इंग्रजी)</Label>
+                  <Textarea
+                    id="descriptionEn"
+                    value={editingDepartment.descriptionEn}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, descriptionEn: e.target.value})}
+                    placeholder="Department details"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="headName">प्रमुख नाव (मराठी)</Label>
+                  <Input
+                    id="headName"
+                    value={editingDepartment.headName}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, headName: e.target.value})}
+                    placeholder="डॉ. प्रिया शर्मा"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="headNameEn">प्रमुख नाव (इंग्रजी)</Label>
+                  <Input
+                    id="headNameEn"
+                    value={editingDepartment.headNameEn}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, headNameEn: e.target.value})}
+                    placeholder="Dr. Priya Sharma"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="designation">पद (मराठी)</Label>
+                  <Input
+                    id="designation"
+                    value={editingDepartment.designation}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, designation: e.target.value})}
+                    placeholder="आरोग्य अधिकारी"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="designationEn">पद (इंग्रजी)</Label>
+                  <Input
+                    id="designationEn"
+                    value={editingDepartment.designationEn}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, designationEn: e.target.value})}
+                    placeholder="Health Officer"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phone">फोन</Label>
+                  <Input
+                    id="phone"
+                    value={editingDepartment.phone}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, phone: e.target.value})}
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">ईमेल</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editingDepartment.email}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, email: e.target.value})}
+                    placeholder="health@grampanchayat.com"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="address">पत्ता (मराठी)</Label>
+                  <Textarea
+                    id="address"
+                    value={editingDepartment.address}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, address: e.target.value})}
+                    placeholder="आरोग्य केंद्र, गाव, तालुका, जिल्हा"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="addressEn">पत्ता (इंग्रजी)</Label>
+                  <Textarea
+                    id="addressEn"
+                    value={editingDepartment.addressEn}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, addressEn: e.target.value})}
+                    placeholder="Health Center, Village, Taluka, District"
+                    rows={2}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="workingHours">कार्यवेळ (मराठी)</Label>
+                  <Input
+                    id="workingHours"
+                    value={editingDepartment.workingHours}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, workingHours: e.target.value})}
+                    placeholder="सकाळी ८:०० ते संध्याकाळी ४:००"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workingHoursEn">कार्यवेळ (इंग्रजी)</Label>
+                  <Input
+                    id="workingHoursEn"
+                    value={editingDepartment.workingHoursEn}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, workingHoursEn: e.target.value})}
+                    placeholder="8:00 AM to 4:00 PM"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>सेवा निवडा</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                  {serviceOptions.map((service, index) => {
+                    const serviceEn = serviceOptionsEn[index];
+                    const isSelected = editingDepartment.services.includes(service);
+                    return (
+                      <button
+                        key={service}
+                        type="button"
+                        onClick={() => handleServiceToggle(service, serviceEn)}
+                        className={`p-2 text-xs rounded border transition-colors ${
+                          isSelected 
+                            ? 'bg-blue-100 border-blue-300 text-blue-700' 
+                            : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {service}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="image">प्रतिमा</Label>
+                <div className="mt-2">
+                  {editingDepartment.imageUrl && (
+                    <img
+                      src={editingDepartment.imageUrl}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-lg mb-2"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    id="image"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="image"
+                    className="cursor-pointer flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                  >
+                    <div className="text-center">
+                      <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500">प्रतिमा अपलोड करा</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={editingDepartment.isActive}
+                  onChange={(e) => setEditingDepartment({...editingDepartment, isActive: e.target.checked})}
+                  className="rounded"
+                />
+                <Label htmlFor="isActive">सक्रिय</Label>
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <Button variant="outline" onClick={handleCancel}>
+                  रद्द करा
+                </Button>
+                <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+                  <Save className="h-4 w-4 mr-2" />
+                  सेव्ह करा
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
