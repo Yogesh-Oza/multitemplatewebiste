@@ -1,0 +1,295 @@
+'use client';
+
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Globe, 
+  Edit, 
+  Trash2, 
+  Plus,
+  ArrowLeft,
+  Save,
+  Upload,
+  Image
+} from 'lucide-react';
+import Link from 'next/link';
+import { toast } from 'sonner';
+
+interface CulturalHeritage {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  imageUrl: string;
+}
+
+const mockCulturalHeritage: CulturalHeritage[] = [
+  {
+    id: '1',
+    title: 'गणेशोत्सव',
+    titleEn: 'Ganesh Festival',
+    description: 'गावातील सर्वात मोठा सांस्कृतिक उत्सव. 10 दिवसांचा साजरा केला जातो.',
+    descriptionEn: 'The biggest cultural festival of the village. Celebrated for 10 days.',
+    imageUrl: '/images/cultural-1.jpg'
+  },
+  {
+    id: '2',
+    title: 'लोकनृत्य',
+    titleEn: 'Folk Dance',
+    description: 'परंपरागत लोकनृत्य आणि संगीताची समृद्ध परंपरा.',
+    descriptionEn: 'Rich tradition of folk dance and music.',
+    imageUrl: '/images/cultural-2.jpg'
+  },
+  {
+    id: '3',
+    title: 'हस्तकला',
+    titleEn: 'Handicrafts',
+    description: 'स्थानिक कारागीरांची हस्तकला आणि कलाकृती.',
+    descriptionEn: 'Local artisans handicrafts and artworks.',
+    imageUrl: '/images/cultural-3.jpg'
+  },
+  {
+    id: '4',
+    title: 'पारंपरिक व्यंजने',
+    titleEn: 'Traditional Cuisine',
+    description: 'गावातील पारंपरिक व्यंजने आणि पाककला.',
+    descriptionEn: 'Traditional village cuisine and cooking methods.',
+    imageUrl: '/images/cultural-4.jpg'
+  }
+];
+
+export default function CulturalHeritagePage() {
+  const [heritage, setHeritage] = useState<CulturalHeritage[]>(mockCulturalHeritage);
+  const [editingItem, setEditingItem] = useState<CulturalHeritage | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleEdit = (item: CulturalHeritage) => {
+    setEditingItem(item);
+    setIsAdding(false);
+  };
+
+  const handleAdd = () => {
+    setEditingItem({
+      id: '',
+      title: '',
+      titleEn: '',
+      description: '',
+      descriptionEn: '',
+      imageUrl: ''
+    });
+    setIsAdding(true);
+  };
+
+  const handleSave = () => {
+    if (!editingItem) return;
+
+    if (isAdding) {
+      const newItem = { ...editingItem, id: Date.now().toString() };
+      setHeritage(prev => [...prev, newItem]);
+      toast.success('नवीन आयटम जोडले');
+    } else {
+      setHeritage(prev => prev.map(item => 
+        item.id === editingItem.id ? editingItem : item
+      ));
+      toast.success('आयटम अपडेट केले');
+    }
+
+    setEditingItem(null);
+    setIsAdding(false);
+  };
+
+  const handleDelete = (id: string) => {
+    setHeritage(prev => prev.filter(item => item.id !== id));
+    toast.success('आयटम हटवले');
+  };
+
+  const handleCancel = () => {
+    setEditingItem(null);
+    setIsAdding(false);
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    setEditingItem(prev => prev ? { ...prev, imageUrl } : null);
+    toast.success('प्रतिमा अपलोड केली');
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/admin">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              मुख्यपृष्ठ
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">सांस्कृतिक वारसा</h1>
+            <p className="text-gray-600 mt-1">सांस्कृतिक उत्सव आणि परंपरागत कला व्यवस्थापन</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            {heritage.length} आयटम
+          </Badge>
+          <Button onClick={handleAdd} className="bg-green-600 hover:bg-green-700">
+            <Plus className="h-4 w-4 mr-2" />
+            नवीन आयटम
+          </Button>
+        </div>
+      </div>
+
+      {/* Heritage Items Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {heritage.map((item) => (
+          <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+            <div className="relative">
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute top-2 right-2">
+                <Badge className="bg-green-500">
+                  सांस्कृतिक
+                </Badge>
+              </div>
+            </div>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-3">{item.description}</p>
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEdit(item)}
+                  className="flex-1"
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  संपादन
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-red-600 hover:text-red-700"
+                  onClick={() => handleDelete(item.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Edit Modal */}
+      {editingItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Edit className="h-5 w-5" />
+                <span>{isAdding ? 'नवीन आयटम जोडा' : 'आयटम संपादित करा'}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="title">शीर्षक (मराठी)</Label>
+                  <Input
+                    id="title"
+                    value={editingItem.title}
+                    onChange={(e) => setEditingItem({...editingItem, title: e.target.value})}
+                    placeholder="गणेशोत्सव"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="titleEn">शीर्षक (इंग्रजी)</Label>
+                  <Input
+                    id="titleEn"
+                    value={editingItem.titleEn}
+                    onChange={(e) => setEditingItem({...editingItem, titleEn: e.target.value})}
+                    placeholder="Ganesh Festival"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="description">वर्णन (मराठी)</Label>
+                  <Textarea
+                    id="description"
+                    value={editingItem.description}
+                    onChange={(e) => setEditingItem({...editingItem, description: e.target.value})}
+                    placeholder="गावातील सर्वात मोठा सांस्कृतिक उत्सव"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="descriptionEn">वर्णन (इंग्रजी)</Label>
+                  <Textarea
+                    id="descriptionEn"
+                    value={editingItem.descriptionEn}
+                    onChange={(e) => setEditingItem({...editingItem, descriptionEn: e.target.value})}
+                    placeholder="The biggest cultural festival of the village"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="image">प्रतिमा</Label>
+                <div className="mt-2">
+                  {editingItem.imageUrl && (
+                    <img
+                      src={editingItem.imageUrl}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-lg mb-2"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    id="image"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="image"
+                    className="cursor-pointer flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                  >
+                    <div className="text-center">
+                      <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500">प्रतिमा अपलोड करा</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <Button variant="outline" onClick={handleCancel}>
+                  रद्द करा
+                </Button>
+                <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+                  <Save className="h-4 w-4 mr-2" />
+                  सेव्ह करा
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}

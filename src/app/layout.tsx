@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -115,6 +116,9 @@ export default function RootLayout({
         
         {/* Google Translate Widget */}
         <div id="google_translate_element" className="fixed bottom-4 right-4 z-50"></div>
+        
+        {/* Toast Notifications */}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
