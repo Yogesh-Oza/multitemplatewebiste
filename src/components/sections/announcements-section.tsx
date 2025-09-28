@@ -59,8 +59,6 @@ export function AnnouncementsSection() {
 
   const featuredAnnouncements = announcements.slice(0, 3);
 
-
-export function AnnouncementsSection() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -133,7 +131,7 @@ export function AnnouncementsSection() {
                 <div className="relative">
                   <div className="h-56 w-full overflow-hidden">
                     <Image
-                      src={announcement.image}
+                      src={announcement.imageUrl || '/images/placeholder-announcement.jpg'}
                       alt={announcement.title}
                       width={400}
                       height={220}
