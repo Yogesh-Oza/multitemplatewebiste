@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model VillageInfo {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  stats       Json   // Array of statistics
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("village_info")
+}
+
+model HistoryCard {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  gradient    String
+  icon        String
+  order       Int    @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("history_cards")
+}
+
+model Announcement {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  date        String
+  description String
+  fullDescription String?
+  image       String
+  category    String
+  priority    String // high, medium, low
+  status      String // active, completed, upcoming
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+model CulturalHeritage {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  image       String
+  category    String
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("cultural_heritage")
+}
+
+model HeroImage {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl    String
+  title       String?
+  description String?
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("hero_images")
+}
+
+model AdminUser {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  username  String @unique
+  email     String @unique
+  password  String
+  role      String @default("admin") // admin, editor
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
+}

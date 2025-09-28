@@ -1,0 +1,155 @@
+import Link from 'next/link';
+import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Instagram } from 'lucide-react';
+
+export function Footer() {
+  return (
+    <footer className="bg-gray-900 text-white">
+      <div className="container py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Brand Section */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600" />
+              <span className="text-xl font-bold">ग्रामपंचायत</span>
+            </div>
+            <p className="text-gray-300 leading-relaxed">
+              एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख. 
+              सर्वांसाठी विकास आणि समृद्धी.
+            </p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Instagram className="h-5 w-5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">द्रुत लिंक</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                  आमच्याबद्दल
+                </Link>
+              </li>
+              <li>
+                <Link href="/history" className="text-gray-300 hover:text-white transition-colors">
+                  इतिहास
+                </Link>
+              </li>
+              <li>
+                <Link href="/programs" className="text-gray-300 hover:text-white transition-colors">
+                  कार्यक्रम
+                </Link>
+              </li>
+              <li>
+                <Link href="/gallery" className="text-gray-300 hover:text-white transition-colors">
+                  गॅलरी
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
+                  संपर्क
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">सेवा</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/jama-kharch" className="text-gray-300 hover:text-white transition-colors">
+                  जमा-खर्च
+                </Link>
+              </li>
+              <li>
+                <Link href="/announcements" className="text-gray-300 hover:text-white transition-colors">
+                  सूचना
+                </Link>
+              </li>
+              <li>
+                <Link href="/gov-programs" className="text-gray-300 hover:text-white transition-colors">
+                  शासकीय योजना
+                </Link>
+              </li>
+              <li>
+                <Link href="/departments" className="text-gray-300 hover:text-white transition-colors">
+                  विभाग
+                </Link>
+              </li>
+              <li>
+                <Link href="/amenities" className="text-gray-300 hover:text-white transition-colors">
+                  सोई-सुविधा
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">संपर्क माहिती</h3>
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-gray-300">
+                    ग्रामपंचायत कार्यालय<br />
+                    गाव, तालुका, जिल्हा<br />
+                    महाराष्ट्र, भारत
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                <p className="text-gray-300">+91 12345 67890</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Mail className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                <p className="text-gray-300">info@grampanchayat.com</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Globe className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                <a 
+                  href="https://digitalgp.in" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  digitalgp.in
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-800 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p className="text-gray-400 text-sm">
+              © 2024 ग्रामपंचायत. सर्व हक्क राखीव.
+            </p>
+            <div className="flex space-x-6 text-sm">
+              <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                गोपनीयता धोरण
+              </Link>
+              <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                वापराच्या अटी
+              </Link>
+              <Link href="/sitemap" className="text-gray-400 hover:text-white transition-colors">
+                साइटमॅप
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
