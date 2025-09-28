@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const data = await request.json();
-    console.log('Admin API received data:', data);
     
     // Transform stats array to the format expected by the database
     const statsData = data.stats.reduce((acc: any, stat: any) => {
@@ -49,11 +48,8 @@ export async function PUT(request: NextRequest) {
       return acc;
     }, { families: 0, population: 0, gramPanchayatCount: 0, area: 0 });
     
-    console.log('Transformed stats data:', statsData);
-    
     // First, try to find existing village info
     let villageInfo = await prisma.villageInfo.findFirst();
-    console.log('Found existing village info:', villageInfo);
     
     if (villageInfo) {
       // Update existing record
@@ -67,7 +63,6 @@ export async function PUT(request: NextRequest) {
           stats: statsData,
         },
       });
-      console.log('Updated village info:', villageInfo);
     } else {
       // Create new record
       villageInfo = await prisma.villageInfo.create({
@@ -79,7 +74,6 @@ export async function PUT(request: NextRequest) {
           stats: statsData,
         },
       });
-      console.log('Created new village info:', villageInfo);
     }
 
     return NextResponse.json(villageInfo);

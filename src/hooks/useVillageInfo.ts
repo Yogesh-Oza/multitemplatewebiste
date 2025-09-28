@@ -32,12 +32,10 @@ export function useVillageInfo() {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched village info:', data);
         setVillageInfo(data);
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to fetch village information');
-        console.error('API Error:', errorData);
       }
     } catch (err) {
       setError('Error fetching village information');

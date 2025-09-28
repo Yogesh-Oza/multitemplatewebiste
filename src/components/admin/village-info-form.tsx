@@ -70,25 +70,17 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
     ];
   };
 
-  const [formData, setFormData] = useState<VillageInfo>(() => {
-    // Debug logging
-    console.log('Initial data received:', initialData);
-    console.log('Stats type:', typeof initialData?.stats);
-    console.log('Stats value:', initialData?.stats);
-    
-    return {
-      title: initialData?.title || 'आमच्या गावाबद्दल',
-      titleEn: initialData?.titleEn || 'About Our Village',
-      description: initialData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
-      descriptionEn: initialData?.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
-      stats: transformStats(initialData?.stats),
-    };
+  const [formData, setFormData] = useState<VillageInfo>({
+    title: initialData?.title || 'आमच्या गावाबद्दल',
+    titleEn: initialData?.titleEn || 'About Our Village',
+    description: initialData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+    descriptionEn: initialData?.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
+    stats: transformStats(initialData?.stats),
   });
 
   // Update form data when initialData changes
   useEffect(() => {
     if (initialData) {
-      console.log('Initial data updated:', initialData);
       setFormData({
         title: initialData.title || 'आमच्या गावाबद्दल',
         titleEn: initialData.titleEn || 'About Our Village',
@@ -137,8 +129,6 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         stats: Array.isArray(formData.stats) ? formData.stats : []
       };
       
-      console.log('Submitting data:', dataToSubmit);
-      
       const response = await fetch('/api/admin/village-info', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -146,8 +136,6 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log('Village info updated:', result);
         toast.success('गाव माहिती सफलतापूर्वक सेव्ह केली!');
         
         // Force refresh the page to show updated data
@@ -156,7 +144,6 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         }, 500);
       } else {
         const errorData = await response.json();
-        console.error('Error response:', errorData);
         toast.error(`त्रुटी आली: ${errorData.error || 'अज्ञात त्रुटी'}`);
       }
     } catch (error) {

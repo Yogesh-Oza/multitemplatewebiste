@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const villageInfo = await prisma.villageInfo.findFirst();
-    console.log('Public API - Raw village info from DB:', villageInfo);
     
     if (!villageInfo) {
       return NextResponse.json({ 
@@ -29,8 +28,6 @@ export async function GET() {
       createdAt: villageInfo.createdAt,
       updatedAt: villageInfo.updatedAt
     };
-
-    console.log('Public API - Transformed data:', transformedData);
 
     const response = NextResponse.json(transformedData);
     
