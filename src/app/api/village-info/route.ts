@@ -12,6 +12,7 @@ export async function GET() {
     }
 
     // Transform the data to match the expected interface for the frontend
+    const stats = villageInfo.stats as any; // Type assertion for JSON data
     const transformedData = {
       id: villageInfo.id,
       title: villageInfo.title,
@@ -19,10 +20,10 @@ export async function GET() {
       description: villageInfo.description,
       descriptionEn: villageInfo.descriptionEn,
       // Extract stats from JSON and flatten them
-      families: villageInfo.stats?.families || 0,
-      population: villageInfo.stats?.population || 0,
-      gramPanchayatCount: villageInfo.stats?.gramPanchayatCount || 0,
-      area: villageInfo.stats?.area || 0,
+      families: stats?.families || 0,
+      population: stats?.population || 0,
+      gramPanchayatCount: stats?.gramPanchayatCount || 0,
+      area: stats?.area || 0,
       // Keep original stats for admin use
       stats: villageInfo.stats,
       createdAt: villageInfo.createdAt,
