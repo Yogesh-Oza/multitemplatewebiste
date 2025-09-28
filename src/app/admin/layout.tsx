@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
 import { AdminHeader } from '@/components/admin/admin-header';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'प्रशासन पैनल - ग्रामपंचायत',
@@ -25,6 +26,7 @@ export default function AdminLayout({
             {children}
           </main>
         </div>
+        <Toaster position="top-right" richColors />
     </div>
   );
 }

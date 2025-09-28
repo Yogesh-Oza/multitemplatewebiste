@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Plus, Trash2, Users, Home, MapPin, TrendingUp } from 'lucide-react';
+import { Save, Plus, Trash2, Users, Home, MapPin, TrendingUp, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Stat {
@@ -34,18 +34,70 @@ interface VillageInfoFormProps {
 export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<VillageInfo>({
-    title: initialData?.title || 'आमच्या गावाबद्दल',
-    titleEn: initialData?.titleEn || 'About Our Village',
-    description: initialData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
-    descriptionEn: initialData?.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
-    stats: initialData?.stats || [
+  
+  // Helper function to transform stats data
+  const transformStats = (stats: any): Stat[] => {
+    if (!stats) {
+      return [
+        { value: '227', label: 'कुटुंबे', labelEn: 'Families', icon: '👨‍👩‍👧‍👦' },
+        { value: '1958', label: 'लोकसंख्या', labelEn: 'Population', icon: '👥' },
+        { value: '1', label: 'ग्रामपंचायत', labelEn: 'Gram Panchayat', icon: '🏛️' },
+        { value: '654.40', label: 'क्षेत्रफळ (हेक्टर)', labelEn: 'Area (Hectares)', icon: '🌾' },
+      ];
+    }
+    
+    // If stats is already an array, return it
+    if (Array.isArray(stats)) {
+      return stats;
+    }
+    
+    // If stats is an object (from database), transform it to array format
+    if (typeof stats === 'object') {
+      return [
+        { value: stats.families?.toString() || '227', label: 'कुटुंबे', labelEn: 'Families', icon: '👨‍👩‍👧‍👦' },
+        { value: stats.population?.toString() || '1958', label: 'लोकसंख्या', labelEn: 'Population', icon: '👥' },
+        { value: stats.gramPanchayatCount?.toString() || '1', label: 'ग्रामपंचायत', labelEn: 'Gram Panchayat', icon: '🏛️' },
+        { value: stats.area?.toString() || '654.40', label: 'क्षेत्रफळ (हेक्टर)', labelEn: 'Area (Hectares)', icon: '🌾' },
+      ];
+    }
+    
+    // Default fallback
+    return [
       { value: '227', label: 'कुटुंबे', labelEn: 'Families', icon: '👨‍👩‍👧‍👦' },
       { value: '1958', label: 'लोकसंख्या', labelEn: 'Population', icon: '👥' },
       { value: '1', label: 'ग्रामपंचायत', labelEn: 'Gram Panchayat', icon: '🏛️' },
       { value: '654.40', label: 'क्षेत्रफळ (हेक्टर)', labelEn: 'Area (Hectares)', icon: '🌾' },
-    ],
+    ];
+  };
+
+  const [formData, setFormData] = useState<VillageInfo>(() => {
+    // Debug logging
+    console.log('Initial data received:', initialData);
+    console.log('Stats type:', typeof initialData?.stats);
+    console.log('Stats value:', initialData?.stats);
+    
+    return {
+      title: initialData?.title || 'आमच्या गावाबद्दल',
+      titleEn: initialData?.titleEn || 'About Our Village',
+      description: initialData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+      descriptionEn: initialData?.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
+      stats: transformStats(initialData?.stats),
+    };
   });
+
+  // Update form data when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      console.log('Initial data updated:', initialData);
+      setFormData({
+        title: initialData.title || 'आमच्या गावाबद्दल',
+        titleEn: initialData.titleEn || 'About Our Village',
+        description: initialData.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+        descriptionEn: initialData.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
+        stats: transformStats(initialData.stats),
+      });
+    }
+  }, [initialData]);
 
   const handleInputChange = (field: keyof VillageInfo, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -54,23 +106,23 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
   const handleStatChange = (index: number, field: keyof Stat, value: string) => {
     setFormData(prev => ({
       ...prev,
-      stats: prev.stats.map((stat, i) => 
+      stats: Array.isArray(prev.stats) ? prev.stats.map((stat, i) => 
         i === index ? { ...stat, [field]: value } : stat
-      )
+      ) : []
     }));
   };
 
   const addStat = () => {
     setFormData(prev => ({
       ...prev,
-      stats: [...prev.stats, { value: '', label: '', labelEn: '', icon: '📊' }]
+      stats: [...(Array.isArray(prev.stats) ? prev.stats : []), { value: '', label: '', labelEn: '', icon: '📊' }]
     }));
   };
 
   const removeStat = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      stats: prev.stats.filter((_, i) => i !== index)
+      stats: Array.isArray(prev.stats) ? prev.stats.filter((_, i) => i !== index) : []
     }));
   };
 
@@ -79,19 +131,36 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
     setIsLoading(true);
 
     try {
+      // Ensure stats is an array before submitting
+      const dataToSubmit = {
+        ...formData,
+        stats: Array.isArray(formData.stats) ? formData.stats : []
+      };
+      
+      console.log('Submitting data:', dataToSubmit);
+      
       const response = await fetch('/api/admin/village-info', {
-        method: initialData ? 'PUT' : 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSubmit),
       });
 
       if (response.ok) {
+        const result = await response.json();
+        console.log('Village info updated:', result);
         toast.success('गाव माहिती सफलतापूर्वक सेव्ह केली!');
-        router.refresh();
+        
+        // Force refresh the page to show updated data
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       } else {
-        toast.error('त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        toast.error(`त्रुटी आली: ${errorData.error || 'अज्ञात त्रुटी'}`);
       }
     } catch (error) {
+      console.error('Submit error:', error);
       toast.error('त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
     } finally {
       setIsLoading(false);
@@ -174,7 +243,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {formData.stats.map((stat, index) => (
+            {(Array.isArray(formData.stats) ? formData.stats : []).map((stat, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}

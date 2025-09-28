@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Home, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Users, Home, MapPin, TrendingUp, ChevronRight, RefreshCw } from 'lucide-react';
+import { useVillageInfo } from '@/hooks/useVillageInfo';
 
 interface VillageInfo {
   id: string;
@@ -19,26 +19,12 @@ interface VillageInfo {
 }
 
 export function AboutSection() {
-  const [villageInfo, setVillageInfo] = useState<VillageInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchVillageInfo = async () => {
-      try {
-        const response = await fetch('/api/village-info');
-        if (response.ok) {
-          const data = await response.json();
-          setVillageInfo(data);
-        }
-      } catch (error) {
-        console.error('Error fetching village info:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchVillageInfo();
-  }, []);
+  const { villageInfo, loading, error, refresh } = useVillageInfo();
+  
+  // Debug logging
+  console.log('AboutSection - villageInfo:', villageInfo);
+  console.log('AboutSection - loading:', loading);
+  console.log('AboutSection - error:', error);
 
   if (loading) {
     return (
@@ -55,12 +41,24 @@ export function AboutSection() {
     );
   }
 
+  if (error) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+        <div className="container">
+          <div className="text-center">
+            <p className="text-red-600">गावाची माहिती लोड करताना त्रुटी आली</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!villageInfo) {
     return (
       <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
         <div className="container">
           <div className="text-center">
-            <p className="text-gray-600">गावाची माहिती लोड होत आहे...</p>
+            <p className="text-gray-600">गावाची माहिती उपलब्ध नाही</p>
           </div>
         </div>
       </section>
@@ -116,7 +114,7 @@ export function AboutSection() {
 
   return (
     <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
-      <div className="container">
+      <div className="container" key={villageInfo?.updatedAt}>
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -130,11 +128,26 @@ export function AboutSection() {
               <Users className="h-8 w-8" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-              आमच्या गावाबद्दल
+              {villageInfo.title || 'आमच्या गावाबद्दल'}
             </h2>
+            {villageInfo.title && (
+              <div className="text-sm text-green-600 mt-2">
+                ✓ माहिती अपडेट केली: {new Date(villageInfo.updatedAt).toLocaleString('mr-IN')}
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={refresh}
+              className="ml-4 text-gray-500 hover:text-gray-700"
+              title="माहिती रिफ्रेश करा"
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख
+            {villageInfo.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख'}
           </p>
         </motion.div>
 
@@ -225,6 +238,7 @@ export function AboutSection() {
             </Card>
           </motion.div>
         </motion.div>
+
 
         {/* Call to Action */}
         <motion.div

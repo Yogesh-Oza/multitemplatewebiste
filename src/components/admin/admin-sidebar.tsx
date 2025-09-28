@@ -23,6 +23,12 @@ import { cn } from '@/lib/utils';
 
 const adminNavItems = [
   {
+    href: '/admin/hero-images',
+    label: 'मुख्य प्रतिमा',
+    icon: Image,
+    description: 'होमपेज मुख्य प्रतिमा व्यवस्थापन'
+  },
+  {
     href: '/admin/village-info',
     label: 'गाव माहिती',
     icon: Users,
@@ -81,12 +87,6 @@ const adminNavItems = [
     label: 'सांस्कृतिक वारसा',
     icon: Globe,
     description: 'सांस्कृतिक उत्सव आणि परंपरागत कला'
-  },
-  {
-    href: '/admin/hero-images',
-    label: 'मुख्य प्रतिमा',
-    icon: Image,
-    description: 'होमपेज मुख्य प्रतिमा व्यवस्थापन'
   },
   {
     href: '/admin/contact',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,85 +21,151 @@ import { toast } from 'sonner';
 interface HeroImage {
   id: string;
   imageUrl: string;
-  altText: string;
+  title?: string;
+  description?: string;
   isActive: boolean;
   createdAt: string;
 }
 
-const mockHeroImages: HeroImage[] = [
-  {
-    id: '1',
-    imageUrl: '/images/hero-1.jpg',
-    altText: 'ग्रामपंचायत कार्यालय',
-    isActive: true,
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    imageUrl: '/images/hero-2.jpg',
-    altText: 'गावाचा दृश्य',
-    isActive: true,
-    createdAt: '2024-01-14'
-  },
-  {
-    id: '3',
-    imageUrl: '/images/hero-3.jpg',
-    altText: 'सामुदायिक केंद्र',
-    isActive: false,
-    createdAt: '2024-01-13'
-  },
-  {
-    id: '4',
-    imageUrl: '/images/hero-4.jpg',
-    altText: 'गावाचा निसर्ग',
-    isActive: true,
-    createdAt: '2024-01-12'
-  },
-  {
-    id: '5',
-    imageUrl: '/images/hero-5.jpg',
-    altText: 'सांस्कृतिक कार्यक्रम',
-    isActive: true,
-    createdAt: '2024-01-11'
-  }
-];
-
 export default function HeroImagesPage() {
-  const [images, setImages] = useState<HeroImage[]>(mockHeroImages);
+  const [images, setImages] = useState<HeroImage[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch images from API
+  const fetchImages = async () => {
+    try {
+      const response = await fetch('/api/hero-images');
+      if (response.ok) {
+        const data = await response.json();
+        setImages(data);
+      }
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      toast.error('प्रतिमा लोड करताना त्रुटी');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('कृपया प्रतिमा फाइल निवडा');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('फाइल आकार 10MB पेक्षा कमी असावा');
+      return;
+    }
+
     setIsUploading(true);
     
-    // Simulate upload
-    setTimeout(() => {
-      const newImage: HeroImage = {
-        id: Date.now().toString(),
-        imageUrl: URL.createObjectURL(file),
-        altText: file.name,
-        isActive: true,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
+    try {
+      // Upload file to Vercel Blob
+      const formData = new FormData();
+      formData.append('file', file);
       
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const uploadData = await uploadResponse.json();
+      
+      // Save to database
+      const saveResponse = await fetch('/api/hero-images', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageUrl: uploadData.imageUrl,
+          title: file.name.split('.')[0],
+          description: '',
+          isActive: true,
+        }),
+      });
+
+      if (!saveResponse.ok) {
+        throw new Error('Save to database failed');
+      }
+
+      const newImage = await saveResponse.json();
       setImages(prev => [newImage, ...prev]);
-      setIsUploading(false);
       toast.success('प्रतिमा यशस्वीरित्या अपलोड केली');
-    }, 2000);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('अपलोड करताना त्रुटी');
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setImages(prev => prev.filter(img => img.id !== id));
-    toast.success('प्रतिमा हटवली');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/hero-images?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setImages(prev => prev.filter(img => img.id !== id));
+        toast.success('प्रतिमा हटवली');
+      } else {
+        throw new Error('Delete failed');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('हटवताना त्रुटी');
+    }
   };
 
-  const handleToggleActive = (id: string) => {
-    setImages(prev => prev.map(img => 
-      img.id === id ? { ...img, isActive: !img.isActive } : img
-    ));
-    toast.success('प्रतिमा स्थिती अपडेट केली');
+  const handleToggleActive = async (id: string) => {
+    const image = images.find(img => img.id === id);
+    if (!image) return;
+
+    try {
+      const response = await fetch('/api/hero-images', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id,
+          imageUrl: image.imageUrl,
+          title: image.title,
+          description: image.description,
+          isActive: !image.isActive,
+        }),
+      });
+
+      if (response.ok) {
+        setImages(prev => prev.map(img => 
+          img.id === id ? { ...img, isActive: !img.isActive } : img
+        ));
+        toast.success('प्रतिमा स्थिती अपडेट केली');
+      } else {
+        throw new Error('Update failed');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      toast.error('अपडेट करताना त्रुटी');
+    }
   };
 
   return (
@@ -172,51 +238,63 @@ export default function HeroImagesPage() {
       {/* Images Grid */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-6">प्रतिमा सूची</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {images.map((image) => (
-            <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-              <div className="relative">
-                <img
-                  src={image.imageUrl}
-                  alt={image.altText}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-2 right-2">
-                  <Badge 
-                    variant={image.isActive ? "default" : "secondary"}
-                    className={image.isActive ? "bg-green-500" : "bg-gray-500"}
-                  >
-                    {image.isActive ? 'सक्रिय' : 'निष्क्रिय'}
-                  </Badge>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">लोड होत आहे...</span>
+          </div>
+        ) : images.length === 0 ? (
+          <div className="text-center py-12">
+            <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">अजून कोणतीही प्रतिमा नाही</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {images.map((image) => (
+              <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                <div className="relative">
+                  <img
+                    src={image.imageUrl}
+                    alt={image.title || 'Hero Image'}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <Badge 
+                      variant={image.isActive ? "default" : "secondary"}
+                      className={image.isActive ? "bg-green-500" : "bg-gray-500"}
+                    >
+                      {image.isActive ? 'सक्रिय' : 'निष्क्रिय'}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-medium text-gray-900 mb-2">{image.altText}</h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  जोडले: {new Date(image.createdAt).toLocaleDateString('mr-IN')}
-                </p>
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleToggleActive(image.id)}
-                    className="flex-1"
-                  >
-                    {image.isActive ? 'निष्क्रिय करा' : 'सक्रिय करा'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => handleDelete(image.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-gray-900 mb-2">{image.title || 'प्रतिमा'}</h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    जोडले: {new Date(image.createdAt).toLocaleDateString('mr-IN')}
+                  </p>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleToggleActive(image.id)}
+                      className="flex-1"
+                    >
+                      {image.isActive ? 'निष्क्रिय करा' : 'सक्रिय करा'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => handleDelete(image.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Instructions */}
