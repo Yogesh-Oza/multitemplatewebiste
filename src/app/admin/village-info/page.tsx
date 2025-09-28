@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: 'गाव माहिती व्यवस्थापन',
 };
 
+// Force dynamic rendering for admin pages
+export const dynamic = 'force-dynamic';
+
 export default async function VillageInfoPage() {
   const villageInfo = await prisma.villageInfo.findFirst();
   
