@@ -20,7 +20,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, titleEn, description, descriptionEn, imageUrl } = body;
+    const { title, titleEn, description, descriptionEn, imageUrl, category } = body;
 
     const culturalHeritage = await prisma.culturalHeritage.create({
       data: {
@@ -28,7 +28,8 @@ export async function POST(request: NextRequest) {
         titleEn,
         description,
         descriptionEn,
-        imageUrl,
+        image: imageUrl,
+        category: category || 'सांस्कृतिक वारसा',
       },
     });
 
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, title, titleEn, description, descriptionEn, imageUrl } = body;
+    const { id, title, titleEn, description, descriptionEn, imageUrl, category } = body;
 
     const culturalHeritage = await prisma.culturalHeritage.update({
       where: { id },
@@ -54,7 +55,8 @@ export async function PUT(request: NextRequest) {
         titleEn,
         description,
         descriptionEn,
-        imageUrl,
+        image: imageUrl,
+        category: category || 'सांस्कृतिक वारसा',
       },
     });
 

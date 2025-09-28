@@ -33,9 +33,9 @@ export async function PUT(
       where: { id },
       data: {
         title: data.title,
-        date: new Date(data.date),
+        date: data.date,
         description: data.description,
-        imageUrl: data.imageUrl,
+        image: data.imageUrl,
         category: data.category,
         priority: data.priority,
         status: data.status,

@@ -10,6 +10,12 @@ export const metadata: Metadata = {
 export default async function VillageInfoPage() {
   const villageInfo = await prisma.villageInfo.findFirst();
   
+  // Transform the data to match the expected interface
+  const transformedVillageInfo = villageInfo ? {
+    ...villageInfo,
+    stats: villageInfo.stats as any[] || []
+  } : null;
+  
   return (
     <div className="space-y-6">
       <div>
@@ -17,7 +23,7 @@ export default async function VillageInfoPage() {
         <p className="text-gray-600 mt-2">गावाची मुख्य माहिती आणि आकडेवारी व्यवस्थापन</p>
       </div>
       
-      <VillageInfoForm initialData={villageInfo} />
+      <VillageInfoForm initialData={transformedVillageInfo} />
     </div>
   );
 }

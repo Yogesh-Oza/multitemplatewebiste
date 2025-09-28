@@ -21,12 +21,13 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { imageUrl, altText, isActive } = body;
+    const { imageUrl, title, description, isActive } = body;
 
     const heroImage = await prisma.heroImage.create({
       data: {
         imageUrl,
-        altText,
+        title: title || '',
+        description: description || '',
         isActive: isActive || true,
       },
     });
@@ -44,13 +45,14 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, imageUrl, altText, isActive } = body;
+    const { id, imageUrl, title, description, isActive } = body;
 
     const heroImage = await prisma.heroImage.update({
       where: { id },
       data: {
         imageUrl,
-        altText,
+        title: title || '',
+        description: description || '',
         isActive,
       },
     });

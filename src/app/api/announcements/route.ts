@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         description,
-        date: new Date(date),
-        imageUrl,
+        date,
+        image: imageUrl,
         priority,
         status,
         category,
@@ -55,8 +55,8 @@ export async function PUT(request: NextRequest) {
       data: {
         title,
         description,
-        date: new Date(date),
-        imageUrl,
+        date,
+        image: imageUrl,
         priority,
         status,
         category,

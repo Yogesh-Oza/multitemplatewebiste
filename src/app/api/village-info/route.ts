@@ -33,10 +33,12 @@ export async function POST(request: NextRequest) {
         description,
         titleEn,
         descriptionEn,
-        families: parseInt(families),
-        population: parseInt(population),
-        gramPanchayatCount: parseInt(gramPanchayatCount),
-        area: parseFloat(area),
+        stats: {
+          families: parseInt(families),
+          population: parseInt(population),
+          gramPanchayatCount: parseInt(gramPanchayatCount),
+          area: parseFloat(area),
+        },
       },
       create: {
         id: 'default',
@@ -44,10 +46,12 @@ export async function POST(request: NextRequest) {
         description,
         titleEn,
         descriptionEn,
-        families: parseInt(families),
-        population: parseInt(population),
-        gramPanchayatCount: parseInt(gramPanchayatCount),
-        area: parseFloat(area),
+        stats: {
+          families: parseInt(families),
+          population: parseInt(population),
+          gramPanchayatCount: parseInt(gramPanchayatCount),
+          area: parseFloat(area),
+        },
       },
     });
 
