@@ -7,36 +7,58 @@ import { Badge } from '@/components/ui/badge';
 import { Megaphone, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-const ANNOUNCEMENTS = [
-  {
-    id: 1,
-    title: 'पाणीपुरवठा बंदची सूचना',
-    date: '२३ मार्च २०२४',
-    description: 'गावातील पाणीपुरवठा यंत्रणेच्या देखभालीसाठी २४ मार्च रोजी पाणी बंद राहील.',
-    image: 'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    category: 'पाणीपुरवठा',
-    priority: 'high',
-  },
-  {
-    id: 2,
-    title: 'लसीकरण मोहिम',
-    date: '१५ फेब्रुवारी २०२४',
-    description: 'उद्या सकाळी १० पासून गावात लसीकरण शिबीर आयोजित करण्यात आले आहे.',
-    image: 'https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    category: 'आरोग्य',
-    priority: 'medium',
-  },
-  {
-    id: 3,
-    title: 'रस्त्याचे काम सुरू',
-    date: '८ जानेवारी २०२४',
-    description: 'मुख्य रस्त्याच्या डांबरीकरणाचे काम सुरू झाले असून ३ दिवसात पूर्ण होणार आहे.',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXHzQbI8CMazDK7mcyIVO4w3rKJ7hxrAkk-FkTmqVcgj_6dvsvIpfzTMBYju6jtAgymV8&usqp=CAU',
-    category: 'विकास',
-    priority: 'low',
-  },
-] as const;
+interface Announcement {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  imageUrl?: string;
+  priority: string;
+  status: string;
+  category: string;
+}
+
+export function AnnouncementsSection() {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await fetch('/api/announcements');
+        if (response.ok) {
+          const data = await response.json();
+          setAnnouncements(data);
+        }
+      } catch (error) {
+        console.error('Error fetching announcements:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnnouncements();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="announcements" className="py-16 bg-gray-50">
+        <div className="container">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const featuredAnnouncements = announcements.slice(0, 3);
+
 
 export function AnnouncementsSection() {
   const containerVariants = {
@@ -105,7 +127,7 @@ export function AnnouncementsSection() {
           viewport={{ once: true }}
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
         >
-          {ANNOUNCEMENTS.map((announcement) => (
+          {featuredAnnouncements.map((announcement) => (
             <motion.div key={announcement.id} variants={itemVariants}>
               <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group overflow-hidden">
                 <div className="relative">

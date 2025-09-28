@@ -4,19 +4,47 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Users, History, Info } from 'lucide-react';
-import { HERO_IMAGES } from '@/lib/constants';
 import Image from 'next/image';
+
+interface HeroImage {
+  id: string;
+  imageUrl: string;
+  altText?: string;
+  isActive: boolean;
+}
 
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % HERO_IMAGES.length);
-    }, 5000);
+    const fetchHeroImages = async () => {
+      try {
+        const response = await fetch('/api/hero-images');
+        if (response.ok) {
+          const data = await response.json();
+          setHeroImages(data);
+        }
+      } catch (error) {
+        console.error('Error fetching hero images:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearInterval(timer);
+    fetchHeroImages();
   }, []);
+
+  useEffect(() => {
+    if (heroImages.length > 0) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+      }, 5000);
+
+      return () => clearInterval(timer);
+    }
+  }, [heroImages.length]);
 
   return (
     <section className="relative h-screen overflow-hidden">
@@ -31,7 +59,7 @@ export function HeroSection() {
             transition={{ duration: 1 }}
             className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-gradient-to-br from-blue-600 to-purple-700"
             style={{
-              backgroundImage: `url(${HERO_IMAGES[currentSlide]})`,
+              backgroundImage: heroImages.length > 0 ? `url(${heroImages[currentSlide]?.imageUrl})` : undefined,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
@@ -90,7 +118,7 @@ export function HeroSection() {
       {/* Slider Dots */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
         <div className="flex space-x-2">
-          {HERO_IMAGES.map((_, index) => (
+          {heroImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}

@@ -4,9 +4,54 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { History, BookOpen, Users, ChevronRight, TrendingUp, Palette } from 'lucide-react';
-import { HISTORY_CARDS } from '@/lib/constants';
+import { useEffect, useState } from 'react';
+
+interface HistoryCard {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  gradient: string;
+  icon: string;
+}
 
 export function HistorySection() {
+  const [historyCards, setHistoryCards] = useState<HistoryCard[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHistoryCards = async () => {
+      try {
+        const response = await fetch('/api/history-cards');
+        if (response.ok) {
+          const data = await response.json();
+          setHistoryCards(data);
+        }
+      } catch (error) {
+        console.error('Error fetching history cards:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistoryCards();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -53,14 +98,14 @@ export function HistorySection() {
         </motion.div>
 
         {/* History Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
-        >
-          {HISTORY_CARDS.map((card, index) => (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
+            >
+              {historyCards.map((card, index) => (
             <motion.div key={index} variants={itemVariants}>
               <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
                 <CardContent className="p-0 h-full">

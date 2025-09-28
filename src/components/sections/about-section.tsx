@@ -4,9 +4,95 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Home, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
-import { VILLAGE_STATS } from '@/lib/constants';
+import { useEffect, useState } from 'react';
+
+interface VillageInfo {
+  id: string;
+  title: string;
+  description: string;
+  titleEn: string;
+  descriptionEn: string;
+  families: number;
+  population: number;
+  gramPanchayatCount: number;
+  area: number;
+}
 
 export function AboutSection() {
+  const [villageInfo, setVillageInfo] = useState<VillageInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVillageInfo = async () => {
+      try {
+        const response = await fetch('/api/village-info');
+        if (response.ok) {
+          const data = await response.json();
+          setVillageInfo(data);
+        }
+      } catch (error) {
+        console.error('Error fetching village info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVillageInfo();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+        <div className="container">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!villageInfo) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+        <div className="container">
+          <div className="text-center">
+            <p className="text-gray-600">गावाची माहिती लोड होत आहे...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const villageStats = [
+    {
+      icon: '👨‍👩‍👧‍👦',
+      value: villageInfo.families,
+      label: 'कुटुंबे',
+      labelEn: 'Families'
+    },
+    {
+      icon: '👥',
+      value: villageInfo.population,
+      label: 'लोकसंख्या',
+      labelEn: 'Population'
+    },
+    {
+      icon: '🏛️',
+      value: villageInfo.gramPanchayatCount,
+      label: 'ग्रामपंचायत',
+      labelEn: 'Gram Panchayat'
+    },
+    {
+      icon: '🌾',
+      value: villageInfo.area,
+      label: 'क्षेत्रफळ (हेक्टर)',
+      labelEn: 'Area (Hectares)'
+    }
+  ];
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -60,7 +146,7 @@ export function AboutSection() {
           viewport={{ once: true }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
         >
-          {VILLAGE_STATS.map((stat, index) => (
+          {villageStats.map((stat, index) => (
             <motion.div key={index} variants={itemVariants}>
               <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br from-blue-100 to-purple-100">
                 <CardContent className="p-8 text-center">
