@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Home, MapPin, TrendingUp, ChevronRight, RefreshCw } from 'lucide-react';
+import { Users, Home, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
 import { useVillageInfo } from '@/hooks/useVillageInfo';
 
 interface VillageInfo {
@@ -19,12 +19,7 @@ interface VillageInfo {
 }
 
 export function AboutSection() {
-  const { villageInfo, loading, error, refresh } = useVillageInfo();
-  
-  // Debug logging
-  console.log('AboutSection - villageInfo:', villageInfo);
-  console.log('AboutSection - loading:', loading);
-  console.log('AboutSection - error:', error);
+  const { villageInfo, loading, error } = useVillageInfo();
 
   if (loading) {
     return (
@@ -114,7 +109,7 @@ export function AboutSection() {
 
   return (
     <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
-      <div className="container" key={villageInfo?.updatedAt}>
+      <div className="container">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -130,21 +125,6 @@ export function AboutSection() {
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
               {villageInfo.title || 'आमच्या गावाबद्दल'}
             </h2>
-            {villageInfo.title && (
-              <div className="text-sm text-green-600 mt-2">
-                ✓ माहिती अपडेट केली: {new Date(villageInfo.updatedAt).toLocaleString('mr-IN')}
-              </div>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={refresh}
-              className="ml-4 text-gray-500 hover:text-gray-700"
-              title="माहिती रिफ्रेश करा"
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             {villageInfo.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख'}
