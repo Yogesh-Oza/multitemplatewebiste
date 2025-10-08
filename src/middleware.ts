@@ -47,9 +47,9 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
       }
 
-      // For now, skip subdomain validation in middleware to avoid Prisma issues
-      // This validation will be handled in the API routes instead
-      console.log('Subdomain validation skipped in middleware - will be handled in API routes');
+      // Basic validation - user has a subdomain ID, allow access
+      // Detailed validation will be done in the admin layout
+      console.log('Subdomain validation - user has subdomain ID, allowing access');
     }
   }
 
