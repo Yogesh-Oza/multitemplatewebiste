@@ -17,7 +17,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { title, titleEn, description, descriptionEn, imageUrl } = body;
+    const { title, titleEn, description, descriptionEn, image, category } = body;
 
     // Verify the heritage belongs to this subdomain
     const existingHeritage = await prisma.culturalHeritage.findFirst({
@@ -40,7 +40,8 @@ export async function PUT(
         titleEn,
         description,
         descriptionEn,
-        imageUrl,
+        image,
+        category: category || 'सांस्कृतिक',
       },
     });
 

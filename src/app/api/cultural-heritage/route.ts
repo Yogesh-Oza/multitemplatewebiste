@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, titleEn, description, descriptionEn, imageUrl } = body;
+    const { title, titleEn, description, descriptionEn, image, category } = body;
 
     const heritage = await prisma.culturalHeritage.create({
       data: {
@@ -46,7 +46,8 @@ export async function POST(request: NextRequest) {
         titleEn,
         description,
         descriptionEn,
-        imageUrl,
+        image,
+        category: category || 'सांस्कृतिक',
         subdomainId,
       },
     });
