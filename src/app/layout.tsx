@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ConditionalLayout } from '../components/conditional-layout';
+import GoogleTranslateLoader from '@/components/GoogleTranslateLoader';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -73,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="mr" className="scroll-smooth">
+    <html lang="mr" className="scroll-smooth" suppressHydrationWarning>
       <head>
         {/* Google Fonts for Devanagari */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -86,32 +87,15 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" 
           rel="stylesheet" 
         />
-        
-        {/* Google Translate */}
-        <script
-          type="text/javascript"
-          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-        />
-        <script
-          type="text/javascript"
-          dangerouslySetInnerHTML={{
-            __html: `
-              function googleTranslateElementInit() {
-                new google.translate.TranslateElement({
-                  pageLanguage: 'mr',
-                  includedLanguages: 'en,mr',
-                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-                }, 'google_translate_element');
-              }
-            `,
-          }}
-        />
       </head>
       <body className={`${inter.className} antialiased font-sans`}>
         <ThemeProvider>
           <ConditionalLayout>
             {children}
           </ConditionalLayout>
+          {/* Client-only Google Translate loader */}
+          <div id="google_translate_element" />
+          <GoogleTranslateLoader />
           
           {/* Toast Notifications */}
           <Toaster position="top-right" richColors />

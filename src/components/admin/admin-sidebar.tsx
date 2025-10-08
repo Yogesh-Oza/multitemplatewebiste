@@ -102,7 +102,11 @@ const adminNavItems = [
   },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  subdomain?: string;
+}
+
+export function AdminSidebar({ subdomain }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -111,11 +115,12 @@ export function AdminSidebar() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">वेबसाइट व्यवस्थापन</h2>
         <nav className="space-y-3">
           {adminNavItems.map((item) => {
-            const isActive = pathname === item.href;
+            const href = subdomain ? `/subdomain/${subdomain}/admin${item.href.replace('/admin', '')}` : item.href;
+            const isActive = pathname === href;
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={href}
                 className={cn(
                   'block p-4 rounded-xl transition-all duration-200 hover:shadow-md',
                   isActive

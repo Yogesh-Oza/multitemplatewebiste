@@ -17,6 +17,8 @@ model VillageInfo {
   description String
   descriptionEn String
   stats       Json   // Array of statistics
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -33,6 +35,8 @@ model HistoryCard {
   icon        String
   order       Int    @default(0)
   isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -51,6 +55,8 @@ model Announcement {
   status      String // active, completed, upcoming
   isActive    Boolean @default(true)
   order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -67,6 +73,8 @@ model CulturalHeritage {
   category    String
   isActive    Boolean @default(true)
   order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -80,6 +88,8 @@ model HeroImage {
   description String?
   isActive    Boolean @default(true)
   order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -93,8 +103,38 @@ model AdminUser {
   password  String
   role      String @default("admin") // admin, editor
   isActive  Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("admin_users")
+}
+
+model Subdomain {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  subdomain     String @unique
+  villageName   String
+  villageNameEn String
+  contactPerson String
+  email         String
+  phone         String
+  address       String
+  description   String?
+  adminUsername String
+  adminPassword String
+  status        String @default("pending") // pending, active, suspended
+  isActive      Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  adminUsers    AdminUser[]
+  villageInfo   VillageInfo[]
+  announcements Announcement[]
+  culturalHeritage CulturalHeritage[]
+  heroImages    HeroImage[]
+  historyCards  HistoryCard[]
+
+  @@map("subdomains")
 }

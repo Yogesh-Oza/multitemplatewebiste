@@ -4,12 +4,18 @@ import { Bell, Settings, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-export function AdminHeader() {
+interface AdminHeaderProps {
+  villageName?: string;
+}
+
+export function AdminHeader({ villageName }: AdminHeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-gray-900">प्रशासन पैनल</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {villageName ? `${villageName} - प्रशासन पैनल` : 'प्रशासन पैनल'}
+          </h1>
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             सक्रिय
           </Badge>

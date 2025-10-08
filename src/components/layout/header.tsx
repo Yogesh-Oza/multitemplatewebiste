@@ -8,7 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { NAVIGATION_ITEMS } from '@/lib/constants';
 
-export function Header() {
+interface HeaderProps {
+  villageName?: string;
+  villageNameEn?: string;
+}
+
+export function Header({ villageName, villageNameEn }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -18,7 +23,9 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <div className="h-8 w-8 rounded-full gradient-theme" />
-          <span className="text-xl font-bold text-gray-900">ग्रामपंचायत</span>
+          <span className="text-xl font-bold text-gray-900">
+            {villageName || 'ग्रामपंचायत'}
+          </span>
         </Link>
 
         {/* Desktop Navigation */}

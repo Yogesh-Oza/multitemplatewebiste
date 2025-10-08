@@ -243,15 +243,15 @@ export default function SettingsPage() {
                       <div className="flex space-x-2 mb-2">
                         <div 
                           className="w-6 h-6 rounded-full" 
-                          style={{ backgroundColor: preset.primary }}
+                          style={{ backgroundColor: preset.colors.primary }}
                         ></div>
                         <div 
                           className="w-6 h-6 rounded-full" 
-                          style={{ backgroundColor: preset.secondary }}
+                          style={{ backgroundColor: preset.colors.secondary }}
                         ></div>
                         <div 
                           className="w-6 h-6 rounded-full" 
-                          style={{ backgroundColor: preset.accent }}
+                          style={{ backgroundColor: preset.colors.accent }}
                         ></div>
                       </div>
                       <p className="text-sm font-medium">{preset.name}</p>
