@@ -1,24 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { signIn } from 'next-auth/react';
 
 export function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
+
+  // Check for subdomain mismatch error
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'subdomain_mismatch') {
+      toast.error('आपण या सबडोमेनसाठी अधिकृत नाही. कृपया योग्य सबडोमेनवर लॉगिन करा.');
+    }
+  }, [searchParams]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -33,12 +42,18 @@ export function AdminLoginForm() {
         username: formData.username,
         password: formData.password,
         redirect: false,
+        callbackUrl: window.location.origin + '/admin'
       });
       if (result?.ok) {
         toast.success('लॉगिन यशस्वी!');
         router.push('/admin');
       } else {
-        toast.error('अवैध वापरकर्ता नाव किंवा पासवर्ड');
+        // Check if it's a subdomain mismatch error
+        if (result?.error === 'CredentialsSignin') {
+          toast.error('अवैध वापरकर्ता नाव किंवा पासवर्ड, किंवा आपण या सबडोमेनसाठी अधिकृत नाही');
+        } else {
+          toast.error('अवैध वापरकर्ता नाव किंवा पासवर्ड');
+        }
       }
     } catch (error) {
       toast.error('त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');

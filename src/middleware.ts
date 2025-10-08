@@ -29,6 +29,52 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set('callbackUrl', request.nextUrl.pathname);
       return NextResponse.redirect(url);
     }
+
+    // Additional subdomain validation for admin routes
+    const subdomain = getSubdomain(hostname);
+    if (subdomain && subdomain !== 'www' && subdomain !== 'mahagp') {
+      console.log('Validating subdomain access:', { subdomain, userSubdomainId: (token as any).subdomainId });
+      
+      // Check if the authenticated user belongs to this subdomain
+      const userSubdomainId = (token as any).subdomainId;
+      if (!userSubdomainId) {
+        console.log('User has no subdomain association');
+        // User doesn't have a subdomain association, redirect to login with error
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin-login';
+        url.searchParams.set('error', 'subdomain_mismatch');
+        url.searchParams.set('callbackUrl', request.nextUrl.pathname);
+        return NextResponse.redirect(url);
+      }
+
+      // Verify the user's subdomain matches the current subdomain
+      // We'll need to fetch the subdomain info to validate
+      try {
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+        
+        const userSubdomain = await prisma.subdomain.findUnique({
+          where: { id: userSubdomainId }
+        });
+        
+        console.log('User subdomain from DB:', userSubdomain?.subdomain);
+        
+        if (!userSubdomain || userSubdomain.subdomain !== subdomain) {
+          console.log('Subdomain mismatch:', { current: subdomain, user: userSubdomain?.subdomain });
+          // User doesn't belong to this subdomain, redirect to login with error
+          const url = request.nextUrl.clone();
+          url.pathname = '/admin-login';
+          url.searchParams.set('error', 'subdomain_mismatch');
+          url.searchParams.set('callbackUrl', request.nextUrl.pathname);
+          return NextResponse.redirect(url);
+        }
+        
+        console.log('Subdomain validation passed');
+      } catch (error) {
+        console.error('Error validating subdomain:', error);
+        // On error, allow access to prevent blocking legitimate users
+      }
+    }
   }
 
   // Check if this is a subdomain request
