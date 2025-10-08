@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const villageInfo = await prisma.villageInfo.findFirst();
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
+    const villageInfo = await prisma.villageInfo.findFirst({
+      where: { subdomainId }
+    });
     
     if (!villageInfo) {
       return NextResponse.json({ 
@@ -49,6 +60,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { title, description, titleEn, descriptionEn, stats } = body;
 
@@ -79,8 +98,10 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // First, try to find existing village info
-    let villageInfo = await prisma.villageInfo.findFirst();
+    // First, try to find existing village info for this subdomain
+    let villageInfo = await prisma.villageInfo.findFirst({
+      where: { subdomainId }
+    });
     
     if (villageInfo) {
       // Update existing record
@@ -103,6 +124,7 @@ export async function POST(request: NextRequest) {
           titleEn,
           descriptionEn,
           stats: statsData,
+          subdomainId,
         },
       });
     }

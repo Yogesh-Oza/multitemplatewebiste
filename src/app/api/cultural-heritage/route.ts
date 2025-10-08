@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { validateSubdomain } from '@/lib/subdomain';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const culturalHeritage = await prisma.culturalHeritage.findMany({
+      where: { subdomainId },
       orderBy: { createdAt: 'asc' }
     });
 
@@ -19,6 +29,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { title, titleEn, description, descriptionEn, imageUrl, category } = body;
 
@@ -30,6 +48,7 @@ export async function POST(request: NextRequest) {
         descriptionEn,
         image: imageUrl,
         category: category || 'सांस्कृतिक वारसा',
+        subdomainId,
       },
     });
 
@@ -45,8 +64,27 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { id, title, titleEn, description, descriptionEn, imageUrl, category } = body;
+
+    // Verify the cultural heritage belongs to this subdomain
+    const existingHeritage = await prisma.culturalHeritage.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingHeritage) {
+      return NextResponse.json({ 
+        message: 'Cultural heritage not found or access denied' 
+      }, { status: 404 });
+    }
 
     const culturalHeritage = await prisma.culturalHeritage.update({
       where: { id },
@@ -72,6 +110,14 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -80,6 +126,17 @@ export async function DELETE(request: NextRequest) {
         { error: 'ID is required' },
         { status: 400 }
       );
+    }
+
+    // Verify the cultural heritage belongs to this subdomain
+    const existingHeritage = await prisma.culturalHeritage.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingHeritage) {
+      return NextResponse.json({ 
+        message: 'Cultural heritage not found or access denied' 
+      }, { status: 404 });
     }
 
     await prisma.culturalHeritage.delete({

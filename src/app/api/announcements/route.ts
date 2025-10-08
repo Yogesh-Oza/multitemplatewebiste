@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { validateSubdomain } from '@/lib/subdomain';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const announcements = await prisma.announcement.findMany({
+      where: { subdomainId },
       orderBy: { date: 'desc' },
       take: 10
     });
@@ -20,6 +30,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { title, description, date, imageUrl, priority, status, category } = body;
 
@@ -32,6 +50,7 @@ export async function POST(request: NextRequest) {
         priority,
         status,
         category,
+        subdomainId,
       },
     });
 
@@ -47,8 +66,27 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { id, title, description, date, imageUrl, priority, status, category } = body;
+
+    // Verify the announcement belongs to this subdomain
+    const existingAnnouncement = await prisma.announcement.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingAnnouncement) {
+      return NextResponse.json({ 
+        message: 'Announcement not found or access denied' 
+      }, { status: 404 });
+    }
 
     const announcement = await prisma.announcement.update({
       where: { id },
@@ -75,6 +113,14 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -83,6 +129,17 @@ export async function DELETE(request: NextRequest) {
         { error: 'ID is required' },
         { status: 400 }
       );
+    }
+
+    // Verify the announcement belongs to this subdomain
+    const existingAnnouncement = await prisma.announcement.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingAnnouncement) {
+      return NextResponse.json({ 
+        message: 'Announcement not found or access denied' 
+      }, { status: 404 });
     }
 
     await prisma.announcement.delete({

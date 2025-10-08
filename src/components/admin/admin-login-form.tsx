@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { signIn } from 'next-auth/react';
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -28,8 +29,12 @@ export function AdminLoginForm() {
     setIsLoading(true);
 
     try {
-      // Simple authentication - in production, use proper auth
-      if (formData.username === 'admin' && formData.password === 'admin123') {
+      const result = await signIn('credentials', {
+        username: formData.username,
+        password: formData.password,
+        redirect: false,
+      });
+      if (result?.ok) {
         toast.success('लॉगिन यशस्वी!');
         router.push('/admin');
       } else {
@@ -93,11 +98,6 @@ export function AdminLoginForm() {
         {isLoading ? 'लॉगिन करत आहे...' : 'लॉगिन करा'}
       </Button>
       
-      <div className="text-center text-sm text-gray-500">
-        <p>डिफॉल्ट क्रेडेन्शियल्स:</p>
-        <p>वापरकर्ता नाव: admin</p>
-        <p>पासवर्ड: admin123</p>
-      </div>
     </form>
   );
 }

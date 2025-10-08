@@ -1,8 +1,10 @@
 'use client';
 
-import { Bell, Settings, User, LogOut } from 'lucide-react';
+import { Settings, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 interface AdminHeaderProps {
   villageName?: string;
@@ -22,22 +24,27 @@ export function AdminHeader({ villageName }: AdminHeaderProps) {
         </div>
         
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm">
-            <Bell className="h-5 w-5" />
-          </Button>
+          <Link href="/admin/settings">
+            <Button variant="ghost" size="sm">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </Link>
           
-          <Button variant="ghost" size="sm">
-            <Settings className="h-5 w-5" />
-          </Button>
-          
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
+          <Link href="/admin/profile">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-sm font-medium text-gray-700">प्रशासक</span>
             </div>
-            <span className="text-sm font-medium text-gray-700">प्रशासक</span>
-          </div>
+          </Link>
           
-          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-600 hover:text-red-700"
+            onClick={() => signOut({ callbackUrl: '/admin/login' })}
+          >
             <LogOut className="h-4 w-4 mr-2" />
             बाहेर जा
           </Button>

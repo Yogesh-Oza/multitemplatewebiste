@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { validateSubdomain } from '@/lib/subdomain';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const historyCards = await prisma.historyCard.findMany({
+      where: { subdomainId },
       orderBy: { createdAt: 'asc' }
     });
 
@@ -19,6 +29,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { title, titleEn, description, descriptionEn, gradient, icon } = body;
 
@@ -30,6 +48,7 @@ export async function POST(request: NextRequest) {
         descriptionEn,
         gradient,
         icon,
+        subdomainId,
       },
     });
 
@@ -45,8 +64,27 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { id, title, titleEn, description, descriptionEn, gradient, icon } = body;
+
+    // Verify the history card belongs to this subdomain
+    const existingCard = await prisma.historyCard.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingCard) {
+      return NextResponse.json({ 
+        message: 'History card not found or access denied' 
+      }, { status: 404 });
+    }
 
     const historyCard = await prisma.historyCard.update({
       where: { id },
@@ -72,6 +110,14 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -80,6 +126,17 @@ export async function DELETE(request: NextRequest) {
         { error: 'ID is required' },
         { status: 400 }
       );
+    }
+
+    // Verify the history card belongs to this subdomain
+    const existingCard = await prisma.historyCard.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingCard) {
+      return NextResponse.json({ 
+        message: 'History card not found or access denied' 
+      }, { status: 404 });
     }
 
     await prisma.historyCard.delete({

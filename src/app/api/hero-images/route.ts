@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { validateSubdomain } from '@/lib/subdomain';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const heroImages = await prisma.heroImage.findMany({
-      where: { isActive: true },
+      where: { isActive: true, subdomainId },
       orderBy: { createdAt: 'asc' }
     });
 
@@ -20,6 +29,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { imageUrl, title, description, isActive } = body;
 
@@ -29,6 +46,7 @@ export async function POST(request: NextRequest) {
         title: title || '',
         description: description || '',
         isActive: isActive || true,
+        subdomainId,
       },
     });
 
@@ -44,8 +62,27 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { id, imageUrl, title, description, isActive } = body;
+
+    // Verify the hero image belongs to this subdomain
+    const existingImage = await prisma.heroImage.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingImage) {
+      return NextResponse.json({ 
+        message: 'Hero image not found or access denied' 
+      }, { status: 404 });
+    }
 
     const heroImage = await prisma.heroImage.update({
       where: { id },
@@ -69,6 +106,14 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -77,6 +122,17 @@ export async function DELETE(request: NextRequest) {
         { error: 'ID is required' },
         { status: 400 }
       );
+    }
+
+    // Verify the hero image belongs to this subdomain
+    const existingImage = await prisma.heroImage.findFirst({
+      where: { id, subdomainId }
+    });
+
+    if (!existingImage) {
+      return NextResponse.json({ 
+        message: 'Hero image not found or access denied' 
+      }, { status: 404 });
     }
 
     await prisma.heroImage.delete({

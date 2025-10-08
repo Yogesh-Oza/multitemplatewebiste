@@ -4,6 +4,7 @@ import { AdminHeader } from '@/components/admin/admin-header';
 import { Toaster } from 'sonner';
 import { PrismaClient } from '@prisma/client';
 import { notFound } from 'next/navigation';
+import { Providers } from '@/components/providers/session-provider';
 
 const prisma = new PrismaClient();
 
@@ -49,15 +50,17 @@ export default async function SubdomainAdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader villageName={subdomainData.villageName} />
-      <div className="flex">
-        <AdminSidebar subdomain={subdomain} />
-        <main className="flex-1 p-6 ml-80">
-          {children}
-        </main>
+    <Providers>
+      <div className="min-h-screen bg-gray-50">
+        <AdminHeader villageName={subdomainData.villageName} />
+        <div className="flex">
+          <AdminSidebar subdomain={subdomain} />
+          <main className="flex-1 p-6 ml-80">
+            {children}
+          </main>
+        </div>
+        <Toaster position="top-right" richColors />
       </div>
-      <Toaster position="top-right" richColors />
-    </div>
+    </Providers>
   );
 }

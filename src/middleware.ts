@@ -1,30 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
+  const secret = process.env.NEXTAUTH_SECRET;
   
-  // Skip middleware for API routes, static files, and admin routes
+  // Skip middleware for API routes, static files
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon.ico') ||
-    pathname.startsWith('/admin') ||
     pathname === '/subdomain-register'
   ) {
     return NextResponse.next();
+  }
+
+  // Protect admin routes (but allow the login page)
+  const isAdminBase = pathname.startsWith('/admin');
+  const isAdminLogin = pathname === '/admin/login' || pathname === '/admin-login';
+  const isSubdomainAdmin = /^\/subdomain\/[^/]+\/admin(\/.*)?$/.test(pathname);
+
+  if ((isAdminBase && !isAdminLogin) || isSubdomainAdmin) {
+    const token = await getToken({ req: request as any, secret });
+    if (!token) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/admin-login';
+      url.searchParams.set('callbackUrl', request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
   }
 
   // Check if this is a subdomain request
   const subdomain = getSubdomain(hostname);
   
   if (subdomain && subdomain !== 'www' && subdomain !== 'mahagp') {
-    // This is a subdomain request
+    // This is a subdomain request - rewrite to subdomain route
+    // The subdomain page will handle validation and redirect if needed
     const url = request.nextUrl.clone();
-    
-    // Add subdomain to the URL path for the page to access
     url.pathname = `/subdomain/${subdomain}${pathname}`;
-    
     return NextResponse.rewrite(url);
   }
 
@@ -38,8 +52,8 @@ function getSubdomain(hostname: string): string | null {
   // Split by dots
   const parts = host.split('.');
   
-  // If we have more than 2 parts, the first part is the subdomain
-  if (parts.length > 2) {
+  // For localhost development, check if first part is not 'www' or 'localhost'
+  if (parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost') {
     return parts[0];
   }
   

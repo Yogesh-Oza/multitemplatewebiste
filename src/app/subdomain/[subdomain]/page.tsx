@@ -1,12 +1,11 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { HeroSection } from '@/components/sections/hero-section';
 import { AboutSection } from '@/components/sections/about-section';
 import { AnnouncementsSection } from '@/components/sections/announcements-section';
 import { HistorySection } from '@/components/sections/history-section';
 import { CulturalHeritageSection } from '@/components/sections/cultural-heritage-section';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
+import { SubdomainValidator } from '@/components/subdomain-validator';
 
 const prisma = new PrismaClient();
 
@@ -45,27 +44,22 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
   });
 
   if (!subdomainData || !subdomainData.isActive) {
-    notFound();
+    // Redirect to main site for invalid subdomains
+    redirect('http://localhost:3000');
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
+    <SubdomainValidator subdomain={subdomain}>
+      <HeroSection />
       
-      <main>
-        <HeroSection />
-        
-        <AboutSection />
-        
-        <AnnouncementsSection />
-        
-        <HistorySection />
-        
-        <CulturalHeritageSection />
-      </main>
+      <AboutSection />
       
-      <Footer />
-    </div>
+      <AnnouncementsSection />
+      
+      <HistorySection />
+      
+      <CulturalHeritageSection />
+    </SubdomainValidator>
   );
 }
 
