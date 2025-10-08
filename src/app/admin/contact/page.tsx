@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,53 +38,6 @@ interface ContactInfo {
   isActive: boolean;
 }
 
-const mockContactInfo: ContactInfo[] = [
-  {
-    id: '1',
-    type: 'office',
-    name: 'ग्रामपंचायत कार्यालय',
-    nameEn: 'Gram Panchayat Office',
-    designation: 'मुख्य कार्यालय',
-    designationEn: 'Main Office',
-    phone: '+91 12345 67890',
-    email: 'info@grampanchayat.com',
-    address: 'ग्रामपंचायत कार्यालय, गाव, तालुका, जिल्हा, महाराष्ट्र, भारत',
-    addressEn: 'Gram Panchayat Office, Village, Taluka, District, Maharashtra, India',
-    workingHours: 'सकाळी ९:०० ते संध्याकाळी ६:००',
-    workingHoursEn: '9:00 AM to 6:00 PM',
-    isActive: true
-  },
-  {
-    id: '2',
-    type: 'person',
-    name: 'श्री. राजेश पाटील',
-    nameEn: 'Mr. Rajesh Patil',
-    designation: 'सरपंच',
-    designationEn: 'Sarpanch',
-    phone: '+91 98765 43210',
-    email: 'sarpanch@grampanchayat.com',
-    address: 'गाव, तालुका, जिल्हा, महाराष्ट्र',
-    addressEn: 'Village, Taluka, District, Maharashtra',
-    workingHours: 'सकाळी १०:०० ते संध्याकाळी ५:००',
-    workingHoursEn: '10:00 AM to 5:00 PM',
-    isActive: true
-  },
-  {
-    id: '3',
-    type: 'department',
-    name: 'आरोग्य विभाग',
-    nameEn: 'Health Department',
-    designation: 'आरोग्य केंद्र',
-    designationEn: 'Health Center',
-    phone: '+91 87654 32109',
-    email: 'health@grampanchayat.com',
-    address: 'आरोग्य केंद्र, गाव, तालुका, जिल्हा',
-    addressEn: 'Health Center, Village, Taluka, District',
-    workingHours: 'सकाळी ८:०० ते संध्याकाळी ४:००',
-    workingHoursEn: '8:00 AM to 4:00 PM',
-    isActive: true
-  }
-];
 
 const contactTypes = [
   { value: 'office', label: 'कार्यालय', icon: Building },
@@ -93,9 +46,30 @@ const contactTypes = [
 ];
 
 export default function ContactPage() {
-  const [contacts, setContacts] = useState<ContactInfo[]>(mockContactInfo);
+  const [contacts, setContacts] = useState<ContactInfo[]>([]);
   const [editingContact, setEditingContact] = useState<ContactInfo | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch contacts from API
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const response = await fetch('/api/contacts');
+        if (response.ok) {
+          const data = await response.json();
+          setContacts(data);
+        }
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+        toast.error('संपर्क माहिती लोड करताना त्रुटी आली');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContacts();
+  }, []);
 
   const handleEdit = (contact: ContactInfo) => {
     setEditingContact(contact);
@@ -121,27 +95,70 @@ export default function ContactPage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingContact) return;
 
-    if (isAdding) {
-      const newContact = { ...editingContact, id: Date.now().toString() };
-      setContacts(prev => [...prev, newContact]);
-      toast.success('नवीन संपर्क जोडले');
-    } else {
-      setContacts(prev => prev.map(contact => 
-        contact.id === editingContact.id ? editingContact : contact
-      ));
-      toast.success('संपर्क अपडेट केले');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/contacts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingContact),
+        });
 
-    setEditingContact(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newContact = await response.json();
+          setContacts(prev => [...prev, newContact]);
+          toast.success('नवीन संपर्क जोडले');
+        } else {
+          throw new Error('Failed to create contact');
+        }
+      } else {
+        const response = await fetch(`/api/contacts/${editingContact.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingContact),
+        });
+
+        if (response.ok) {
+          const updatedContact = await response.json();
+          setContacts(prev => prev.map(contact => 
+            contact.id === updatedContact.id ? updatedContact : contact
+          ));
+          toast.success('संपर्क अपडेट केले');
+        } else {
+          throw new Error('Failed to update contact');
+        }
+      }
+
+      setEditingContact(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving contact:', error);
+      toast.error('संपर्क सेव्ह करताना त्रुटी आली');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setContacts(prev => prev.filter(contact => contact.id !== id));
-    toast.success('संपर्क हटवले');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/contacts/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setContacts(prev => prev.filter(contact => contact.id !== id));
+        toast.success('संपर्क हटवले');
+      } else {
+        throw new Error('Failed to delete contact');
+      }
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      toast.error('संपर्क हटवताना त्रुटी आली');
+    }
   };
 
   const handleCancel = () => {
@@ -161,21 +178,21 @@ export default function ContactPage() {
     return contactType ? contactType.icon : Building;
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">संपर्क</h1>
-            <p className="text-gray-600 mt-1">संपर्क माहिती व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">संपर्क</h1>
+          <p className="text-gray-600 mt-1">संपर्क माहिती व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">

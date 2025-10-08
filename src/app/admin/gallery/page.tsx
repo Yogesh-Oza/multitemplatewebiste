@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,62 +34,37 @@ interface GalleryItem {
   isFeatured: boolean;
 }
 
-const mockGalleryItems: GalleryItem[] = [
-  {
-    id: '1',
-    title: 'गणपती उत्सव २०२४',
-    titleEn: 'Ganesh Festival 2024',
-    description: 'गावातील गणपती उत्सवाच्या प्रतिमा',
-    descriptionEn: 'Images from village Ganesh festival',
-    imageUrl: '/images/gallery-1.jpg',
-    category: 'उत्सव',
-    date: '2024-09-15',
-    isFeatured: true
-  },
-  {
-    id: '2',
-    title: 'ग्रामपंचायत मैदान',
-    titleEn: 'Gram Panchayat Ground',
-    description: 'ग्रामपंचायत मैदानाचे दृश्य',
-    descriptionEn: 'View of Gram Panchayat ground',
-    imageUrl: '/images/gallery-2.jpg',
-    category: 'स्थळ',
-    date: '2024-08-20',
-    isFeatured: false
-  },
-  {
-    id: '3',
-    title: 'किसान मेळा',
-    titleEn: 'Farmers Fair',
-    description: 'शेती संबंधित प्रदर्शन',
-    descriptionEn: 'Agricultural exhibition',
-    imageUrl: '/images/gallery-3.jpg',
-    category: 'कार्यक्रम',
-    date: '2024-07-10',
-    isFeatured: true
-  },
-  {
-    id: '4',
-    title: 'लोकनृत्य कार्यक्रम',
-    titleEn: 'Folk Dance Program',
-    description: 'परंपरागत लोकनृत्य प्रदर्शन',
-    descriptionEn: 'Traditional folk dance performance',
-    imageUrl: '/images/gallery-4.jpg',
-    category: 'सांस्कृतिक',
-    date: '2024-06-25',
-    isFeatured: false
-  }
-];
 
 const categories = [
   'उत्सव', 'कार्यक्रम', 'स्थळ', 'सांस्कृतिक', 'शेती', 'शिक्षण', 'आरोग्य', 'अन्य'
 ];
 
 export default function GalleryPage() {
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(mockGalleryItems);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('सर्व');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch gallery items from API
+  useEffect(() => {
+    const fetchGalleryItems = async () => {
+      try {
+        const response = await fetch('/api/gallery');
+        if (response.ok) {
+          const data = await response.json();
+          setGalleryItems(data);
+        }
+      } catch (error) {
+        console.error('Error fetching gallery items:', error);
+        toast.error('गॅलरी लोड करताना त्रुटी आली');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGalleryItems();
+  }, []);
 
   const handleEdit = (item: GalleryItem) => {
     setEditingItem(item);
@@ -111,27 +86,70 @@ export default function GalleryPage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingItem) return;
 
-    if (isAdding) {
-      const newItem = { ...editingItem, id: Date.now().toString() };
-      setGalleryItems(prev => [...prev, newItem]);
-      toast.success('नवीन प्रतिमा जोडली');
-    } else {
-      setGalleryItems(prev => prev.map(item => 
-        item.id === editingItem.id ? editingItem : item
-      ));
-      toast.success('प्रतिमा अपडेट केली');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/gallery', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingItem),
+        });
 
-    setEditingItem(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newItem = await response.json();
+          setGalleryItems(prev => [...prev, newItem]);
+          toast.success('नवीन प्रतिमा जोडली');
+        } else {
+          throw new Error('Failed to create gallery item');
+        }
+      } else {
+        const response = await fetch(`/api/gallery/${editingItem.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingItem),
+        });
+
+        if (response.ok) {
+          const updatedItem = await response.json();
+          setGalleryItems(prev => prev.map(item => 
+            item.id === updatedItem.id ? updatedItem : item
+          ));
+          toast.success('प्रतिमा अपडेट केली');
+        } else {
+          throw new Error('Failed to update gallery item');
+        }
+      }
+
+      setEditingItem(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving gallery item:', error);
+      toast.error('प्रतिमा सेव्ह करताना त्रुटी आली');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setGalleryItems(prev => prev.filter(item => item.id !== id));
-    toast.success('प्रतिमा हटवली');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/gallery/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setGalleryItems(prev => prev.filter(item => item.id !== id));
+        toast.success('प्रतिमा हटवली');
+      } else {
+        throw new Error('Failed to delete gallery item');
+      }
+    } catch (error) {
+      console.error('Error deleting gallery item:', error);
+      toast.error('प्रतिमा हटवताना त्रुटी आली');
+    }
   };
 
   const handleCancel = () => {
@@ -159,21 +177,21 @@ export default function GalleryPage() {
     ? galleryItems 
     : galleryItems.filter(item => item.category === selectedCategory);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">गॅलरी</h1>
-            <p className="text-gray-600 mt-1">प्रतिमा गॅलरी व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">गॅलरी</h1>
+          <p className="text-gray-600 mt-1">प्रतिमा गॅलरी व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">

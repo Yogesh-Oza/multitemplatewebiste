@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,47 +36,6 @@ interface Program {
   status: 'upcoming' | 'ongoing' | 'completed';
 }
 
-const mockPrograms: Program[] = [
-  {
-    id: '1',
-    title: 'गणपती उत्सव',
-    titleEn: 'Ganesh Festival',
-    description: 'गावातील सर्वात महत्त्वाचा सांस्कृतिक उत्सव. १० दिवसांचा उत्सव साजरा केला जातो.',
-    descriptionEn: 'The most important cultural festival of the village. Celebrated for 10 days.',
-    date: '2024-09-15',
-    time: '06:00',
-    location: 'ग्रामपंचायत मैदान',
-    category: 'उत्सव',
-    imageUrl: '/images/program-1.jpg',
-    status: 'upcoming'
-  },
-  {
-    id: '2',
-    title: 'लसीकरण शिबीर',
-    titleEn: 'Vaccination Camp',
-    description: 'सर्व वयोगटासाठी लसीकरण शिबीर आयोजित करण्यात आले आहे.',
-    descriptionEn: 'Vaccination camp organized for all age groups.',
-    date: '2024-03-15',
-    time: '10:00',
-    location: 'आरोग्य केंद्र',
-    category: 'आरोग्य',
-    imageUrl: '/images/program-2.jpg',
-    status: 'completed'
-  },
-  {
-    id: '3',
-    title: 'किसान मेळा',
-    titleEn: 'Farmers Fair',
-    description: 'शेती संबंधित सुविधा आणि तंत्रज्ञानाचे प्रदर्शन.',
-    descriptionEn: 'Exhibition of agricultural facilities and technology.',
-    date: '2024-04-20',
-    time: '09:00',
-    location: 'शेती मंडप',
-    category: 'शेती',
-    imageUrl: '/images/program-3.jpg',
-    status: 'upcoming'
-  }
-];
 
 const categories = [
   'उत्सव', 'आरोग्य', 'शेती', 'शिक्षण', 'क्रीडा', 'सांस्कृतिक', 'सामाजिक', 'अन्य'
@@ -89,9 +48,30 @@ const statusOptions = [
 ];
 
 export default function ProgramsPage() {
-  const [programs, setPrograms] = useState<Program[]>(mockPrograms);
+  const [programs, setPrograms] = useState<Program[]>([]);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch programs from API
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await fetch('/api/programs');
+        if (response.ok) {
+          const data = await response.json();
+          setPrograms(data);
+        }
+      } catch (error) {
+        console.error('Error fetching programs:', error);
+        toast.error('कार्यक्रम लोड करताना त्रुटी आली');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPrograms();
+  }, []);
 
   const handleEdit = (program: Program) => {
     setEditingProgram(program);
@@ -115,27 +95,70 @@ export default function ProgramsPage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingProgram) return;
 
-    if (isAdding) {
-      const newProgram = { ...editingProgram, id: Date.now().toString() };
-      setPrograms(prev => [...prev, newProgram]);
-      toast.success('नवीन कार्यक्रम जोडले');
-    } else {
-      setPrograms(prev => prev.map(program => 
-        program.id === editingProgram.id ? editingProgram : program
-      ));
-      toast.success('कार्यक्रम अपडेट केले');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/programs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingProgram),
+        });
 
-    setEditingProgram(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newProgram = await response.json();
+          setPrograms(prev => [...prev, newProgram]);
+          toast.success('नवीन कार्यक्रम जोडले');
+        } else {
+          throw new Error('Failed to create program');
+        }
+      } else {
+        const response = await fetch(`/api/programs/${editingProgram.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingProgram),
+        });
+
+        if (response.ok) {
+          const updatedProgram = await response.json();
+          setPrograms(prev => prev.map(program => 
+            program.id === updatedProgram.id ? updatedProgram : program
+          ));
+          toast.success('कार्यक्रम अपडेट केले');
+        } else {
+          throw new Error('Failed to update program');
+        }
+      }
+
+      setEditingProgram(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving program:', error);
+      toast.error('कार्यक्रम सेव्ह करताना त्रुटी आली');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setPrograms(prev => prev.filter(program => program.id !== id));
-    toast.success('कार्यक्रम हटवले');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/programs/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setPrograms(prev => prev.filter(program => program.id !== id));
+        toast.success('कार्यक्रम हटवले');
+      } else {
+        throw new Error('Failed to delete program');
+      }
+    } catch (error) {
+      console.error('Error deleting program:', error);
+      toast.error('कार्यक्रम हटवताना त्रुटी आली');
+    }
   };
 
   const handleCancel = () => {
@@ -161,21 +184,21 @@ export default function ProgramsPage() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">कार्यक्रम</h1>
-            <p className="text-gray-600 mt-1">कार्यक्रम आणि उत्सव व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">कार्यक्रम</h1>
+          <p className="text-gray-600 mt-1">कार्यक्रम आणि उत्सव व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,66 +35,37 @@ interface IncomeExpense {
   receipt: string;
 }
 
-const mockIncomeExpense: IncomeExpense[] = [
-  {
-    id: '1',
-    type: 'income',
-    title: 'कर संग्रह',
-    titleEn: 'Tax Collection',
-    description: 'गावातील कर संग्रह',
-    descriptionEn: 'Tax collection from village',
-    amount: 150000,
-    category: 'कर',
-    date: '2024-03-15',
-    receipt: '/receipts/receipt-1.pdf'
-  },
-  {
-    id: '2',
-    type: 'expense',
-    title: 'रस्ता दुरुस्ती',
-    titleEn: 'Road Repair',
-    description: 'मुख्य रस्त्याची दुरुस्ती',
-    descriptionEn: 'Main road repair work',
-    amount: 75000,
-    category: 'विकास',
-    date: '2024-03-10',
-    receipt: '/receipts/receipt-2.pdf'
-  },
-  {
-    id: '3',
-    type: 'income',
-    title: 'सरकारी अनुदान',
-    titleEn: 'Government Grant',
-    description: 'केंद्र सरकारचे अनुदान',
-    descriptionEn: 'Central government grant',
-    amount: 200000,
-    category: 'अनुदान',
-    date: '2024-02-28',
-    receipt: '/receipts/receipt-3.pdf'
-  },
-  {
-    id: '4',
-    type: 'expense',
-    title: 'पाणीपुरवठा यंत्रणा',
-    titleEn: 'Water Supply System',
-    description: 'पाणीपुरवठा यंत्रणेची दुरुस्ती',
-    descriptionEn: 'Water supply system maintenance',
-    amount: 120000,
-    category: 'सुविधा',
-    date: '2024-02-20',
-    receipt: '/receipts/receipt-4.pdf'
-  }
-];
 
 const categories = [
   'कर', 'अनुदान', 'दान', 'विकास', 'सुविधा', 'शिक्षण', 'आरोग्य', 'अन्य'
 ];
 
 export default function IncomeExpensePage() {
-  const [transactions, setTransactions] = useState<IncomeExpense[]>(mockIncomeExpense);
+  const [transactions, setTransactions] = useState<IncomeExpense[]>([]);
   const [editingTransaction, setEditingTransaction] = useState<IncomeExpense | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedType, setSelectedType] = useState<'all' | 'income' | 'expense'>('all');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch transactions from API
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('/api/income-expense');
+        if (response.ok) {
+          const data = await response.json();
+          setTransactions(data);
+        }
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        toast.error('जमा-खर्च लोड करताना त्रुटी आली');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   const handleEdit = (transaction: IncomeExpense) => {
     setEditingTransaction(transaction);
@@ -117,27 +88,70 @@ export default function IncomeExpensePage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingTransaction) return;
 
-    if (isAdding) {
-      const newTransaction = { ...editingTransaction, id: Date.now().toString() };
-      setTransactions(prev => [...prev, newTransaction]);
-      toast.success('नवीन नोंद जोडली');
-    } else {
-      setTransactions(prev => prev.map(transaction => 
-        transaction.id === editingTransaction.id ? editingTransaction : transaction
-      ));
-      toast.success('नोंद अपडेट केली');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/income-expense', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingTransaction),
+        });
 
-    setEditingTransaction(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newTransaction = await response.json();
+          setTransactions(prev => [...prev, newTransaction]);
+          toast.success('नवीन नोंद जोडली');
+        } else {
+          throw new Error('Failed to create transaction');
+        }
+      } else {
+        const response = await fetch(`/api/income-expense/${editingTransaction.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingTransaction),
+        });
+
+        if (response.ok) {
+          const updatedTransaction = await response.json();
+          setTransactions(prev => prev.map(transaction => 
+            transaction.id === updatedTransaction.id ? updatedTransaction : transaction
+          ));
+          toast.success('नोंद अपडेट केली');
+        } else {
+          throw new Error('Failed to update transaction');
+        }
+      }
+
+      setEditingTransaction(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving transaction:', error);
+      toast.error('नोंद सेव्ह करताना त्रुटी आली');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setTransactions(prev => prev.filter(transaction => transaction.id !== id));
-    toast.success('नोंद हटवली');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/income-expense/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setTransactions(prev => prev.filter(transaction => transaction.id !== id));
+        toast.success('नोंद हटवली');
+      } else {
+        throw new Error('Failed to delete transaction');
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      toast.error('नोंद हटवताना त्रुटी आली');
+    }
   };
 
   const handleCancel = () => {
@@ -159,21 +173,21 @@ export default function IncomeExpensePage() {
 
   const balance = totalIncome - totalExpense;
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">जमा-खर्च</h1>
-            <p className="text-gray-600 mt-1">आर्थिक माहिती व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">जमा-खर्च</h1>
+          <p className="text-gray-600 mt-1">आर्थिक माहिती व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Button variant="outline">

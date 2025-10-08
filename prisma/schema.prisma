@@ -98,6 +98,155 @@ model HeroImage {
   @@map("hero_images")
 }
 
+model Program {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  date        DateTime
+  location    String?
+  category    String?
+  imageUrl    String?
+  status      String @default("upcoming") // upcoming, ongoing, completed
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("programs")
+}
+
+model Gallery {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  imageUrl    String
+  category    String?
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("gallery")
+}
+
+model Facility {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  nameEn      String
+  description String
+  descriptionEn String
+  category    String
+  location    String?
+  contactInfo String?
+  workingHours String?
+  isActive    Boolean @default(true)
+  imageUrl    String?
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("facilities")
+}
+
+model Contact {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  type        String // office, person, department
+  name        String
+  nameEn      String
+  designation String?
+  designationEn String?
+  phone       String?
+  email       String?
+  address     String?
+  addressEn   String?
+  workingHours String?
+  workingHoursEn String?
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("contacts")
+}
+
+model IncomeExpense {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  type        String // income, expense
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  amount      Float
+  category    String
+  date        DateTime
+  receiptUrl  String?
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("income_expense")
+}
+
+model Department {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  nameEn      String
+  description String
+  descriptionEn String
+  head        String
+  headEn      String
+  phone       String?
+  email       String?
+  address     String?
+  addressEn   String?
+  workingHours String?
+  workingHoursEn String?
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("departments")
+}
+
+model GovernmentScheme {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  category    String
+  eligibility String
+  eligibilityEn String
+  benefits    String
+  benefitsEn  String
+  documents   String
+  documentsEn String
+  applicationProcess String
+  applicationProcessEn String
+  contactInfo String
+  contactInfoEn String
+  website     String?
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("government_schemes")
+}
+
 model AdminUser {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   username  String @unique
@@ -137,6 +286,13 @@ model Subdomain {
   culturalHeritage CulturalHeritage[]
   heroImages    HeroImage[]
   historyCards  HistoryCard[]
+  programs      Program[]
+  gallery       Gallery[]
+  facilities    Facility[]
+  contacts      Contact[]
+  incomeExpense IncomeExpense[]
+  departments   Department[]
+  governmentSchemes GovernmentScheme[]
 
   @@map("subdomains")
 }

@@ -12,14 +12,40 @@ export async function GET(request: NextRequest) {
       }, { status: 404 });
     }
 
-    const villageInfo = await prisma.villageInfo.findFirst({
-      where: { subdomainId }
+    let villageInfo = await prisma.villageInfo.findFirst({
+      where: { subdomainId },
+      orderBy: { createdAt: 'desc' } // Get the most recent record
     });
     
     if (!villageInfo) {
-      return NextResponse.json({ 
-        message: 'Village information not found' 
-      }, { status: 404 });
+      // Auto-create village info record for this subdomain
+      const subdomainData = await prisma.subdomain.findUnique({
+        where: { id: subdomainId },
+        select: { subdomain: true, villageName: true, villageNameEn: true }
+      });
+      
+      if (!subdomainData) {
+        return NextResponse.json({ 
+          message: 'Subdomain not found' 
+        }, { status: 404 });
+      }
+      
+      // Create default village info for this subdomain
+      villageInfo = await prisma.villageInfo.create({
+        data: {
+          title: `${subdomainData.villageName} ग्रामपंचायत`,
+          titleEn: `${subdomainData.villageNameEn} Gram Panchayat`,
+          description: `${subdomainData.villageName} ग्रामपंचायतची माहिती`,
+          descriptionEn: `Information about ${subdomainData.villageNameEn} Gram Panchayat`,
+          stats: {
+            families: 0,
+            population: 0,
+            gramPanchayatCount: 1,
+            area: 0
+          },
+          subdomainId: subdomainId
+        }
+      });
     }
 
     // Transform the data to match the expected interface for the frontend

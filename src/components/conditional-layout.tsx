@@ -19,19 +19,14 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
     return <>{children}</>;
   }
   
-  // For public routes, render with header/footer and Google Translate
+  // For public routes, render with header/footer
   return (
-    <>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-      </div>
-      
-      {/* Google Translate Widget - only for public pages */}
-      <div id="google_translate_element" className="fixed bottom-4 right-4 z-50"></div>
-    </>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+    </div>
   );
 }

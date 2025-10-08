@@ -5,6 +5,7 @@ export async function uploadFile(file: File): Promise<string> {
     const blob = await put(file.name, file, {
       access: 'public',
       token: process.env.BLOB_READ_WRITE_TOKEN,
+      addRandomSuffix: true, // Generate unique filename to avoid conflicts
     });
     
     return blob.url;

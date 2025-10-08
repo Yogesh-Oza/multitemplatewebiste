@@ -34,6 +34,28 @@ interface VillageInfoFormProps {
 export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [villageData, setVillageData] = useState<VillageInfo | null>(initialData || null);
+  const [isLoadingData, setIsLoadingData] = useState(!initialData);
+
+  // Fetch village data from API
+  useEffect(() => {
+    if (!initialData) {
+      const fetchVillageData = async () => {
+        try {
+          const response = await fetch('/api/village-info');
+          if (response.ok) {
+            const data = await response.json();
+            setVillageData(data);
+          }
+        } catch (error) {
+          console.error('Error fetching village data:', error);
+        } finally {
+          setIsLoadingData(false);
+        }
+      };
+      fetchVillageData();
+    }
+  }, [initialData]);
   
   // Helper function to transform stats data
   const transformStats = (stats: any): Stat[] => {
@@ -71,25 +93,25 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
   };
 
   const [formData, setFormData] = useState<VillageInfo>({
-    title: initialData?.title || 'आमच्या गावाबद्दल',
-    titleEn: initialData?.titleEn || 'About Our Village',
-    description: initialData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
-    descriptionEn: initialData?.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
-    stats: transformStats(initialData?.stats),
+    title: villageData?.title || 'आमच्या गावाबद्दल',
+    titleEn: villageData?.titleEn || 'About Our Village',
+    description: villageData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+    descriptionEn: villageData?.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
+    stats: transformStats(villageData?.stats),
   });
 
-  // Update form data when initialData changes
+  // Update form data when villageData changes
   useEffect(() => {
-    if (initialData) {
+    if (villageData) {
       setFormData({
-        title: initialData.title || 'आमच्या गावाबद्दल',
-        titleEn: initialData.titleEn || 'About Our Village',
-        description: initialData.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
-        descriptionEn: initialData.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
-        stats: transformStats(initialData.stats),
+        title: villageData.title || 'आमच्या गावाबद्दल',
+        titleEn: villageData.titleEn || 'About Our Village',
+        description: villageData.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+        descriptionEn: villageData.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
+        stats: transformStats(villageData.stats),
       });
     }
-  }, [initialData]);
+  }, [villageData]);
 
   const handleInputChange = (field: keyof VillageInfo, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -153,6 +175,14 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       setIsLoading(false);
     }
   };
+
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

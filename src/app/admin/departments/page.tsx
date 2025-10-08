@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,71 +47,6 @@ interface Department {
   isActive: boolean;
 }
 
-const mockDepartments: Department[] = [
-  {
-    id: '1',
-    name: 'आरोग्य विभाग',
-    nameEn: 'Health Department',
-    description: 'गावातील आरोग्य सेवा आणि उपचार सुविधा',
-    descriptionEn: 'Village health services and treatment facilities',
-    headName: 'डॉ. प्रिया शर्मा',
-    headNameEn: 'Dr. Priya Sharma',
-    designation: 'आरोग्य अधिकारी',
-    designationEn: 'Health Officer',
-    phone: '+91 98765 43210',
-    email: 'health@grampanchayat.com',
-    address: 'आरोग्य केंद्र, गाव, तालुका, जिल्हा',
-    addressEn: 'Health Center, Village, Taluka, District',
-    workingHours: 'सकाळी ८:०० ते संध्याकाळी ४:००',
-    workingHoursEn: '8:00 AM to 4:00 PM',
-    services: ['उपचार', 'लसीकरण', 'आरोग्य तपासणी', 'दवाखाना'],
-    servicesEn: ['Treatment', 'Vaccination', 'Health Checkup', 'Pharmacy'],
-    imageUrl: '/images/dept-1.jpg',
-    isActive: true
-  },
-  {
-    id: '2',
-    name: 'शिक्षण विभाग',
-    nameEn: 'Education Department',
-    description: 'गावातील शिक्षण सुविधा आणि शाळा व्यवस्थापन',
-    descriptionEn: 'Village education facilities and school management',
-    headName: 'श्री. रवींद्र जाधव',
-    headNameEn: 'Mr. Ravindra Jadhav',
-    designation: 'शिक्षण अधिकारी',
-    designationEn: 'Education Officer',
-    phone: '+91 87654 32109',
-    email: 'education@grampanchayat.com',
-    address: 'शाळा कार्यालय, गाव, तालुका, जिल्हा',
-    addressEn: 'School Office, Village, Taluka, District',
-    workingHours: 'सकाळी ९:०० ते संध्याकाळी ५:००',
-    workingHoursEn: '9:00 AM to 5:00 PM',
-    services: ['शाळा व्यवस्थापन', 'शिक्षक नियुक्ती', 'पुस्तके वाटप', 'शिष्यवृत्ती'],
-    servicesEn: ['School Management', 'Teacher Recruitment', 'Book Distribution', 'Scholarships'],
-    imageUrl: '/images/dept-2.jpg',
-    isActive: true
-  },
-  {
-    id: '3',
-    name: 'कृषी विभाग',
-    nameEn: 'Agriculture Department',
-    description: 'शेती संबंधित सुविधा आणि मार्गदर्शन',
-    descriptionEn: 'Agricultural facilities and guidance',
-    headName: 'श्री. सुनील पाटील',
-    headNameEn: 'Mr. Sunil Patil',
-    designation: 'कृषी अधिकारी',
-    designationEn: 'Agriculture Officer',
-    phone: '+91 76543 21098',
-    email: 'agriculture@grampanchayat.com',
-    address: 'कृषी केंद्र, गाव, तालुका, जिल्हा',
-    addressEn: 'Agriculture Center, Village, Taluka, District',
-    workingHours: 'सकाळी १०:०० ते संध्याकाळी ६:००',
-    workingHoursEn: '10:00 AM to 6:00 PM',
-    services: ['बियाणे वाटप', 'खत सबसिडी', 'शेती मार्गदर्शन', 'कर्ज मदत'],
-    servicesEn: ['Seed Distribution', 'Fertilizer Subsidy', 'Farming Guidance', 'Loan Assistance'],
-    imageUrl: '/images/dept-3.jpg',
-    isActive: true
-  }
-];
 
 const serviceOptions = [
   'उपचार', 'लसीकरण', 'आरोग्य तपासणी', 'दवाखाना',
@@ -128,9 +63,30 @@ const serviceOptionsEn = [
 ];
 
 export default function DepartmentsPage() {
-  const [departments, setDepartments] = useState<Department[]>(mockDepartments);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch departments from API
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch('/api/departments');
+        if (response.ok) {
+          const data = await response.json();
+          setDepartments(data);
+        }
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        toast.error('विभाग लोड करताना त्रुटी आली');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   const handleEdit = (department: Department) => {
     setEditingDepartment(department);
@@ -162,27 +118,70 @@ export default function DepartmentsPage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingDepartment) return;
 
-    if (isAdding) {
-      const newDepartment = { ...editingDepartment, id: Date.now().toString() };
-      setDepartments(prev => [...prev, newDepartment]);
-      toast.success('नवीन विभाग जोडला');
-    } else {
-      setDepartments(prev => prev.map(dept => 
-        dept.id === editingDepartment.id ? editingDepartment : dept
-      ));
-      toast.success('विभाग अपडेट केला');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/departments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingDepartment),
+        });
 
-    setEditingDepartment(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newDepartment = await response.json();
+          setDepartments(prev => [...prev, newDepartment]);
+          toast.success('नवीन विभाग जोडला');
+        } else {
+          throw new Error('Failed to create department');
+        }
+      } else {
+        const response = await fetch(`/api/departments/${editingDepartment.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingDepartment),
+        });
+
+        if (response.ok) {
+          const updatedDepartment = await response.json();
+          setDepartments(prev => prev.map(dept => 
+            dept.id === updatedDepartment.id ? updatedDepartment : dept
+          ));
+          toast.success('विभाग अपडेट केला');
+        } else {
+          throw new Error('Failed to update department');
+        }
+      }
+
+      setEditingDepartment(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving department:', error);
+      toast.error('विभाग सेव्ह करताना त्रुटी आली');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setDepartments(prev => prev.filter(dept => dept.id !== id));
-    toast.success('विभाग हटवला');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/departments/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setDepartments(prev => prev.filter(dept => dept.id !== id));
+        toast.success('विभाग हटवला');
+      } else {
+        throw new Error('Failed to delete department');
+      }
+    } catch (error) {
+      console.error('Error deleting department:', error);
+      toast.error('विभाग हटवताना त्रुटी आली');
+    }
   };
 
   const handleCancel = () => {
@@ -225,21 +224,21 @@ export default function DepartmentsPage() {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">विभाग</h1>
-            <p className="text-gray-600 mt-1">विभागीय माहिती व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">विभाग</h1>
+          <p className="text-gray-600 mt-1">विभागीय माहिती व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">

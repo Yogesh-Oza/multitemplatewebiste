@@ -29,45 +29,32 @@ interface CulturalHeritage {
   imageUrl: string;
 }
 
-const mockCulturalHeritage: CulturalHeritage[] = [
-  {
-    id: '1',
-    title: 'गणेशोत्सव',
-    titleEn: 'Ganesh Festival',
-    description: 'गावातील सर्वात मोठा सांस्कृतिक उत्सव. 10 दिवसांचा साजरा केला जातो.',
-    descriptionEn: 'The biggest cultural festival of the village. Celebrated for 10 days.',
-    imageUrl: '/images/cultural-1.jpg'
-  },
-  {
-    id: '2',
-    title: 'लोकनृत्य',
-    titleEn: 'Folk Dance',
-    description: 'परंपरागत लोकनृत्य आणि संगीताची समृद्ध परंपरा.',
-    descriptionEn: 'Rich tradition of folk dance and music.',
-    imageUrl: '/images/cultural-2.jpg'
-  },
-  {
-    id: '3',
-    title: 'हस्तकला',
-    titleEn: 'Handicrafts',
-    description: 'स्थानिक कारागीरांची हस्तकला आणि कलाकृती.',
-    descriptionEn: 'Local artisans handicrafts and artworks.',
-    imageUrl: '/images/cultural-3.jpg'
-  },
-  {
-    id: '4',
-    title: 'पारंपरिक व्यंजने',
-    titleEn: 'Traditional Cuisine',
-    description: 'गावातील पारंपरिक व्यंजने आणि पाककला.',
-    descriptionEn: 'Traditional village cuisine and cooking methods.',
-    imageUrl: '/images/cultural-4.jpg'
-  }
-];
 
 export default function CulturalHeritagePage() {
-  const [heritage, setHeritage] = useState<CulturalHeritage[]>(mockCulturalHeritage);
+  const [heritage, setHeritage] = useState<CulturalHeritage[]>([]);
   const [editingItem, setEditingItem] = useState<CulturalHeritage | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch heritage from API
+  useEffect(() => {
+    const fetchHeritage = async () => {
+      try {
+        const response = await fetch('/api/cultural-heritage');
+        if (response.ok) {
+          const data = await response.json();
+          setHeritage(data);
+        }
+      } catch (error) {
+        console.error('Error fetching heritage:', error);
+        toast.error('सांस्कृतिक वारसा लोड करताना त्रुटी आली');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHeritage();
+  }, []);
 
   const handleEdit = (item: CulturalHeritage) => {
     setEditingItem(item);
@@ -86,27 +73,70 @@ export default function CulturalHeritagePage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingItem) return;
 
-    if (isAdding) {
-      const newItem = { ...editingItem, id: Date.now().toString() };
-      setHeritage(prev => [...prev, newItem]);
-      toast.success('नवीन आयटम जोडले');
-    } else {
-      setHeritage(prev => prev.map(item => 
-        item.id === editingItem.id ? editingItem : item
-      ));
-      toast.success('आयटम अपडेट केले');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/cultural-heritage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingItem),
+        });
 
-    setEditingItem(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newItem = await response.json();
+          setHeritage(prev => [...prev, newItem]);
+          toast.success('नवीन आयटम जोडले');
+        } else {
+          throw new Error('Failed to create heritage item');
+        }
+      } else {
+        const response = await fetch(`/api/cultural-heritage/${editingItem.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingItem),
+        });
+
+        if (response.ok) {
+          const updatedItem = await response.json();
+          setHeritage(prev => prev.map(item => 
+            item.id === updatedItem.id ? updatedItem : item
+          ));
+          toast.success('आयटम अपडेट केले');
+        } else {
+          throw new Error('Failed to update heritage item');
+        }
+      }
+
+      setEditingItem(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving heritage item:', error);
+      toast.error('आयटम सेव्ह करताना त्रुटी आली');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setHeritage(prev => prev.filter(item => item.id !== id));
-    toast.success('आयटम हटवले');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/cultural-heritage/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setHeritage(prev => prev.filter(item => item.id !== id));
+        toast.success('आयटम हटवले');
+      } else {
+        throw new Error('Failed to delete heritage item');
+      }
+    } catch (error) {
+      console.error('Error deleting heritage item:', error);
+      toast.error('आयटम हटवताना त्रुटी आली');
+    }
   };
 
   const handleCancel = () => {
@@ -123,21 +153,21 @@ export default function CulturalHeritagePage() {
     toast.success('प्रतिमा अपलोड केली');
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">सांस्कृतिक वारसा</h1>
-            <p className="text-gray-600 mt-1">सांस्कृतिक उत्सव आणि परंपरागत कला व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">सांस्कृतिक वारसा</h1>
+          <p className="text-gray-600 mt-1">सांस्कृतिक उत्सव आणि परंपरागत कला व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,77 +48,6 @@ interface GovernmentScheme {
   imageUrl: string;
 }
 
-const mockSchemes: GovernmentScheme[] = [
-  {
-    id: '1',
-    title: 'पीएम आवास योजना',
-    titleEn: 'PM Awas Yojana',
-    description: 'सर्वांसाठी घराची योजना - ग्रामीण भागासाठी',
-    descriptionEn: 'Housing for All - Rural Scheme',
-    category: 'घर',
-    department: 'ग्रामीण विकास',
-    eligibility: 'ग्रामीण भागातील गरीब कुटुंबे',
-    eligibilityEn: 'Poor families in rural areas',
-    benefits: '₹१.५ लाख ते ₹२ लाख अनुदान',
-    benefitsEn: '₹1.5 lakh to ₹2 lakh grant',
-    applicationProcess: 'ऑनलाइन अर्ज, दस्तऐवज सादर करणे',
-    applicationProcessEn: 'Online application, document submission',
-    requiredDocuments: 'आधार कार्ड, आय प्रमाणपत्र, जमीन कागद',
-    requiredDocumentsEn: 'Aadhaar Card, Income Certificate, Land Papers',
-    contactInfo: 'ग्रामसेवक कार्यालय',
-    website: 'https://pmaymis.gov.in',
-    status: 'active',
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
-    imageUrl: '/images/scheme-1.jpg'
-  },
-  {
-    id: '2',
-    title: 'महात्मा गांधी राष्ट्रीय ग्रामीण रोजगार गारंटी योजना',
-    titleEn: 'MGNREGA',
-    description: 'ग्रामीण भागातील रोजगार हमी योजना',
-    descriptionEn: 'Rural Employment Guarantee Scheme',
-    category: 'रोजगार',
-    department: 'ग्रामीण विकास',
-    eligibility: '१८ वर्षांपेक्षा जास्त वयाचे ग्रामीण नागरिक',
-    eligibilityEn: 'Rural citizens above 18 years',
-    benefits: 'दरवर्षी १०० दिवस रोजगार हमी',
-    benefitsEn: '100 days employment guarantee per year',
-    applicationProcess: 'ग्रामसेवक कडे अर्ज, जॉब कार्ड तयार करणे',
-    applicationProcessEn: 'Application to Gram Sevak, Job Card creation',
-    requiredDocuments: 'आधार कार्ड, रहिवासी प्रमाणपत्र',
-    requiredDocumentsEn: 'Aadhaar Card, Residence Certificate',
-    contactInfo: 'ग्रामसेवक कार्यालय',
-    website: 'https://nrega.nic.in',
-    status: 'active',
-    startDate: '2024-04-01',
-    endDate: '2025-03-31',
-    imageUrl: '/images/scheme-2.jpg'
-  },
-  {
-    id: '3',
-    title: 'प्रधानमंत्री किसान सम्मान निधि',
-    titleEn: 'PM Kisan Samman Nidhi',
-    description: 'किसानांना वार्षिक आर्थिक सहाय्य',
-    descriptionEn: 'Annual financial assistance to farmers',
-    category: 'शेती',
-    department: 'कृषी',
-    eligibility: 'छोटे आणि सीमांत किसान',
-    eligibilityEn: 'Small and marginal farmers',
-    benefits: 'दरवर्षी ₹६,००० तीन हप्त्यांमध्ये',
-    benefitsEn: '₹6,000 annually in three installments',
-    applicationProcess: 'ऑनलाइन पंजीकरण, बँक खाते लिंक करणे',
-    applicationProcessEn: 'Online registration, bank account linking',
-    requiredDocuments: 'आधार कार्ड, जमीन कागद, बँक खाते',
-    requiredDocumentsEn: 'Aadhaar Card, Land Papers, Bank Account',
-    contactInfo: 'कृषी विभाग',
-    website: 'https://pmkisan.gov.in',
-    status: 'active',
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
-    imageUrl: '/images/scheme-3.jpg'
-  }
-];
 
 const categories = [
   'घर', 'रोजगार', 'शेती', 'शिक्षण', 'आरोग्य', 'महिला', 'बाल', 'वृद्ध', 'अन्य'
@@ -135,10 +64,31 @@ const statusOptions = [
 ];
 
 export default function GovernmentSchemesPage() {
-  const [schemes, setSchemes] = useState<GovernmentScheme[]>(mockSchemes);
+  const [schemes, setSchemes] = useState<GovernmentScheme[]>([]);
   const [editingScheme, setEditingScheme] = useState<GovernmentScheme | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('सर्व');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch schemes from API
+  useEffect(() => {
+    const fetchSchemes = async () => {
+      try {
+        const response = await fetch('/api/government-schemes');
+        if (response.ok) {
+          const data = await response.json();
+          setSchemes(data);
+        }
+      } catch (error) {
+        console.error('Error fetching schemes:', error);
+        toast.error('शासकीय योजना लोड करताना त्रुटी आली');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSchemes();
+  }, []);
 
   const handleEdit = (scheme: GovernmentScheme) => {
     setEditingScheme(scheme);
@@ -172,27 +122,70 @@ export default function GovernmentSchemesPage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingScheme) return;
 
-    if (isAdding) {
-      const newScheme = { ...editingScheme, id: Date.now().toString() };
-      setSchemes(prev => [...prev, newScheme]);
-      toast.success('नवीन योजना जोडली');
-    } else {
-      setSchemes(prev => prev.map(scheme => 
-        scheme.id === editingScheme.id ? editingScheme : scheme
-      ));
-      toast.success('योजना अपडेट केली');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/government-schemes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingScheme),
+        });
 
-    setEditingScheme(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newScheme = await response.json();
+          setSchemes(prev => [...prev, newScheme]);
+          toast.success('नवीन योजना जोडली');
+        } else {
+          throw new Error('Failed to create scheme');
+        }
+      } else {
+        const response = await fetch(`/api/government-schemes/${editingScheme.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingScheme),
+        });
+
+        if (response.ok) {
+          const updatedScheme = await response.json();
+          setSchemes(prev => prev.map(scheme => 
+            scheme.id === updatedScheme.id ? updatedScheme : scheme
+          ));
+          toast.success('योजना अपडेट केली');
+        } else {
+          throw new Error('Failed to update scheme');
+        }
+      }
+
+      setEditingScheme(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving scheme:', error);
+      toast.error('योजना सेव्ह करताना त्रुटी आली');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setSchemes(prev => prev.filter(scheme => scheme.id !== id));
-    toast.success('योजना हटवली');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/government-schemes/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setSchemes(prev => prev.filter(scheme => scheme.id !== id));
+        toast.success('योजना हटवली');
+      } else {
+        throw new Error('Failed to delete scheme');
+      }
+    } catch (error) {
+      console.error('Error deleting scheme:', error);
+      toast.error('योजना हटवताना त्रुटी आली');
+    }
   };
 
   const handleCancel = () => {
@@ -222,21 +215,21 @@ export default function GovernmentSchemesPage() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">शासकीय योजना</h1>
-            <p className="text-gray-600 mt-1">सरकारी योजना व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">शासकीय योजना</h1>
+          <p className="text-gray-600 mt-1">सरकारी योजना व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">

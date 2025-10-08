@@ -6,7 +6,6 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ConditionalLayout } from '../components/conditional-layout';
-import GoogleTranslateLoader from '@/components/GoogleTranslateLoader';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -93,9 +92,6 @@ export default function RootLayout({
           <ConditionalLayout>
             {children}
           </ConditionalLayout>
-          {/* Client-only Google Translate loader */}
-          <div id="google_translate_element" />
-          <GoogleTranslateLoader />
           
           {/* Toast Notifications */}
           <Toaster position="top-right" richColors />

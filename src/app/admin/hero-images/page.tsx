@@ -172,17 +172,9 @@ export default function HeroImagesPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              मुख्यपृष्ठ
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">मुख्य प्रतिमा</h1>
-            <p className="text-gray-600 mt-1">होमपेज मुख्य प्रतिमा व्यवस्थापन</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">मुख्य प्रतिमा</h1>
+          <p className="text-gray-600 mt-1">होमपेज मुख्य प्रतिमा व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">

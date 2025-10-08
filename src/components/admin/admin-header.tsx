@@ -15,6 +15,13 @@ export function AdminHeader({ villageName }: AdminHeaderProps) {
   const { isSubdomain, villageName: contextVillageName } = useAdminContext();
   const displayVillageName = villageName || contextVillageName;
   
+  const handleLogout = () => {
+    // Get the current hostname to maintain subdomain context
+    const currentHost = window.location.host;
+    const callbackUrl = `http://${currentHost}/admin-login`;
+    signOut({ callbackUrl });
+  };
+  
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
@@ -52,7 +59,7 @@ export function AdminHeader({ villageName }: AdminHeaderProps) {
             variant="ghost"
             size="sm"
             className="text-red-600 hover:text-red-700"
-            onClick={() => signOut({ callbackUrl: '/admin/login' })}
+            onClick={handleLogout}
           >
             <LogOut className="h-4 w-4 mr-2" />
             बाहेर जा
