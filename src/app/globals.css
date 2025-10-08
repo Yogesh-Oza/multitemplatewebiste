@@ -24,6 +24,15 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
+    
+    /* Theme variables */
+    --theme-primary: #7c3aed;
+    --theme-secondary: #3b82f6;
+    --theme-accent: #10b981;
+    --theme-background: #ffffff;
+    --font-primary: 'Inter';
+    --font-secondary: 'Noto Sans Devanagari';
+    --font-heading: 'Inter';
   }
 
   .dark {
@@ -119,6 +128,89 @@
 }
 
 @layer utilities {
+  /* Theme-aware utilities */
+  .bg-theme-primary {
+    background-color: var(--theme-primary);
+  }
+  
+  .bg-theme-secondary {
+    background-color: var(--theme-secondary);
+  }
+  
+  .bg-theme-accent {
+    background-color: var(--theme-accent);
+  }
+  
+  .text-theme-primary {
+    color: var(--theme-primary);
+  }
+  
+  .text-theme-secondary {
+    color: var(--theme-secondary);
+  }
+  
+  .text-theme-accent {
+    color: var(--theme-accent);
+  }
+  
+  .border-theme-primary {
+    border-color: var(--theme-primary);
+  }
+  
+  .border-theme-secondary {
+    border-color: var(--theme-secondary);
+  }
+  
+  .border-theme-accent {
+    border-color: var(--theme-accent);
+  }
+  
+  .ring-theme-primary {
+    --tw-ring-color: var(--theme-primary);
+  }
+  
+  .ring-theme-secondary {
+    --tw-ring-color: var(--theme-secondary);
+  }
+  
+  .ring-theme-accent {
+    --tw-ring-color: var(--theme-accent);
+  }
+  
+  .shadow-theme-primary {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--theme-primary) 30%, transparent);
+  }
+  
+  .shadow-theme-secondary {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--theme-secondary) 30%, transparent);
+  }
+  
+  .shadow-theme-accent {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--theme-accent) 30%, transparent);
+  }
+  
+  .gradient-theme {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+  }
+  
+  .gradient-theme-accent {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-accent));
+  }
+  
+  .text-gradient-theme {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-theme-accent {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   /* Text gradient utilities */
   .text-gradient {
     @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;

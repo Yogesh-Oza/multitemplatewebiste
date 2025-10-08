@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useTheme } from '@/components/theme-provider';
+import { colorPresets, ThemeSettings } from '@/lib/theme';
 
 interface WebsiteSettings {
   theme: {
@@ -78,20 +80,61 @@ const fontOptions = [
   { value: 'Open Sans', label: 'Open Sans (वाचनीय)' }
 ];
 
-const colorPresets = [
-  { name: 'पर्पल थीम', primary: '#7c3aed', secondary: '#3b82f6', accent: '#10b981' },
-  { name: 'ब्लू थीम', primary: '#3b82f6', secondary: '#1d4ed8', accent: '#06b6d4' },
-  { name: 'ग्रीन थीम', primary: '#10b981', secondary: '#059669', accent: '#84cc16' },
-  { name: 'ऑरेंज थीम', primary: '#f59e0b', secondary: '#d97706', accent: '#ef4444' },
-  { name: 'पिंक थीम', primary: '#ec4899', secondary: '#be185d', accent: '#f97316' }
-];
 
 export default function SettingsPage() {
+  const { theme, setTheme, applyThemeColors } = useTheme();
   const [settings, setSettings] = useState<WebsiteSettings>(mockSettings);
   const [activeTab, setActiveTab] = useState('theme');
 
+  useEffect(() => {
+    // Sync theme with settings
+    setSettings(prev => ({
+      ...prev,
+      theme: {
+        primaryColor: theme.colors.primary,
+        secondaryColor: theme.colors.secondary,
+        accentColor: theme.colors.accent,
+        backgroundColor: theme.colors.background
+      }
+    }));
+  }, [theme]);
+
   const handleSave = () => {
+    // Apply theme changes
+    const newTheme: ThemeSettings = {
+      colors: {
+        primary: settings.theme.primaryColor,
+        secondary: settings.theme.secondaryColor,
+        accent: settings.theme.accentColor,
+        background: settings.theme.backgroundColor
+      },
+      fonts: {
+        primary: settings.fonts.primaryFont,
+        secondary: settings.fonts.secondaryFont,
+        heading: settings.fonts.headingFont
+      },
+      layout: {
+        headerStyle: settings.layout.headerStyle,
+        footerStyle: settings.layout.footerStyle
+      }
+    };
+    
+    setTheme(newTheme);
     toast.success('सेटिंग्स सेव्ह केल्या');
+  };
+
+  const handlePresetSelect = (preset: typeof colorPresets[0]) => {
+    applyThemeColors(preset.colors);
+    setSettings(prev => ({
+      ...prev,
+      theme: {
+        ...prev.theme,
+        primaryColor: preset.colors.primary,
+        secondaryColor: preset.colors.secondary,
+        accentColor: preset.colors.accent
+      }
+    }));
+    toast.success(`${preset.name} लागू केला`);
   };
 
   const handlePreview = () => {
@@ -195,15 +238,7 @@ export default function SettingsPage() {
                     <div
                       key={index}
                       className="p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setSettings({
-                        ...settings,
-                        theme: {
-                          ...settings.theme,
-                          primaryColor: preset.primary,
-                          secondaryColor: preset.secondary,
-                          accentColor: preset.accent
-                        }
-                      })}
+                      onClick={() => handlePresetSelect(preset)}
                     >
                       <div className="flex space-x-2 mb-2">
                         <div 

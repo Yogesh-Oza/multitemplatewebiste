@@ -82,7 +82,7 @@ export function HeroSection() {
               className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
             >
               आमच्या गावात{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+              <span className="text-gradient-theme">
                 स्वागत आहे
               </span>
             </motion.h1>
@@ -102,11 +102,11 @@ export function HeroSection() {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-4 text-lg">
+              <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-4 text-lg shadow-theme-primary">
                 आमच्याबद्दल जाणून घ्या
                 <ChevronRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-gray-900 hover:bg-grey-100 hover:text-gray-900 px-8 py-4 text-lg">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 text-lg">
                 <History className="mr-2 h-5 w-5" />
                 इतिहास पहा
               </Button>

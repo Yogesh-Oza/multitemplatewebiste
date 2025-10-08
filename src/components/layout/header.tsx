@@ -17,7 +17,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600" />
+          <div className="h-8 w-8 rounded-full gradient-theme" />
           <span className="text-xl font-bold text-gray-900">ग्रामपंचायत</span>
         </Link>
 
@@ -31,15 +31,15 @@ export function Header() {
                 href={item.href}
                 className={`relative px-4 py-3 text-base font-medium transition-all duration-300 rounded-md group ${
                   isActive 
-                    ? 'text-blue-600 bg-blue-50 shadow-sm' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    ? 'text-theme-primary bg-theme-primary/10 shadow-sm' 
+                    : 'text-gray-700 hover:text-theme-primary hover:bg-gray-50'
                 }`}
               >
                 {item.label}
                 {isActive && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 gradient-theme rounded-full animate-pulse" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-10 rounded-md transition-opacity duration-300" />
+                <div className="absolute inset-0 gradient-theme opacity-0 group-hover:opacity-10 rounded-md transition-opacity duration-300" />
               </Link>
             );
           })}

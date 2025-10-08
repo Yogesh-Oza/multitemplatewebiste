@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,8 @@ import {
   BookOpen,
   Users,
   TrendingUp,
-  Save
+  Save,
+  Globe
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -29,37 +30,11 @@ interface HistoryCard {
   descriptionEn: string;
   gradient: string;
   icon: string;
+  isActive?: boolean;
+  order?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
-
-const mockHistoryCards: HistoryCard[] = [
-  {
-    id: '1',
-    title: 'ग्रामाचा इतिहास',
-    titleEn: 'Village History',
-    description: 'आमच्या गावाचा समृद्ध इतिहास आणि परंपरा',
-    descriptionEn: 'Rich history and traditions of our village',
-    gradient: 'from-amber-500 to-orange-600',
-    icon: 'BookOpen'
-  },
-  {
-    id: '2',
-    title: 'सांस्कृतिक वारसा',
-    titleEn: 'Cultural Heritage',
-    description: 'सांस्कृतिक उत्सव आणि परंपरागत कला',
-    descriptionEn: 'Cultural festivals and traditional arts',
-    gradient: 'from-emerald-500 to-teal-600',
-    icon: 'Users'
-  },
-  {
-    id: '3',
-    title: 'सामाजिक विकास',
-    titleEn: 'Social Development',
-    description: 'गावाच्या सामाजिक प्रगतीचा प्रवास',
-    descriptionEn: 'Journey of social progress in the village',
-    gradient: 'from-blue-500 to-indigo-600',
-    icon: 'TrendingUp'
-  }
-];
 
 const iconOptions = [
   { value: 'BookOpen', label: 'पुस्तक (BookOpen)' },
@@ -78,9 +53,30 @@ const gradientOptions = [
 ];
 
 export default function HistoryPage() {
-  const [cards, setCards] = useState<HistoryCard[]>(mockHistoryCards);
+  const [cards, setCards] = useState<HistoryCard[]>([]);
   const [editingCard, setEditingCard] = useState<HistoryCard | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch cards from API
+  const fetchCards = async () => {
+    try {
+      const response = await fetch('/api/history-cards');
+      if (response.ok) {
+        const data = await response.json();
+        setCards(data);
+      }
+    } catch (error) {
+      console.error('Error fetching history cards:', error);
+      toast.error('इतिहास कार्ड लोड करताना त्रुटी');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+  }, []);
 
   const handleEdit = (card: HistoryCard) => {
     setEditingCard(card);
@@ -100,33 +96,94 @@ export default function HistoryPage() {
     setIsAdding(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingCard) return;
 
-    if (isAdding) {
-      const newCard = { ...editingCard, id: Date.now().toString() };
-      setCards(prev => [...prev, newCard]);
-      toast.success('नवीन कार्ड जोडले');
-    } else {
-      setCards(prev => prev.map(card => 
-        card.id === editingCard.id ? editingCard : card
-      ));
-      toast.success('कार्ड अपडेट केले');
-    }
+    try {
+      if (isAdding) {
+        const response = await fetch('/api/history-cards', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingCard),
+        });
 
-    setEditingCard(null);
-    setIsAdding(false);
+        if (response.ok) {
+          const newCard = await response.json();
+          setCards(prev => [...prev, newCard]);
+          toast.success('नवीन कार्ड जोडले');
+        } else {
+          throw new Error('Failed to create card');
+        }
+      } else {
+        const response = await fetch('/api/history-cards', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingCard),
+        });
+
+        if (response.ok) {
+          const updatedCard = await response.json();
+          setCards(prev => prev.map(card => 
+            card.id === editingCard.id ? updatedCard : card
+          ));
+          toast.success('कार्ड अपडेट केले');
+        } else {
+          throw new Error('Failed to update card');
+        }
+      }
+
+      setEditingCard(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error saving card:', error);
+      toast.error('कार्ड सेव्ह करताना त्रुटी');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setCards(prev => prev.filter(card => card.id !== id));
-    toast.success('कार्ड हटवले');
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/history-cards?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCards(prev => prev.filter(card => card.id !== id));
+        toast.success('कार्ड हटवले');
+      } else {
+        throw new Error('Failed to delete card');
+      }
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      toast.error('कार्ड हटवताना त्रुटी');
+    }
   };
 
   const handleCancel = () => {
     setEditingCard(null);
     setIsAdding(false);
   };
+
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'BookOpen': return <BookOpen className="h-12 w-12 mx-auto" />;
+      case 'Users': return <Users className="h-12 w-12 mx-auto" />;
+      case 'TrendingUp': return <TrendingUp className="h-12 w-12 mx-auto" />;
+      case 'History': return <History className="h-12 w-12 mx-auto" />;
+      case 'Globe': return <Globe className="h-12 w-12 mx-auto" />;
+      default: return <BookOpen className="h-12 w-12 mx-auto" />;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">लोड होत आहे...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -148,7 +205,7 @@ export default function HistoryPage() {
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
             {cards.length} कार्ड
           </Badge>
-          <Button onClick={handleAdd} className="bg-purple-600 hover:bg-purple-700">
+          <Button onClick={handleAdd}>
             <Plus className="h-4 w-4 mr-2" />
             नवीन कार्ड
           </Button>
@@ -162,10 +219,7 @@ export default function HistoryPage() {
             <div className={`h-32 bg-gradient-to-br ${card.gradient} flex items-center justify-center`}>
               <div className="text-center text-white">
                 <div className="text-3xl mb-2">
-                  {card.icon === 'BookOpen' && <BookOpen className="h-12 w-12 mx-auto" />}
-                  {card.icon === 'Users' && <Users className="h-12 w-12 mx-auto" />}
-                  {card.icon === 'TrendingUp' && <TrendingUp className="h-12 w-12 mx-auto" />}
-                  {card.icon === 'History' && <History className="h-12 w-12 mx-auto" />}
+                  {getIconComponent(card.icon)}
                 </div>
               </div>
             </div>
@@ -198,15 +252,13 @@ export default function HistoryPage() {
 
       {/* Edit Modal */}
       {editingCard && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Edit className="h-5 w-5" />
-                <span>{isAdding ? 'नवीन कार्ड जोडा' : 'कार्ड संपादित करा'}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">
+              {isAdding ? 'नवीन कार्ड जोडा' : 'कार्ड संपादित करा'}
+            </h2>
+            
+            <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="title">शीर्षक (मराठी)</Label>
@@ -227,31 +279,46 @@ export default function HistoryPage() {
                   />
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="description">वर्णन (मराठी)</Label>
-                  <Textarea
-                    id="description"
-                    value={editingCard.description}
-                    onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
-                    placeholder="आमच्या गावाचा समृद्ध इतिहास आणि परंपरा"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="descriptionEn">वर्णन (इंग्रजी)</Label>
-                  <Textarea
-                    id="descriptionEn"
-                    value={editingCard.descriptionEn}
-                    onChange={(e) => setEditingCard({...editingCard, descriptionEn: e.target.value})}
-                    placeholder="Rich history and traditions of our village"
-                    rows={3}
-                  />
-                </div>
+              
+              <div>
+                <Label htmlFor="description">वर्णन (मराठी)</Label>
+                <Textarea
+                  id="description"
+                  value={editingCard.description}
+                  onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
+                  placeholder="आमच्या गावाचा समृद्ध इतिहास आणि परंपरा"
+                  rows={3}
+                />
               </div>
-
+              
+              <div>
+                <Label htmlFor="descriptionEn">वर्णन (इंग्रजी)</Label>
+                <Textarea
+                  id="descriptionEn"
+                  value={editingCard.descriptionEn}
+                  onChange={(e) => setEditingCard({...editingCard, descriptionEn: e.target.value})}
+                  placeholder="Rich history and traditions of our village"
+                  rows={3}
+                />
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="gradient">ग्रेडिएंट</Label>
+                  <select
+                    id="gradient"
+                    value={editingCard.gradient}
+                    onChange={(e) => setEditingCard({...editingCard, gradient: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    {gradientOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
                 <div>
                   <Label htmlFor="icon">आयकॉन</Label>
                   <select
@@ -267,34 +334,19 @@ export default function HistoryPage() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <Label htmlFor="gradient">रंग संयोजन</Label>
-                  <select
-                    id="gradient"
-                    value={editingCard.gradient}
-                    onChange={(e) => setEditingCard({...editingCard, gradient: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    {gradientOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
-
-              <div className="flex justify-end space-x-4">
-                <Button variant="outline" onClick={handleCancel}>
-                  रद्द करा
-                </Button>
-                <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
-                  <Save className="h-4 w-4 mr-2" />
-                  सेव्ह करा
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            
+            <div className="flex justify-end space-x-4 mt-6">
+              <Button variant="outline" onClick={handleCancel}>
+                रद्द करा
+              </Button>
+              <Button onClick={handleSave}>
+                <Save className="h-4 w-4 mr-2" />
+                सेव्ह करा
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

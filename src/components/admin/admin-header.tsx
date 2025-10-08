@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 
 export function AdminHeader() {
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold text-gray-900">प्रशासन पैनल</h1>

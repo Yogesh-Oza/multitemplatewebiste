@@ -4,6 +4,8 @@ import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ConditionalLayout } from '../components/conditional-layout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -106,19 +108,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased font-sans`}>
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <main className="flex-1">
+        <ThemeProvider>
+          <ConditionalLayout>
             {children}
-          </main>
-          <Footer />
-        </div>
-        
-        {/* Google Translate Widget */}
-        <div id="google_translate_element" className="fixed bottom-4 right-4 z-50"></div>
-        
-        {/* Toast Notifications */}
-        <Toaster position="top-right" richColors />
+          </ConditionalLayout>
+          
+          {/* Toast Notifications */}
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
       </body>
     </html>
   );
