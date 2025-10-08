@@ -5,22 +5,31 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
+import { useAdminContext } from '@/components/providers/admin-context';
 
 interface AdminHeaderProps {
   villageName?: string;
 }
 
 export function AdminHeader({ villageName }: AdminHeaderProps) {
+  const { isSubdomain, villageName: contextVillageName } = useAdminContext();
+  const displayVillageName = villageName || contextVillageName;
+  
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold text-gray-900">
-            {villageName ? `${villageName} - प्रशासन पैनल` : 'प्रशासन पैनल'}
+            {displayVillageName ? `${displayVillageName} - प्रशासन पैनल` : 'प्रशासन पैनल'}
           </h1>
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             सक्रिय
           </Badge>
+          {isSubdomain && (
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+              सबडोमेन
+            </Badge>
+          )}
         </div>
         
         <div className="flex items-center space-x-4">

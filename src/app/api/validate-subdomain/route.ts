@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const subdomainData = await prisma.subdomain.findUnique({
       where: { subdomain },
-      select: { isActive: true, villageName: true }
+      select: { id: true, isActive: true, villageName: true, villageNameEn: true }
     });
 
     if (!subdomainData || !subdomainData.isActive) {
@@ -27,7 +27,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       valid: true, 
-      villageName: subdomainData.villageName 
+      subdomainData: {
+        id: subdomainData.id,
+        villageName: subdomainData.villageName,
+        villageNameEn: subdomainData.villageNameEn
+      }
     });
 
   } catch (error) {

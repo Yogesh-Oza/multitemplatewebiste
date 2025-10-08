@@ -10,8 +10,8 @@ export function getSubdomainFromRequest(request: NextRequest): string | null {
   // Split by dots
   const parts = host.split('.');
   
-  // If we have more than 2 parts, the first part is the subdomain
-  if (parts.length > 2) {
+  // For localhost development, check if first part is not 'www' or 'localhost'
+  if (parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost') {
     return parts[0];
   }
   

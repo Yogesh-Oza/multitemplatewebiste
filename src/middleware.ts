@@ -35,8 +35,12 @@ export async function middleware(request: NextRequest) {
   const subdomain = getSubdomain(hostname);
   
   if (subdomain && subdomain !== 'www' && subdomain !== 'mahagp') {
-    // This is a subdomain request - rewrite to subdomain route
-    // The subdomain page will handle validation and redirect if needed
+    // For admin routes on subdomains, don't rewrite - let them use the main admin routes
+    if (pathname.startsWith('/admin')) {
+      return NextResponse.next();
+    }
+    
+    // For other subdomain requests, rewrite to subdomain route
     const url = request.nextUrl.clone();
     url.pathname = `/subdomain/${subdomain}${pathname}`;
     return NextResponse.rewrite(url);
