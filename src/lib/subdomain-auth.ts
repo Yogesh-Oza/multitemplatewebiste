@@ -25,7 +25,7 @@ export async function validateSubdomainAccess() {
     redirect('/admin-login');
   }
 
-  const headersList = headers();
+  const headersList = await headers();
   const hostname = headersList.get('host') || '';
   const subdomain = getSubdomainFromHostname(hostname);
 

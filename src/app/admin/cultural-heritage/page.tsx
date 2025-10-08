@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,8 @@ interface CulturalHeritage {
   titleEn: string;
   description: string;
   descriptionEn: string;
-  imageUrl: string;
+  image: string;
+  category: string;
 }
 
 
@@ -68,7 +69,8 @@ export default function CulturalHeritagePage() {
       titleEn: '',
       description: '',
       descriptionEn: '',
-      imageUrl: ''
+      image: '',
+      category: 'सांस्कृतिक'
     });
     setIsAdding(true);
   };
@@ -148,8 +150,8 @@ export default function CulturalHeritagePage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setEditingItem(prev => prev ? { ...prev, imageUrl } : null);
+    const image = URL.createObjectURL(file);
+    setEditingItem(prev => prev ? { ...prev, image } : null);
     toast.success('प्रतिमा अपलोड केली');
   };
 
@@ -186,7 +188,7 @@ export default function CulturalHeritagePage() {
           <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
             <div className="relative">
               <img
-                src={item.imageUrl}
+                src={item.image}
                 alt={item.title}
                 className="w-full h-48 object-cover"
               />
@@ -281,9 +283,9 @@ export default function CulturalHeritagePage() {
               <div>
                 <Label htmlFor="image">प्रतिमा</Label>
                 <div className="mt-2">
-                  {editingItem.imageUrl && (
+                  {editingItem.image && (
                     <img
-                      src={editingItem.imageUrl}
+                      src={editingItem.image}
                       alt="Preview"
                       className="w-full h-32 object-cover rounded-lg mb-2"
                     />

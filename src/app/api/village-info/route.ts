@@ -13,14 +13,14 @@ export async function GET(request: NextRequest) {
     }
 
     let villageInfo = await prisma.villageInfo.findFirst({
-      where: { subdomainId },
+      where: { subdomainId: subdomainId! },
       orderBy: { createdAt: 'desc' } // Get the most recent record
     });
     
     if (!villageInfo) {
       // Auto-create village info record for this subdomain
       const subdomainData = await prisma.subdomain.findUnique({
-        where: { id: subdomainId },
+        where: { id: subdomainId! },
         select: { subdomain: true, villageName: true, villageNameEn: true }
       });
       
