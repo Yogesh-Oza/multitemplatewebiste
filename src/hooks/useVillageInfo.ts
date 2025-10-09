@@ -13,6 +13,12 @@ interface VillageInfo {
   description: string;
   titleEn: string;
   descriptionEn: string;
+  sectionOneTitle?: string;
+  sectionOneBody?: string;
+  sectionTwoTitle?: string;
+  sectionTwoBody?: string;
+  sectionThreeTitle?: string;
+  sectionThreeBody?: string;
   stats: Stat[];
 }
 
