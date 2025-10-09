@@ -13,27 +13,41 @@ interface HeroImage {
   isActive: boolean;
 }
 
+interface HomepageSettings {
+  mainHeading: string;
+  subtitle: string;
+}
+
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
+  const [homepageSettings, setHomepageSettings] = useState<HomepageSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchHeroImages = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/hero-images');
-        if (response.ok) {
-          const data = await response.json();
-          setHeroImages(data);
+        // Fetch hero images
+        const imagesResponse = await fetch('/api/hero-images');
+        if (imagesResponse.ok) {
+          const imagesData = await imagesResponse.json();
+          setHeroImages(imagesData);
+        }
+
+        // Fetch homepage settings
+        const settingsResponse = await fetch('/api/homepage-settings');
+        if (settingsResponse.ok) {
+          const settingsData = await settingsResponse.json();
+          setHomepageSettings(settingsData);
         }
       } catch (error) {
-        console.error('Error fetching hero images:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHeroImages();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -81,10 +95,7 @@ export function HeroSection() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
             >
-              आमच्या गावात{' '}
-              <span className="text-gradient-theme">
-                स्वागत आहे
-              </span>
+              {homepageSettings?.mainHeading || "आमच्या गावात स्वागत आहे"}
             </motion.h1>
             
             <motion.p
@@ -93,7 +104,7 @@ export function HeroSection() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl"
             >
-              एकत्रित विकास, सामाजिक न्याय आणि सुशासनाच्या मार्गावर प्रगतीशील गाव
+              {homepageSettings?.subtitle || "एकत्रित विकास, सामाजिक न्याय आणि सुशासनाच्या मार्गावर प्रगतीशील गाव"}
             </motion.p>
 
             <motion.div

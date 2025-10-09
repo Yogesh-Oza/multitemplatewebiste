@@ -37,37 +37,25 @@ export async function GET(request: NextRequest) {
           titleEn: `${subdomainData.villageNameEn} Gram Panchayat`,
           description: `${subdomainData.villageName} ग्रामपंचायतची माहिती`,
           descriptionEn: `Information about ${subdomainData.villageNameEn} Gram Panchayat`,
-          stats: {
-            families: 0,
-            population: 0,
-            gramPanchayatCount: 1,
-            area: 0
-          },
+          sectionOneTitle: '',
+          sectionOneBody: '',
+          sectionTwoTitle: '',
+          sectionTwoBody: '',
+          sectionThreeTitle: '',
+          sectionThreeBody: '',
+          stats: [
+            { value: '227', label: 'कुटुंबे', labelEn: 'Families', icon: '👨‍👩‍👧‍👦' },
+            { value: '1958', label: 'लोकसंख्या', labelEn: 'Population', icon: '👥' },
+            { value: '1', label: 'ग्रामपंचायत', labelEn: 'Gram Panchayat', icon: '🏛️' },
+            { value: '654.455', label: 'क्षेत्रफळ (हेक्टर)', labelEn: 'Area (Hectares)', icon: '🌾' }
+          ],
           subdomainId: subdomainId
         }
       });
     }
 
-    // Transform the data to match the expected interface for the frontend
-    const stats = villageInfo.stats as any; // Type assertion for JSON data
-    const transformedData = {
-      id: villageInfo.id,
-      title: villageInfo.title,
-      titleEn: villageInfo.titleEn,
-      description: villageInfo.description,
-      descriptionEn: villageInfo.descriptionEn,
-      // Extract stats from JSON and flatten them
-      families: stats?.families || 0,
-      population: stats?.population || 0,
-      gramPanchayatCount: stats?.gramPanchayatCount || 0,
-      area: stats?.area || 0,
-      // Keep original stats for admin use
-      stats: villageInfo.stats,
-      createdAt: villageInfo.createdAt,
-      updatedAt: villageInfo.updatedAt
-    };
-
-    const response = NextResponse.json(transformedData);
+    // Return the data as-is since we're now using the stats array format
+    const response = NextResponse.json(villageInfo);
     
     // Add cache-busting headers
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -95,34 +83,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, titleEn, descriptionEn, stats } = body;
+    const { title, description, titleEn, descriptionEn, stats,
+      sectionOneTitle, sectionOneBody,
+      sectionTwoTitle, sectionTwoBody,
+      sectionThreeTitle, sectionThreeBody } = body;
 
-    // Handle both old format (direct properties) and new format (stats array)
-    let statsData;
-    if (stats && Array.isArray(stats)) {
-      // New format: stats array
-      statsData = stats.reduce((acc, stat) => {
-        if (stat.label === 'कुटुंबे' || stat.labelEn === 'Families') {
-          acc.families = parseInt(stat.value) || 0;
-        } else if (stat.label === 'लोकसंख्या' || stat.labelEn === 'Population') {
-          acc.population = parseInt(stat.value) || 0;
-        } else if (stat.label === 'ग्रामपंचायत' || stat.labelEn === 'Gram Panchayat') {
-          acc.gramPanchayatCount = parseInt(stat.value) || 0;
-        } else if (stat.label === 'क्षेत्रफळ (हेक्टर)' || stat.labelEn === 'Area (Hectares)') {
-          acc.area = parseFloat(stat.value) || 0;
-        }
-        return acc;
-      }, { families: 0, population: 0, gramPanchayatCount: 0, area: 0 });
-    } else {
-      // Old format: direct properties
-      const { families, population, gramPanchayatCount, area } = body;
-      statsData = {
-        families: parseInt(families) || 0,
-        population: parseInt(population) || 0,
-        gramPanchayatCount: parseInt(gramPanchayatCount) || 0,
-        area: parseFloat(area) || 0,
-      };
-    }
+    // Store stats as array directly
+    const statsData = stats && Array.isArray(stats) ? stats : [];
 
     // First, try to find existing village info for this subdomain
     let villageInfo = await prisma.villageInfo.findFirst({
@@ -138,6 +105,12 @@ export async function POST(request: NextRequest) {
           description,
           titleEn,
           descriptionEn,
+          sectionOneTitle: sectionOneTitle ?? '',
+          sectionOneBody: sectionOneBody ?? '',
+          sectionTwoTitle: sectionTwoTitle ?? '',
+          sectionTwoBody: sectionTwoBody ?? '',
+          sectionThreeTitle: sectionThreeTitle ?? '',
+          sectionThreeBody: sectionThreeBody ?? '',
           stats: statsData,
         },
       });
@@ -149,6 +122,12 @@ export async function POST(request: NextRequest) {
           description,
           titleEn,
           descriptionEn,
+          sectionOneTitle: sectionOneTitle ?? '',
+          sectionOneBody: sectionOneBody ?? '',
+          sectionTwoTitle: sectionTwoTitle ?? '',
+          sectionTwoBody: sectionTwoBody ?? '',
+          sectionThreeTitle: sectionThreeTitle ?? '',
+          sectionThreeBody: sectionThreeBody ?? '',
           stats: statsData,
           subdomainId,
         },

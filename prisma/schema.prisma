@@ -17,6 +17,13 @@ model VillageInfo {
   titleEn     String
   description String
   descriptionEn String
+  // Additional dynamic sections (Marathi only)
+  sectionOneTitle   String @default("")
+  sectionOneBody    String @default("")
+  sectionTwoTitle   String @default("")
+  sectionTwoBody    String @default("")
+  sectionThreeTitle String @default("")
+  sectionThreeBody  String @default("")
   stats       Json   // Array of statistics
   subdomainId String? @db.ObjectId
   subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
@@ -95,6 +102,21 @@ model HeroImage {
   updatedAt   DateTime @updatedAt
 
   @@map("hero_images")
+}
+
+model HomepageSettings {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  mainHeading String @default("आमच्या गावात स्वागत आहे")
+  mainHeadingEn String @default("Welcome to Our Village")
+  subtitle    String @default("एकत्रित विकास, सामाजिक न्याय आणि सुशासनाच्या मार्गावर प्रगतीशील गाव")
+  subtitleEn  String @default("A progressive village on the path of integrated development, social justice and good governance")
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("homepage_settings")
 }
 
 model Program {
@@ -292,6 +314,7 @@ model Subdomain {
   incomeExpense IncomeExpense[]
   departments   Department[]
   governmentSchemes GovernmentScheme[]
+  homepageSettings HomepageSettings[]
 
   @@map("subdomains")
 }

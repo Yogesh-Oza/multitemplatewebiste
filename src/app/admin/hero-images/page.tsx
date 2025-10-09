@@ -27,10 +27,19 @@ interface HeroImage {
   createdAt: string;
 }
 
+interface HomepageSettings {
+  id?: string;
+  mainHeading: string;
+  subtitle: string;
+  isActive: boolean;
+}
+
 export default function HeroImagesPage() {
   const [images, setImages] = useState<HeroImage[]>([]);
+  const [homepageSettings, setHomepageSettings] = useState<HomepageSettings | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Fetch images from API
   const fetchImages = async () => {
@@ -48,8 +57,22 @@ export default function HeroImagesPage() {
     }
   };
 
+  // Fetch homepage settings
+  const fetchHomepageSettings = async () => {
+    try {
+      const response = await fetch('/api/homepage-settings');
+      if (response.ok) {
+        const data = await response.json();
+        setHomepageSettings(data);
+      }
+    } catch (error) {
+      console.error('Error fetching homepage settings:', error);
+    }
+  };
+
   useEffect(() => {
     fetchImages();
+    fetchHomepageSettings();
   }, []);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,6 +191,32 @@ export default function HeroImagesPage() {
     }
   };
 
+  const handleSaveSettings = async () => {
+    if (!homepageSettings) return;
+    
+    setIsSavingSettings(true);
+    try {
+      const response = await fetch('/api/homepage-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(homepageSettings),
+      });
+
+      if (response.ok) {
+        toast.success('होमपेज सेटिंग्स सेव्ह केल्या');
+      } else {
+        throw new Error('Failed to save settings');
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('सेटिंग्स सेव्ह करताना त्रुटी');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -224,6 +273,56 @@ export default function HeroImagesPage() {
               </div>
             </label>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Homepage Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Image className="h-5 w-5 mr-2" />
+            होमपेज मुख्य प्रतिमा व्यवस्थापन
+          </CardTitle>
+          <CardDescription>
+            होमपेजवरील मुख्य शीर्षक आणि उपशीर्षक व्यवस्थापन
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {homepageSettings && (
+            <>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mainHeading">मुख्य शीर्षक</Label>
+                  <Input
+                    id="mainHeading"
+                    value={homepageSettings.mainHeading}
+                    onChange={(e) => setHomepageSettings(prev => prev ? { ...prev, mainHeading: e.target.value } : null)}
+                    placeholder="आमच्या गावात स्वागत आहे"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="subtitle">उपशीर्षक</Label>
+                  <Input
+                    id="subtitle"
+                    value={homepageSettings.subtitle}
+                    onChange={(e) => setHomepageSettings(prev => prev ? { ...prev, subtitle: e.target.value } : null)}
+                    placeholder="एकत्रित विकास, सामाजिक न्याय आणि सुशासनाच्या मार्गावर प्रगतीशील गाव"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleSaveSettings}
+                  disabled={isSavingSettings}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isSavingSettings ? 'सेव्ह होत आहे...' : 'सेटिंग्स सेव्ह करा'}
+                </Button>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

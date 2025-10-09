@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 
+interface Stat {
+  value: string;
+  label: string;
+  labelEn: string;
+  icon: string;
+}
+
 interface VillageInfo {
   id: string;
   title: string;
   description: string;
   titleEn: string;
   descriptionEn: string;
-  families: number;
-  population: number;
-  gramPanchayatCount: number;
-  area: number;
+  stats: Stat[];
 }
 
 export function useVillageInfo() {

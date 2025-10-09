@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { validateSubdomain } from '@/lib/subdomain';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const villageInfo = await prisma.villageInfo.findFirst();
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
+    const villageInfo = await prisma.villageInfo.findFirst({
+      where: { subdomainId }
+    });
     return NextResponse.json(villageInfo);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch village info' }, { status: 500 });
@@ -12,15 +23,30 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const data = await request.json();
     
     const villageInfo = await prisma.villageInfo.create({
       data: {
         title: data.title,
-        titleEn: data.titleEn,
+        titleEn: data.titleEn || 'About Our Village',
         description: data.description,
-        descriptionEn: data.descriptionEn,
-        stats: data.stats,
+        descriptionEn: data.descriptionEn || 'Village information',
+        sectionOneTitle: data.sectionOneTitle ?? '',
+        sectionOneBody: data.sectionOneBody ?? '',
+        sectionTwoTitle: data.sectionTwoTitle ?? '',
+        sectionTwoBody: data.sectionTwoBody ?? '',
+        sectionThreeTitle: data.sectionThreeTitle ?? '',
+        sectionThreeBody: data.sectionThreeBody ?? '',
+        stats: data.stats || [],
+        subdomainId,
       },
     });
 
@@ -32,24 +58,23 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    
+    if (!isValid) {
+      return NextResponse.json({ 
+        message: 'Invalid or inactive subdomain' 
+      }, { status: 404 });
+    }
+
     const data = await request.json();
     
-    // Transform stats array to the format expected by the database
-    const statsData = data.stats.reduce((acc: any, stat: any) => {
-      if (stat.label === 'कुटुंबे' || stat.labelEn === 'Families') {
-        acc.families = parseInt(stat.value) || 0;
-      } else if (stat.label === 'लोकसंख्या' || stat.labelEn === 'Population') {
-        acc.population = parseInt(stat.value) || 0;
-      } else if (stat.label === 'ग्रामपंचायत' || stat.labelEn === 'Gram Panchayat') {
-        acc.gramPanchayatCount = parseInt(stat.value) || 0;
-      } else if (stat.label === 'क्षेत्रफळ (हेक्टर)' || stat.labelEn === 'Area (Hectares)') {
-        acc.area = parseFloat(stat.value) || 0;
-      }
-      return acc;
-    }, { families: 0, population: 0, gramPanchayatCount: 0, area: 0 });
+    // Store stats as array directly (no transformation needed)
+    const statsData = Array.isArray(data.stats) ? data.stats : [];
     
-    // First, try to find existing village info
-    let villageInfo = await prisma.villageInfo.findFirst();
+    // First, try to find existing village info for this subdomain
+    let villageInfo = await prisma.villageInfo.findFirst({
+      where: { subdomainId }
+    });
     
     if (villageInfo) {
       // Update existing record
@@ -57,9 +82,15 @@ export async function PUT(request: NextRequest) {
         where: { id: villageInfo.id },
         data: {
           title: data.title,
-          titleEn: data.titleEn,
+          titleEn: data.titleEn || 'About Our Village', // Keep default English
           description: data.description,
-          descriptionEn: data.descriptionEn,
+          descriptionEn: data.descriptionEn || 'Village information', // Keep default English
+          sectionOneTitle: data.sectionOneTitle ?? '',
+          sectionOneBody: data.sectionOneBody ?? '',
+          sectionTwoTitle: data.sectionTwoTitle ?? '',
+          sectionTwoBody: data.sectionTwoBody ?? '',
+          sectionThreeTitle: data.sectionThreeTitle ?? '',
+          sectionThreeBody: data.sectionThreeBody ?? '',
           stats: statsData,
         },
       });
@@ -68,10 +99,17 @@ export async function PUT(request: NextRequest) {
       villageInfo = await prisma.villageInfo.create({
         data: {
           title: data.title,
-          titleEn: data.titleEn,
+          titleEn: data.titleEn || 'About Our Village', // Keep default English
           description: data.description,
-          descriptionEn: data.descriptionEn,
+          descriptionEn: data.descriptionEn || 'Village information', // Keep default English
+          sectionOneTitle: data.sectionOneTitle ?? '',
+          sectionOneBody: data.sectionOneBody ?? '',
+          sectionTwoTitle: data.sectionTwoTitle ?? '',
+          sectionTwoBody: data.sectionTwoBody ?? '',
+          sectionThreeTitle: data.sectionThreeTitle ?? '',
+          sectionThreeBody: data.sectionThreeBody ?? '',
           stats: statsData,
+          subdomainId,
         },
       });
     }

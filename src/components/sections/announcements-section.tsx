@@ -30,7 +30,18 @@ export function AnnouncementsSection() {
         const response = await fetch('/api/announcements');
         if (response.ok) {
           const data = await response.json();
-          setAnnouncements(data);
+          // Normalize image field from API (image -> imageUrl)
+          const normalized = (Array.isArray(data) ? data : []).map((a: any) => ({
+            id: a.id,
+            title: a.title,
+            description: a.description,
+            date: typeof a.date === 'string' ? a.date : (a.date ? new Date(a.date).toISOString().slice(0,10) : ''),
+            imageUrl: a.imageUrl ?? a.image ?? undefined,
+            priority: a.priority ?? 'low',
+            status: a.status ?? 'active',
+            category: a.category ?? ''
+          }));
+          setAnnouncements(normalized);
         }
       } catch (error) {
         console.error('Error fetching announcements:', error);

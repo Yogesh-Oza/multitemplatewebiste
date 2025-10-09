@@ -21,9 +21,13 @@ interface Stat {
 interface VillageInfo {
   id?: string;
   title: string;
-  titleEn: string;
   description: string;
-  descriptionEn: string;
+  sectionOneTitle?: string;
+  sectionOneBody?: string;
+  sectionTwoTitle?: string;
+  sectionTwoBody?: string;
+  sectionThreeTitle?: string;
+  sectionThreeBody?: string;
   stats: Stat[];
 }
 
@@ -94,9 +98,13 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
 
   const [formData, setFormData] = useState<VillageInfo>({
     title: villageData?.title || 'आमच्या गावाबद्दल',
-    titleEn: villageData?.titleEn || 'About Our Village',
     description: villageData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
-    descriptionEn: villageData?.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
+    sectionOneTitle: villageData?.sectionOneTitle || 'आमचे गाव',
+    sectionOneBody: villageData?.sectionOneBody || 'आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.',
+    sectionTwoTitle: villageData?.sectionTwoTitle || 'स्थान',
+    sectionTwoBody: villageData?.sectionTwoBody || 'आमचे गाव महाराष्ट्र राज्यातील एक महत्त्वाचे गाव आहे. येथे सुंदर निसर्ग, समृद्ध संस्कृती आणि मैत्रीपूर्ण वातावरण आहे.',
+    sectionThreeTitle: villageData?.sectionThreeTitle || 'विकास',
+    sectionThreeBody: villageData?.sectionThreeBody || 'आमच्या गावाचा सतत विकास होत आहे. शिक्षण, आरोग्य, रोजगार आणि मूलभूत सुविधांसाठी सर्व प्रयत्न केले जात आहेत.',
     stats: transformStats(villageData?.stats),
   });
 
@@ -105,9 +113,13 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
     if (villageData) {
       setFormData({
         title: villageData.title || 'आमच्या गावाबद्दल',
-        titleEn: villageData.titleEn || 'About Our Village',
         description: villageData.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
-        descriptionEn: villageData.descriptionEn || 'An identity of a progressive, cultured, and social justice-based village',
+        sectionOneTitle: villageData.sectionOneTitle || 'आमचे गाव',
+        sectionOneBody: villageData.sectionOneBody || 'आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.',
+        sectionTwoTitle: villageData.sectionTwoTitle || 'स्थान',
+        sectionTwoBody: villageData.sectionTwoBody || 'आमचे गाव महाराष्ट्र राज्यातील एक महत्त्वाचे गाव आहे. येथे सुंदर निसर्ग, समृद्ध संस्कृती आणि मैत्रीपूर्ण वातावरण आहे.',
+        sectionThreeTitle: villageData.sectionThreeTitle || 'विकास',
+        sectionThreeBody: villageData.sectionThreeBody || 'आमच्या गावाचा सतत विकास होत आहे. शिक्षण, आरोग्य, रोजगार आणि मूलभूत सुविधांसाठी सर्व प्रयत्न केले जात आहेत.',
         stats: transformStats(villageData.stats),
       });
     }
@@ -206,16 +218,6 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="titleEn">शीर्षक (इंग्रजी)</Label>
-              <Input
-                id="titleEn"
-                value={formData.titleEn}
-                onChange={(e) => handleInputChange('titleEn', e.target.value)}
-                placeholder="Village Name"
-                required
-              />
-            </div>
           </div>
           
           <div>
@@ -230,16 +232,34 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
             />
           </div>
           
-          <div>
-            <Label htmlFor="descriptionEn">वर्णन (इंग्रजी)</Label>
-            <Textarea
-              id="descriptionEn"
-              value={formData.descriptionEn}
-              onChange={(e) => handleInputChange('descriptionEn', e.target.value)}
-              placeholder="Village description..."
-              rows={3}
-              required
-            />
+        </CardContent>
+      </Card>
+
+      {/* Additional Sections */}
+      <Card>
+        <CardHeader>
+          <CardTitle>गाव माहिती - विभाग</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label>विभाग 1 शीर्षक</Label>
+              <Input value={formData.sectionOneTitle} onChange={(e) => handleInputChange('sectionOneTitle' as any, e.target.value)} />
+              <Label>विभाग 1 मजकूर</Label>
+              <Textarea rows={5} value={formData.sectionOneBody} onChange={(e) => handleInputChange('sectionOneBody' as any, e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>विभाग 2 शीर्षक</Label>
+              <Input value={formData.sectionTwoTitle} onChange={(e) => handleInputChange('sectionTwoTitle' as any, e.target.value)} />
+              <Label>विभाग 2 मजकूर</Label>
+              <Textarea rows={5} value={formData.sectionTwoBody} onChange={(e) => handleInputChange('sectionTwoBody' as any, e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>विभाग 3 शीर्षक</Label>
+              <Input value={formData.sectionThreeTitle} onChange={(e) => handleInputChange('sectionThreeTitle' as any, e.target.value)} />
+              <Label>विभाग 3 मजकूर</Label>
+              <Textarea rows={5} value={formData.sectionThreeBody} onChange={(e) => handleInputChange('sectionThreeBody' as any, e.target.value)} />
+            </div>
           </div>
         </CardContent>
       </Card>

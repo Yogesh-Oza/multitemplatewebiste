@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { validateSubdomain } from '@/lib/subdomain';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    if (!isValid) return NextResponse.json({ message: 'Invalid or inactive subdomain' }, { status: 404 });
     const { id } = await params;
-    const announcement = await prisma.announcement.findUnique({
-      where: { id },
+    const announcement = await prisma.announcement.findFirst({
+      where: { id, subdomainId },
     });
 
     if (!announcement) {
@@ -26,16 +29,21 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    if (!isValid) return NextResponse.json({ message: 'Invalid or inactive subdomain' }, { status: 404 });
     const { id } = await params;
     const data = await request.json();
-    
+    // Ensure the announcement belongs to this subdomain
+    const existing = await prisma.announcement.findFirst({ where: { id, subdomainId } });
+    if (!existing) return NextResponse.json({ message: 'Announcement not found' }, { status: 404 });
     const announcement = await prisma.announcement.update({
       where: { id },
       data: {
         title: data.title,
         date: data.date,
         description: data.description,
-        image: data.imageUrl,
+        fullDescription: data.fullDescription,
+        image: data.image ?? data.imageUrl,
         category: data.category,
         priority: data.priority,
         status: data.status,
@@ -53,10 +61,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { isValid, subdomainId } = await validateSubdomain(request);
+    if (!isValid) return NextResponse.json({ message: 'Invalid or inactive subdomain' }, { status: 404 });
     const { id } = await params;
-    await prisma.announcement.delete({
-      where: { id },
-    });
+    // Ensure the announcement belongs to this subdomain
+    const existing = await prisma.announcement.findFirst({ where: { id, subdomainId } });
+    if (!existing) return NextResponse.json({ message: 'Announcement not found' }, { status: 404 });
+    await prisma.announcement.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Announcement deleted successfully' });
   } catch (error) {

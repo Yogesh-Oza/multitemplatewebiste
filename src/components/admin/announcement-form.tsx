@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, ArrowLeft, Upload, Calendar, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { uploadImage } from '@/lib/upload';
 
 interface AnnouncementFormProps {
   initialData?: any;
@@ -150,14 +151,39 @@ export function AnnouncementForm({ initialData, isEdit = false }: AnnouncementFo
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="image">प्रतिमा URL</Label>
-            <Input
-              id="image"
-              value={formData.image}
-              onChange={(e) => handleInputChange('image', e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              required
-            />
+            <Label htmlFor="image">प्रतिमा</Label>
+            <div className="flex items-center space-x-3">
+              <Input
+                id="image"
+                value={formData.image}
+                onChange={(e) => handleInputChange('image', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="flex-1"
+              />
+              <label className="inline-flex items-center px-3 py-2 border rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <Upload className="h-4 w-4 mr-2" /> फाइल अपलोड
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await uploadImage(file as any);
+                      setFormData(prev => ({ ...prev, image: url }));
+                      toast.success('प्रतिमा अपलोड झाली');
+                    } catch (err: any) {
+                      toast.error(err.message || 'अपलोड अयशस्वी');
+                    } finally {
+                      // reset input so same file can be reselected
+                      (e.target as HTMLInputElement).value = '';
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">JPG, PNG, WebP, कमाल 10MB</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

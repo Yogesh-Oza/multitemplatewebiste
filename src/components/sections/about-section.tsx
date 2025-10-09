@@ -6,16 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Users, Home, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
 import { useVillageInfo } from '@/hooks/useVillageInfo';
 
+interface Stat {
+  value: string;
+  label: string;
+  labelEn: string;
+  icon: string;
+}
+
 interface VillageInfo {
   id: string;
   title: string;
   description: string;
   titleEn: string;
   descriptionEn: string;
-  families: number;
-  population: number;
-  gramPanchayatCount: number;
-  area: number;
+  stats: Stat[];
 }
 
 export function AboutSection() {
@@ -60,32 +64,35 @@ export function AboutSection() {
     );
   }
 
-  const villageStats = [
-    {
-      icon: '👨‍👩‍👧‍👦',
-      value: villageInfo.families,
-      label: 'कुटुंबे',
-      labelEn: 'Families'
-    },
-    {
-      icon: '👥',
-      value: villageInfo.population,
-      label: 'लोकसंख्या',
-      labelEn: 'Population'
-    },
-    {
-      icon: '🏛️',
-      value: villageInfo.gramPanchayatCount,
-      label: 'ग्रामपंचायत',
-      labelEn: 'Gram Panchayat'
-    },
-    {
-      icon: '🌾',
-      value: villageInfo.area,
-      label: 'क्षेत्रफळ (हेक्टर)',
-      labelEn: 'Area (Hectares)'
-    }
-  ];
+  // Use dynamic stats from villageInfo or fallback to default
+  const villageStats = villageInfo?.stats && villageInfo.stats.length > 0 
+    ? villageInfo.stats 
+    : [
+        {
+          icon: '👨‍👩‍👧‍👦',
+          value: '227',
+          label: 'कुटुंबे',
+          labelEn: 'Families'
+        },
+        {
+          icon: '👥',
+          value: '1958',
+          label: 'लोकसंख्या',
+          labelEn: 'Population'
+        },
+        {
+          icon: '🏛️',
+          value: '1',
+          label: 'ग्रामपंचायत',
+          labelEn: 'Gram Panchayat'
+        },
+        {
+          icon: '🌾',
+          value: '654.455',
+          label: 'क्षेत्रफळ (हेक्टर)',
+          labelEn: 'Area (Hectares)'
+        }
+      ];
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -174,12 +181,9 @@ export function AboutSection() {
                   <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white mr-4">
                     <Home className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">आमचे गाव</h3>
+              <h3 className="text-xl font-bold text-gray-900">{villageInfo.sectionOneTitle || 'आमचे गाव'}</h3>
                 </div>
-                <p className="text-gray-600 leading-relaxed">
-                  आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. 
-                  येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.
-                </p>
+                <p className="text-gray-600 leading-relaxed">{villageInfo.sectionOneBody || 'आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.'}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -191,12 +195,9 @@ export function AboutSection() {
                   <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white mr-4">
                     <MapPin className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">स्थान</h3>
+              <h3 className="text-xl font-bold text-gray-900">{villageInfo.sectionTwoTitle || 'स्थान'}</h3>
                 </div>
-                <p className="text-gray-600 leading-relaxed">
-                  आमचे गाव महाराष्ट्र राज्यातील एक महत्त्वाचे गाव आहे. 
-                  येथे सुंदर निसर्ग, समृद्ध संस्कृती आणि मैत्रीपूर्ण वातावरण आहे.
-                </p>
+                <p className="text-gray-600 leading-relaxed">{villageInfo.sectionTwoBody || 'आमचे गाव महाराष्ट्र राज्यातील एक महत्त्वाचे गाव आहे. येथे सुंदर निसर्ग, समृद्ध संस्कृती आणि मैत्रीपूर्ण वातावरण आहे.'}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -208,12 +209,9 @@ export function AboutSection() {
                   <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white mr-4">
                     <TrendingUp className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">विकास</h3>
+              <h3 className="text-xl font-bold text-gray-900">{villageInfo.sectionThreeTitle || 'विकास'}</h3>
                 </div>
-                <p className="text-gray-600 leading-relaxed">
-                  आमच्या गावाचा सतत विकास होत आहे. शिक्षण, आरोग्य, 
-                  रोजगार आणि मूलभूत सुविधांसाठी सर्व प्रयत्न केले जात आहेत.
-                </p>
+                <p className="text-gray-600 leading-relaxed">{villageInfo.sectionThreeBody || 'आमच्या गावाचा सतत विकास होत आहे. शिक्षण, आरोग्य, रोजगार आणि मूलभूत सुविधांसाठी सर्व प्रयत्न केले जात आहेत.'}</p>
               </CardContent>
             </Card>
           </motion.div>

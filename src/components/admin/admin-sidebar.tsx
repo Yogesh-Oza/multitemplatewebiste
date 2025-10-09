@@ -35,6 +35,12 @@ const adminNavItems = [
     description: 'गावाची मुख्य माहिती आणि आकडेवारी'
   },
   {
+    href: '/admin/announcements',
+    label: 'सूचना',
+    icon: Megaphone,
+    description: 'सूचना आणि जाहीराती व्यवस्थापन'
+  },
+  {
     href: '/admin/history',
     label: 'इतिहास',
     icon: History,
@@ -57,12 +63,6 @@ const adminNavItems = [
     label: 'जमा-खर्च',
     icon: DollarSign,
     description: 'आर्थिक माहिती व्यवस्थापन'
-  },
-  {
-    href: '/admin/announcements',
-    label: 'सूचना',
-    icon: Megaphone,
-    description: 'सूचना आणि जाहीराती व्यवस्थापन'
   },
   {
     href: '/admin/government-schemes',
