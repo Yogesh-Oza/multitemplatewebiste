@@ -82,12 +82,12 @@ export default function SubdomainRegisterPage() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">नोंदणी यशस्वी!</h2>
             <p className="text-gray-600 mb-4">
-              Your subdomain <strong>{formData.subdomain}.mahagp.in</strong> has been created.
+              आपला सबडोमेन <strong>{formData.subdomain}.mahagp.in</strong> तयार झाला आहे.
             </p>
             <p className="text-sm text-gray-500">
-              Check your email for login credentials and setup instructions.
+              लॉगिन क्रेडेन्शियल्स आणि सेटअप सूचनांसाठी आपला ईमेल तपासा.
             </p>
           </CardContent>
         </Card>
@@ -100,10 +100,10 @@ export default function SubdomainRegisterPage() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Create Your Village Website
+            आपल्या गावाची वेबसाइट तयार करा
           </h1>
           <p className="text-xl text-gray-600">
-            Get your own subdomain and start building your gram panchayat website
+            आपला स्वतःचा सबडोमेन मिळवा आणि आपली ग्रामपंचायत वेबसाइट तयार करण्यास सुरुवात करा
           </p>
         </div>
 
@@ -111,23 +111,23 @@ export default function SubdomainRegisterPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-6 w-6 text-blue-600" />
-              Subdomain Registration
+              सबडोमेन नोंदणी
             </CardTitle>
             <CardDescription>
-              Fill in your village details to get started with your website
+              आपल्या वेबसाइटसाठी सुरुवात करण्यासाठी आपल्या गावाची माहिती भरा
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Subdomain Input */}
               <div className="space-y-2">
-                <Label htmlFor="subdomain">Subdomain Name</Label>
+                <Label htmlFor="subdomain">सबडोमेन नाव</Label>
                 <div className="flex items-center space-x-2">
                   <Input
                     id="subdomain"
                     value={formData.subdomain}
                     onChange={(e) => setFormData({...formData, subdomain: e.target.value.toLowerCase()})}
-                    placeholder="your-village-name"
+                    placeholder="आपल्या-गावाचे-नाव"
                     className="flex-1"
                     required
                   />
@@ -136,14 +136,14 @@ export default function SubdomainRegisterPage() {
                   </Badge>
                 </div>
                 <p className="text-sm text-gray-500">
-                  Only lowercase letters, numbers, and hyphens allowed (3-20 characters)
+                  फक्त लोअरकेस अक्षरे, संख्या आणि हायफन परवानगी (3-20 अक्षरे)
                 </p>
               </div>
 
               {/* Village Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="villageName">Village Name (Marathi)</Label>
+                  <Label htmlFor="villageName">गावाचे नाव (मराठी)</Label>
                   <Input
                     id="villageName"
                     value={formData.villageName}
@@ -153,7 +153,7 @@ export default function SubdomainRegisterPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="villageNameEn">Village Name (English)</Label>
+                  <Label htmlFor="villageNameEn">गावाचे नाव (इंग्रजी)</Label>
                   <Input
                     id="villageNameEn"
                     value={formData.villageNameEn}
@@ -168,22 +168,22 @@ export default function SubdomainRegisterPage() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  Contact Information
+                  संपर्क माहिती
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="contactPerson">Contact Person</Label>
+                    <Label htmlFor="contactPerson">संपर्क व्यक्ती</Label>
                     <Input
                       id="contactPerson"
                       value={formData.contactPerson}
                       onChange={(e) => setFormData({...formData, contactPerson: e.target.value})}
-                      placeholder="Full Name"
+                      placeholder="पूर्ण नाव"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">फोन नंबर</Label>
                     <Input
                       id="phone"
                       type="tel"
@@ -196,7 +196,7 @@ export default function SubdomainRegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">ईमेल पत्ता</Label>
                   <Input
                     id="email"
                     type="email"
@@ -212,13 +212,13 @@ export default function SubdomainRegisterPage() {
               <div className="space-y-2">
                 <Label htmlFor="address" className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Village Address
+                  गावाचा पत्ता
                 </Label>
                 <Textarea
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  placeholder="Complete village address with taluka, district, state"
+                  placeholder="तालुका, जिल्हा, राज्यासह पूर्ण गावाचा पत्ता"
                   rows={3}
                   required
                 />
@@ -226,12 +226,12 @@ export default function SubdomainRegisterPage() {
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description">Village Description (Optional)</Label>
+                <Label htmlFor="description">गावाचे वर्णन (पर्यायी)</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Brief description about your village, its history, or special features"
+                  placeholder="आपल्या गावाबद्दल, त्याच्या इतिहासाबद्दल किंवा विशेष वैशिष्ट्यांबद्दल संक्षिप्त वर्णन"
                   rows={3}
                 />
               </div>
@@ -242,7 +242,7 @@ export default function SubdomainRegisterPage() {
                 className="w-full" 
                 disabled={isSubmitting || !validateSubdomain(formData.subdomain)}
               >
-                {isSubmitting ? 'Creating Subdomain...' : 'Create My Village Website'}
+                {isSubmitting ? 'सबडोमेन तयार करत आहे...' : 'माझी गावाची वेबसाइट तयार करा'}
               </Button>
             </form>
           </CardContent>
@@ -253,22 +253,22 @@ export default function SubdomainRegisterPage() {
           <Card className="p-4">
             <div className="text-center">
               <Globe className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <h3 className="font-semibold">Custom Subdomain</h3>
-              <p className="text-sm text-gray-600">Your village gets its own website URL</p>
+              <h3 className="font-semibold">स्वतःचा सबडोमेन</h3>
+              <p className="text-sm text-gray-600">आपल्या गावाला स्वतःचा वेबसाइट URL मिळतो</p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
               <Mail className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <h3 className="font-semibold">Easy Management</h3>
-              <p className="text-sm text-gray-600">Simple admin panel to update content</p>
+              <h3 className="font-semibold">सोपे व्यवस्थापन</h3>
+              <p className="text-sm text-gray-600">सामग्री अपडेट करण्यासाठी सोपे व्यवस्थापक पॅनेल</p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
               <User className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <h3 className="font-semibold">Professional Design</h3>
-              <p className="text-sm text-gray-600">Beautiful, responsive website template</p>
+              <h3 className="font-semibold">व्यावसायिक डिझाइन</h3>
+              <p className="text-sm text-gray-600">सुंदर, प्रतिक्रियाशील वेबसाइट टेम्प्लेट</p>
             </div>
           </Card>
         </div>

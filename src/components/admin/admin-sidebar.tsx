@@ -17,7 +17,8 @@ import {
   Building,
   Wrench,
   Phone,
-  BookOpen
+  BookOpen,
+  Layout
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -93,6 +94,12 @@ const adminNavItems = [
     label: 'संपर्क',
     icon: Phone,
     description: 'संपर्क माहिती व्यवस्थापन'
+  },
+  {
+    href: '/admin/footer',
+    label: 'फुटर',
+    icon: Layout,
+    description: 'फुटर सामग्री व्यवस्थापन'
   },
   {
     href: '/admin/settings',

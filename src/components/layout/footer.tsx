@@ -1,7 +1,79 @@
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Instagram } from 'lucide-react';
+import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+interface SocialMediaLink {
+  platform: string;
+  url: string;
+  icon: string;
+}
+
+interface FooterContent {
+  description: string;
+  socialMedia: SocialMediaLink[];
+  officeName: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+}
 
 export function Footer() {
+  const [footerContent, setFooterContent] = useState<FooterContent>({
+    description: 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख. सर्वांसाठी विकास आणि समृद्धी.',
+    socialMedia: [
+      { platform: 'facebook', url: '#', icon: 'Facebook' },
+      { platform: 'twitter', url: '#', icon: 'Twitter' },
+      { platform: 'instagram', url: '#', icon: 'Instagram' },
+      { platform: 'youtube', url: '#', icon: 'Youtube' }
+    ],
+    officeName: 'ग्रामपंचायत कार्यालय',
+    address: 'गाव, तालुका, जिल्हा\nमहाराष्ट्र, भारत',
+    phone: '+91 12345 67890',
+    email: 'info@grampanchayat.com',
+    website: 'digitalgp.in'
+  });
+
+  useEffect(() => {
+    fetchFooterContent();
+  }, []);
+
+  const fetchFooterContent = async () => {
+    try {
+      const response = await fetch('/api/footer-content');
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
+          setFooterContent({
+            description: data.description || footerContent.description,
+            socialMedia: data.socialMedia || footerContent.socialMedia,
+            officeName: data.officeName || footerContent.officeName,
+            address: data.address || footerContent.address,
+            phone: data.phone || footerContent.phone,
+            email: data.email || footerContent.email,
+            website: data.website || footerContent.website
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching footer content:', error);
+    }
+  };
+
+  const getSocialIcon = (iconName: string) => {
+    switch (iconName.toLowerCase()) {
+      case 'facebook':
+        return <Facebook className="h-5 w-5" />;
+      case 'twitter':
+        return <Twitter className="h-5 w-5" />;
+      case 'instagram':
+        return <Instagram className="h-5 w-5" />;
+      case 'youtube':
+        return <Youtube className="h-5 w-5" />;
+      default:
+        return <Globe className="h-5 w-5" />;
+    }
+  };
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container py-16">
@@ -13,19 +85,20 @@ export function Footer() {
               <span className="text-xl font-bold">ग्रामपंचायत</span>
             </div>
             <p className="text-gray-300 leading-relaxed">
-              एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख. 
-              सर्वांसाठी विकास आणि समृद्धी.
+              {footerContent.description}
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
+              {footerContent.socialMedia.map((social, index) => (
+                <a 
+                  key={index}
+                  href={social.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  {getSocialIcon(social.icon)}
+                </a>
+              ))}
             </div>
           </div>
 
@@ -100,30 +173,29 @@ export function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-gray-300">
-                    ग्रामपंचायत कार्यालय<br />
-                    गाव, तालुका, जिल्हा<br />
-                    महाराष्ट्र, भारत
+                  <p className="text-gray-300 whitespace-pre-line">
+                    {footerContent.officeName}<br />
+                    {footerContent.address}
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                <p className="text-gray-300">+91 12345 67890</p>
+                <p className="text-gray-300">{footerContent.phone}</p>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                <p className="text-gray-300">info@grampanchayat.com</p>
+                <p className="text-gray-300">{footerContent.email}</p>
               </div>
               <div className="flex items-center space-x-3">
                 <Globe className="h-5 w-5 text-blue-400 flex-shrink-0" />
                 <a 
-                  href="https://digitalgp.in" 
+                  href={`https://${footerContent.website}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  digitalgp.in
+                  {footerContent.website}
                 </a>
               </div>
             </div>

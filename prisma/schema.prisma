@@ -315,6 +315,25 @@ model Subdomain {
   departments   Department[]
   governmentSchemes GovernmentScheme[]
   homepageSettings HomepageSettings[]
+  footerContent   FooterContent[]
 
   @@map("subdomains")
+}
+
+model FooterContent {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  description String @default("एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख. सर्वांसाठी विकास आणि समृद्धी.")
+  socialMedia Json   // Array of social media links: [{platform: "facebook", url: "https://...", icon: "Facebook"}]
+  // Contact Information
+  officeName  String @default("ग्रामपंचायत कार्यालय")
+  address     String @default("गाव, तालुका, जिल्हा\nमहाराष्ट्र, भारत")
+  phone       String @default("+91 12345 67890")
+  email       String @default("info@grampanchayat.com")
+  website     String @default("digitalgp.in")
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("footer_content")
 }

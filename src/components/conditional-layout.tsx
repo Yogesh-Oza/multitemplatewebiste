@@ -14,8 +14,11 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   // Check if we're on an admin route
   const isAdminRoute = pathname.startsWith('/admin');
   
-  if (isAdminRoute) {
-    // For admin routes, render children without header/footer and Google Translate
+  // Check if we're on subdomain-register page
+  const isSubdomainRegister = pathname === '/subdomain-register';
+  
+  if (isAdminRoute || isSubdomainRegister) {
+    // For admin routes and subdomain-register, render children without header/footer
     return <>{children}</>;
   }
   
