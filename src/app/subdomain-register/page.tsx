@@ -34,17 +34,141 @@ export default function SubdomainRegisterPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionData, setSubmissionData] = useState<any>(null);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState<{[key: string]: boolean}>({});
 
   const validateSubdomain = (subdomain: string) => {
     const regex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
     return regex.test(subdomain) && subdomain.length >= 3 && subdomain.length <= 20;
   };
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const indianMobileRegex = /^[6-9]\d{9}$/;
+    const withCountryCode = cleanPhone.startsWith('91') && indianMobileRegex.test(cleanPhone.slice(2));
+    return indianMobileRegex.test(cleanPhone) || withCountryCode;
+  };
+
+  const validateDomain = (subdomain: string) => {
+    const reservedWords = ['www', 'admin', 'api', 'mail', 'ftp', 'blog', 'shop', 'app', 'test', 'dev', 'staging', 'production'];
+    const invalidPatterns = /^(www|admin|api|mail|ftp|blog|shop|app|test|dev|staging|production)/;
+    
+    if (reservedWords.includes(subdomain.toLowerCase())) {
+      return { valid: false, message: 'हे सबडोमेन आरक्षित आहे आणि वापरले जाऊ शकत नाही' };
+    }
+    
+    if (invalidPatterns.test(subdomain.toLowerCase())) {
+      return { valid: false, message: 'सबडोमेन आरक्षित शब्दांनी सुरू होऊ शकत नाही' };
+    }
+    
+    if (!validateSubdomain(subdomain)) {
+      return { valid: false, message: 'अवैध सबडोमेन स्वरूप. फक्त लोअरकेस अक्षरे, संख्या आणि हायफन वापरा (3-20 अक्षरे)' };
+    }
+    
+    return { valid: true, message: '' };
+  };
+
+  // Real-time availability checking
+  const checkAvailability = async (field: string, value: string) => {
+    if (!value || value.length < 3) return;
+    
+    setIsCheckingAvailability(prev => ({ ...prev, [field]: true }));
+    
+    try {
+      const response = await fetch(`/api/validate-subdomain?${field}=${encodeURIComponent(value)}`);
+      const result = await response.json();
+      
+      if (!response.ok) {
+        setValidationErrors(prev => ({ ...prev, [field]: result.error }));
+      } else {
+        setValidationErrors(prev => ({ ...prev, [field]: '' }));
+      }
+    } catch (error) {
+      console.error('Availability check failed:', error);
+    } finally {
+      setIsCheckingAvailability(prev => ({ ...prev, [field]: false }));
+    }
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear previous error for this field
+    setValidationErrors(prev => ({ ...prev, [field]: '' }));
+    
+    // Real-time validation
+    let error = '';
+    
+    switch (field) {
+      case 'subdomain':
+        if (value) {
+          const domainValidation = validateDomain(value);
+          if (!domainValidation.valid) {
+            error = domainValidation.message;
+          } else {
+            // Check availability after a short delay
+            setTimeout(() => checkAvailability('subdomain', value), 500);
+          }
+        }
+        break;
+      case 'email':
+        if (value && !validateEmail(value)) {
+          error = 'कृपया वैध ईमेल पत्ता प्रविष्ट करा';
+        } else if (value && validateEmail(value)) {
+          setTimeout(() => checkAvailability('email', value), 500);
+        }
+        break;
+      case 'phone':
+        if (value && !validatePhone(value)) {
+          error = 'कृपया वैध भारतीय मोबाइल नंबर प्रविष्ट करा (6-9 ने सुरू होणारे 10 अंक)';
+        } else if (value && validatePhone(value)) {
+          setTimeout(() => checkAvailability('phone', value), 500);
+        }
+        break;
+    }
+    
+    if (error) {
+      setValidationErrors(prev => ({ ...prev, [field]: error }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateSubdomain(formData.subdomain)) {
-      toast.error('Invalid subdomain format. Use only lowercase letters, numbers, and hyphens (3-20 characters)');
+    // Validate subdomain
+    const domainValidation = validateDomain(formData.subdomain);
+    if (!domainValidation.valid) {
+      toast.error(domainValidation.message);
+      return;
+    }
+
+    // Validate email
+    if (!validateEmail(formData.email)) {
+      toast.error('कृपया वैध ईमेल पत्ता प्रविष्ट करा');
+      return;
+    }
+
+    // Validate phone
+    if (!validatePhone(formData.phone)) {
+      toast.error('कृपया वैध भारतीय मोबाइल नंबर प्रविष्ट करा (6-9 ने सुरू होणारे 10 अंक)');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.villageName.trim() || !formData.villageNameEn.trim() || !formData.contactPerson.trim() || !formData.address.trim()) {
+      toast.error('कृपया सर्व आवश्यक फील्ड भरा');
+      return;
+    }
+
+    // Check for any validation errors
+    if (Object.keys(validationErrors).some(key => validationErrors[key])) {
+      toast.error('कृपया सर्व त्रुटी दुरुस्त करा');
       return;
     }
 
@@ -62,13 +186,18 @@ export default function SubdomainRegisterPage() {
       const result = await response.json();
 
       if (response.ok) {
+        setSubmissionData(result);
         setIsSubmitted(true);
-        toast.success('Subdomain registration successful! Check your email for login details.');
+        if (result.emailSent) {
+          toast.success('सबडोमेन नोंदणी यशस्वी! लॉगिन तपशीलांसाठी आपला ईमेल तपासा.');
+        } else {
+          toast.success('सबडोमेन नोंदणी यशस्वी! कृपया खाली आपले लॉगिन क्रेडेन्शियल्स नोंदवा.');
+        }
       } else {
-        toast.error(result.error || 'Registration failed');
+        toast.error(result.error || 'नोंदणी अयशस्वी');
       }
     } catch (error) {
-      toast.error('Network error. Please try again.');
+      toast.error('नेटवर्क त्रुटी. कृपया पुन्हा प्रयत्न करा.');
     } finally {
       setIsSubmitting(false);
     }
@@ -86,9 +215,35 @@ export default function SubdomainRegisterPage() {
             <p className="text-gray-600 mb-4">
               आपला सबडोमेन <strong>{formData.subdomain}.mahagp.in</strong> तयार झाला आहे.
             </p>
-            <p className="text-sm text-gray-500">
-              लॉगिन क्रेडेन्शियल्स आणि सेटअप सूचनांसाठी आपला ईमेल तपासा.
-            </p>
+            
+            {submissionData?.emailSent ? (
+              <p className="text-sm text-gray-500">
+                लॉगिन क्रेडेन्शियल्स आणि सेटअप सूचनांसाठी आपला ईमेल तपासा.
+              </p>
+            ) : (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800 mb-3">
+                  ईमेल पाठविण्यात समस्या आली. कृपया खालील लॉगिन तपशील नोंदवा:
+                </p>
+                <div className="text-left space-y-2">
+                  <div>
+                    <span className="font-semibold text-gray-700">व्यवस्थापक URL:</span>
+                    <br />
+                    <code className="text-blue-600">{submissionData?.adminUrl}</code>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-700">वापरकर्ता नाव:</span>
+                    <br />
+                    <code className="bg-gray-100 px-2 py-1 rounded">{submissionData?.credentials?.username}</code>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-700">पासवर्ड:</span>
+                    <br />
+                    <code className="bg-gray-100 px-2 py-1 rounded">{submissionData?.credentials?.password}</code>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -126,18 +281,21 @@ export default function SubdomainRegisterPage() {
                   <Input
                     id="subdomain"
                     value={formData.subdomain}
-                    onChange={(e) => setFormData({...formData, subdomain: e.target.value.toLowerCase()})}
+                    onChange={(e) => handleFieldChange('subdomain', e.target.value.toLowerCase())}
                     placeholder="आपल्या-गावाचे-नाव"
-                    className="flex-1"
+                    className={`flex-1 ${validationErrors.subdomain ? 'border-red-500' : ''}`}
                     required
                   />
                   <Badge variant="outline" className="whitespace-nowrap">
                     .mahagp.in
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-500">
-                  फक्त लोअरकेस अक्षरे, संख्या आणि हायफन परवानगी (3-20 अक्षरे)
+                <p className={`text-sm ${validationErrors.subdomain ? 'text-red-500' : 'text-gray-500'}`}>
+                  {validationErrors.subdomain || 'फक्त लोअरकेस अक्षरे, संख्या आणि हायफन परवानगी (3-20 अक्षरे)'}
                 </p>
+                {isCheckingAvailability.subdomain && (
+                  <p className="text-sm text-blue-500">तपासत आहे...</p>
+                )}
               </div>
 
               {/* Village Information */}
@@ -188,10 +346,17 @@ export default function SubdomainRegisterPage() {
                       id="phone"
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      onChange={(e) => handleFieldChange('phone', e.target.value)}
                       placeholder="+91 9876543210"
+                      className={validationErrors.phone ? 'border-red-500' : ''}
                       required
                     />
+                    {validationErrors.phone && (
+                      <p className="text-sm text-red-500">{validationErrors.phone}</p>
+                    )}
+                    {isCheckingAvailability.phone && (
+                      <p className="text-sm text-blue-500">तपासत आहे...</p>
+                    )}
                   </div>
                 </div>
 
@@ -201,10 +366,17 @@ export default function SubdomainRegisterPage() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => handleFieldChange('email', e.target.value)}
                     placeholder="village@example.com"
+                    className={validationErrors.email ? 'border-red-500' : ''}
                     required
                   />
+                  {validationErrors.email && (
+                    <p className="text-sm text-red-500">{validationErrors.email}</p>
+                  )}
+                  {isCheckingAvailability.email && (
+                    <p className="text-sm text-blue-500">तपासत आहे...</p>
+                  )}
                 </div>
               </div>
 
@@ -240,7 +412,7 @@ export default function SubdomainRegisterPage() {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isSubmitting || !validateSubdomain(formData.subdomain)}
+                disabled={isSubmitting || !validateSubdomain(formData.subdomain) || !validateEmail(formData.email) || !validatePhone(formData.phone) || Object.keys(validationErrors).some(key => validationErrors[key]) || Object.values(isCheckingAvailability).some(checking => checking)}
               >
                 {isSubmitting ? 'सबडोमेन तयार करत आहे...' : 'माझी गावाची वेबसाइट तयार करा'}
               </Button>

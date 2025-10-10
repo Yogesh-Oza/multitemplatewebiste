@@ -10,8 +10,22 @@ interface SubdomainEmailData {
   contactPerson: string;
 }
 
-// Create transporter for Hostinger SMTP
+// Create transporter with multiple fallback options
 const createTransporter = () => {
+  // Try Gmail first if configured
+  if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+    console.log('Using Gmail SMTP');
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS
+      }
+    });
+  }
+
+  // Fallback to Hostinger SMTP
+  console.log('Using Hostinger SMTP');
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.hostinger.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -28,11 +42,15 @@ const createTransporter = () => {
 
 export async function sendSubdomainEmail(data: SubdomainEmailData) {
   try {
+    console.log('Attempting to send email to:', data.to);
+    console.log('Email data:', { subdomain: data.subdomain, villageName: data.villageName });
+    
     const transporter = createTransporter();
     
     // Verify connection configuration
+    console.log('Verifying SMTP connection...');
     await transporter.verify();
-    console.log('SMTP connection verified successfully');
+    console.log('✅ SMTP connection verified successfully');
     
     const emailContent = `
       प्रिय ${data.contactPerson},
@@ -65,21 +83,34 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
 
     const htmlContent = generateEmailHTML(data);
 
+    const fromEmail = process.env.GMAIL_USER || process.env.HOSTINGER_USER || 'admin@mahagp.in';
+    
     const mailOptions = {
-      from: process.env.HOSTINGER_USER || 'admin@mahagp.in',
+      from: fromEmail,
       to: data.to,
       subject: `आपली गावाची वेबसाइट तयार आहे - ${data.subdomain}.mahagp.in`,
       text: emailContent,
       html: htmlContent
     };
 
+    console.log('Sending email with options:', { from: mailOptions.from, to: mailOptions.to, subject: mailOptions.subject });
+    
     const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
+    console.log('✅ Email sent successfully:', result.messageId);
+    console.log('Email response:', result.response);
     
     return { success: true, messageId: result.messageId };
-  } catch (error) {
-    console.error('Email sending failed:', error);
-    throw new Error(`Failed to send email: ${error}`);
+  } catch (error: any) {
+    console.error('❌ Email sending failed:', error);
+    console.error('Error details:', {
+      message: error?.message || 'Unknown error',
+      code: error?.code,
+      command: error?.command,
+      response: error?.response
+    });
+    
+    // Don't throw error, just log it so registration doesn't fail
+    return { success: false, error: error?.message || 'Email sending failed' };
   }
 }
 

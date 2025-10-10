@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { sendSubdomainEmail } from '@/lib/email';
 import { generatePassword } from '@/lib/utils';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -22,16 +23,45 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!subdomain || !villageName || !villageNameEn || !contactPerson || !email || !phone || !address) {
       return NextResponse.json(
-        { error: 'All required fields must be filled' },
+        { error: 'कृपया सर्व आवश्यक फील्ड भरा' },
         { status: 400 }
       );
     }
 
-    // Validate subdomain format
+    // Enhanced subdomain validation
     const subdomainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
     if (!subdomainRegex.test(subdomain) || subdomain.length < 3 || subdomain.length > 20) {
       return NextResponse.json(
-        { error: 'Invalid subdomain format' },
+        { error: 'अवैध सबडोमेन स्वरूप. फक्त लोअरकेस अक्षरे, संख्या आणि हायफन वापरा (3-20 अक्षरे)' },
+        { status: 400 }
+      );
+    }
+
+    // Check for reserved words
+    const reservedWords = ['www', 'admin', 'api', 'mail', 'ftp', 'blog', 'shop', 'app', 'test', 'dev', 'staging', 'production'];
+    if (reservedWords.includes(subdomain.toLowerCase())) {
+      return NextResponse.json(
+        { error: 'हे सबडोमेन आरक्षित आहे आणि वापरले जाऊ शकत नाही' },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'कृपया वैध ईमेल पत्ता प्रविष्ट करा' },
+        { status: 400 }
+      );
+    }
+
+    // Validate phone number (Indian mobile)
+    const cleanPhone = phone.replace(/\D/g, '');
+    const indianMobileRegex = /^[6-9]\d{9}$/;
+    const withCountryCode = cleanPhone.startsWith('91') && indianMobileRegex.test(cleanPhone.slice(2));
+    if (!indianMobileRegex.test(cleanPhone) && !withCountryCode) {
+      return NextResponse.json(
+        { error: 'कृपया वैध भारतीय मोबाइल नंबर प्रविष्ट करा (6-9 ने सुरू होणारे 10 अंक)' },
         { status: 400 }
       );
     }
@@ -43,19 +73,43 @@ export async function POST(request: NextRequest) {
 
     if (existingSubdomain) {
       return NextResponse.json(
-        { error: 'Subdomain already exists' },
+        { error: 'हे सबडोमेन आधीच वापरात आहे. कृपया दुसरे नाव वापरा' },
         { status: 409 }
       );
     }
 
-    // Check if email already exists
+    // Check if email already exists in subdomain table
     const existingEmail = await prisma.subdomain.findFirst({
       where: { email }
     });
 
     if (existingEmail) {
       return NextResponse.json(
-        { error: 'Email already registered' },
+        { error: 'हे ईमेल आधीच नोंदणीकृत आहे. कृपया दुसरा ईमेल वापरा' },
+        { status: 409 }
+      );
+    }
+
+    // Check if email already exists in admin users table
+    const existingAdminEmail = await prisma.adminUser.findFirst({
+      where: { email }
+    });
+
+    if (existingAdminEmail) {
+      return NextResponse.json(
+        { error: 'हे ईमेल आधीच व्यवस्थापक म्हणून नोंदणीकृत आहे. कृपया दुसरा ईमेल वापरा' },
+        { status: 409 }
+      );
+    }
+
+    // Check if phone already exists
+    const existingPhone = await prisma.subdomain.findFirst({
+      where: { phone: cleanPhone }
+    });
+
+    if (existingPhone) {
+      return NextResponse.json(
+        { error: 'हे फोन नंबर आधीच नोंदणीकृत आहे. कृपया दुसरा नंबर वापरा' },
         { status: 409 }
       );
     }
@@ -63,40 +117,61 @@ export async function POST(request: NextRequest) {
     // Generate admin credentials
     const adminPassword = generatePassword();
     const adminUsername = `${subdomain}_admin`;
-
-    // Create subdomain record
-    const newSubdomain = await prisma.subdomain.create({
-      data: {
-        subdomain,
-        villageName,
-        villageNameEn,
-        contactPerson,
-        email,
-        phone,
-        address,
-        description: description || '',
-        adminUsername,
-        adminPassword,
-        status: 'pending', // Will be activated after DNS setup
-        isActive: false
-      }
+    
+    // Check if admin username already exists
+    const existingAdminUsername = await prisma.adminUser.findFirst({
+      where: { username: adminUsername }
     });
 
-    // Create admin user for this subdomain
-    await prisma.adminUser.create({
-      data: {
-        username: adminUsername,
-        email,
-        password: adminPassword, // In production, hash this password
-        role: 'admin',
-        subdomainId: newSubdomain.id,
-        isActive: true
-      }
+    if (existingAdminUsername) {
+      return NextResponse.json(
+        { error: 'हे व्यवस्थापक वापरकर्ता नाव आधीच वापरात आहे. कृपया दुसरा सबडोमेन वापरा' },
+        { status: 409 }
+      );
+    }
+    
+    // Hash the password before storing
+    const hashedPassword = await bcrypt.hash(adminPassword, 12);
+
+    // Create subdomain record and admin user in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create subdomain record
+      const newSubdomain = await tx.subdomain.create({
+        data: {
+          subdomain,
+          villageName,
+          villageNameEn,
+          contactPerson,
+          email,
+          phone: cleanPhone,
+          address,
+          description: description || '',
+          adminUsername,
+          adminPassword: hashedPassword, // Store hashed password
+          status: 'pending', // Will be activated after DNS setup
+          isActive: false
+        }
+      });
+
+      // Create admin user for this subdomain
+      const adminUser = await tx.adminUser.create({
+        data: {
+          username: adminUsername,
+          email,
+          password: hashedPassword, // Store hashed password
+          role: 'admin',
+          subdomainId: newSubdomain.id,
+          isActive: true
+        }
+      });
+
+      return { newSubdomain, adminUser };
     });
 
     // Send email with credentials
+    let emailSent = false;
     try {
-      await sendSubdomainEmail({
+      const emailResult = await sendSubdomainEmail({
         to: email,
         subdomain,
         villageName,
@@ -104,6 +179,7 @@ export async function POST(request: NextRequest) {
         adminPassword,
         contactPerson
       });
+      emailSent = emailResult.success;
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       // Don't fail the registration if email fails
@@ -111,15 +187,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Subdomain created successfully',
-      subdomain: newSubdomain.subdomain,
-      adminUrl: `https://${subdomain}.mahagp.in/admin`
+      message: 'सबडोमेन यशस्वीरित्या तयार झाले',
+      subdomain: result.newSubdomain.subdomain,
+      adminUrl: `https://${subdomain}.mahagp.in/admin`,
+      credentials: {
+        username: adminUsername,
+        password: adminPassword
+      },
+      emailSent: emailSent
     });
 
   } catch (error) {
     console.error('Subdomain registration error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'आंतरिक सर्व्हर त्रुटी' },
       { status: 500 }
     );
   }
