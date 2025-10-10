@@ -147,9 +147,9 @@ export async function POST(request: NextRequest) {
           address,
           description: description || '',
           adminUsername,
-          adminPassword: hashedPassword, // Store hashed password
-          status: 'pending', // Will be activated after DNS setup
-          isActive: false
+           adminPassword: hashedPassword, // Store hashed password
+           status: 'active', // Immediately activated
+           isActive: true
         }
       });
 
