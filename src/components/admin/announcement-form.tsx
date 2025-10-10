@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, ArrowLeft, Upload, Calendar, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { uploadImage } from '@/lib/upload';
 
 interface AnnouncementFormProps {
   initialData?: any;
@@ -152,16 +151,11 @@ export function AnnouncementForm({ initialData, isEdit = false }: AnnouncementFo
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="image">प्रतिमा</Label>
-            <div className="flex items-center space-x-3">
-              <Input
-                id="image"
-                value={formData.image}
-                onChange={(e) => handleInputChange('image', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className="flex-1"
-              />
-              <label className="inline-flex items-center px-3 py-2 border rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100">
-                <Upload className="h-4 w-4 mr-2" /> फाइल अपलोड
+            <div className="space-y-3">
+              {/* File Upload Button */}
+              <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                <Upload className="h-5 w-5 mr-2" />
+                <span className="text-sm font-medium">फाइल अपलोड</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -169,11 +163,38 @@ export function AnnouncementForm({ initialData, isEdit = false }: AnnouncementFo
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
+                    
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                      toast.error('कृपया फक्त प्रतिमा फाइल निवडा');
+                      return;
+                    }
+                    
+                    // Validate file size (max 10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast.error('फाइल आकार 10MB पेक्षा कमी असावा');
+                      return;
+                    }
+                    
                     try {
-                      const url = await uploadImage(file as any);
-                      setFormData(prev => ({ ...prev, image: url }));
-                      toast.success('प्रतिमा अपलोड झाली');
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      
+                      const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      
+                      if (response.ok) {
+                        const result = await response.json();
+                        setFormData(prev => ({ ...prev, image: result.imageUrl }));
+                        toast.success('प्रतिमा अपलोड झाली');
+                      } else {
+                        const error = await response.json();
+                        throw new Error(error.error || 'अपलोड अयशस्वी');
+                      }
                     } catch (err: any) {
+                      console.error('Upload error:', err);
                       toast.error(err.message || 'अपलोड अयशस्वी');
                     } finally {
                       // reset input so same file can be reselected
@@ -182,8 +203,31 @@ export function AnnouncementForm({ initialData, isEdit = false }: AnnouncementFo
                   }}
                 />
               </label>
+              
+              {/* File Size Info */}
+              <p className="text-xs text-gray-500">JPG, PNG, WebP, कमाल 10MB</p>
+              
+              {/* Uploaded File Preview */}
+              {formData.image && (
+                <div className="mt-3">
+                  <p className="text-sm text-gray-600 mb-2">अपलोड केलेली प्रतिमा:</p>
+                  <div className="relative inline-block">
+                    <img 
+                      src={formData.image} 
+                      alt="Uploaded preview" 
+                      className="max-w-xs max-h-32 object-cover rounded-lg border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">JPG, PNG, WebP, कमाल 10MB</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
