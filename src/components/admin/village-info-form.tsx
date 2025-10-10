@@ -163,13 +163,19 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         stats: Array.isArray(formData.stats) ? formData.stats : []
       };
       
+      console.log('Submitting village info:', dataToSubmit);
+      
       const response = await fetch('/api/admin/village-info', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSubmit),
       });
 
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Update successful:', result);
         toast.success('गाव माहिती सफलतापूर्वक सेव्ह केली!');
         
         // Force refresh the page to show updated data
@@ -178,6 +184,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         }, 500);
       } else {
         const errorData = await response.json();
+        console.error('Update failed:', errorData);
         toast.error(`त्रुटी आली: ${errorData.error || 'अज्ञात त्रुटी'}`);
       }
     } catch (error) {
