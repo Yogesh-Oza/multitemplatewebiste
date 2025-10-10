@@ -38,7 +38,7 @@ export default function FooterContentPage() {
     address: 'गाव, तालुका, जिल्हा\nमहाराष्ट्र, भारत',
     phone: '+91 12345 67890',
     email: 'info@grampanchayat.com',
-    website: 'digitalgp.in'
+    website: 'mahagp.in'
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -225,7 +225,7 @@ export default function FooterContentPage() {
                 id="website"
                 value={footerContent.website}
                 onChange={(e) => setFooterContent({ ...footerContent, website: e.target.value })}
-                placeholder="digitalgp.in"
+                placeholder="mahagp.in"
               />
             </div>
           </div>

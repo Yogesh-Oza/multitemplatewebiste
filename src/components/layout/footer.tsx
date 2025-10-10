@@ -31,7 +31,7 @@ export function Footer() {
     address: 'गाव, तालुका, जिल्हा\nमहाराष्ट्र, भारत',
     phone: '+91 12345 67890',
     email: 'info@grampanchayat.com',
-    website: 'digitalgp.in'
+    website: 'mahagp.in'
   });
 
   useEffect(() => {

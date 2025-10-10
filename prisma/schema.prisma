@@ -329,7 +329,7 @@ model FooterContent {
   address     String @default("गाव, तालुका, जिल्हा\nमहाराष्ट्र, भारत")
   phone       String @default("+91 12345 67890")
   email       String @default("info@grampanchayat.com")
-  website     String @default("digitalgp.in")
+  website     String @default("mahagp.in")
   subdomainId String? @db.ObjectId
   subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt   DateTime @default(now())
