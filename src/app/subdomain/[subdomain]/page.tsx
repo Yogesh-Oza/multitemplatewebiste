@@ -45,7 +45,8 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
 
   if (!subdomainData || !subdomainData.isActive) {
     // Redirect to main site for invalid subdomains
-    redirect('http://localhost:3000');
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    redirect(baseUrl);
   }
 
   return (

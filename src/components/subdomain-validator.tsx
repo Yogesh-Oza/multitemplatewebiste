@@ -15,13 +15,14 @@ export function SubdomainValidator({ subdomain, children }: SubdomainValidatorPr
   useEffect(() => {
     const validateSubdomain = async () => {
       try {
-        const response = await fetch(`/api/validate-subdomain?subdomain=${subdomain}`);
+        const response = await fetch(`/api/subdomain/validate?subdomain=${subdomain}`);
         const data = await response.json();
         
         if (!data.valid) {
           // Redirect to main site for invalid subdomains
           console.log('Invalid subdomain, redirecting to main site');
-          window.location.replace('http://localhost:3000');
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+          window.location.replace(baseUrl);
           return;
         }
         
@@ -29,7 +30,8 @@ export function SubdomainValidator({ subdomain, children }: SubdomainValidatorPr
       } catch (error) {
         console.error('Error validating subdomain:', error);
         // On error, redirect to main site
-        window.location.replace('http://localhost:3000');
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        window.location.replace(baseUrl);
       }
     };
 
