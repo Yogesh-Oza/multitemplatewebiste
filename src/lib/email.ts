@@ -60,14 +60,14 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
       वेबसाइट माहिती:
       - सबडोमेन: ${data.subdomain}.mahagp.in
       - गाव: ${data.villageName}
-      - व्यवस्थापक URL: https://${data.subdomain}.mahagp.in/admin
+      - व्यवस्थापक URL: https://${data.subdomain}.mahagp.in/admin-login
       
       लॉगिन क्रेडेन्शियल्स:
       - वापरकर्ता नाव: ${data.adminUsername}
       - पासवर्ड: ${data.adminPassword}
       
       पुढील पायऱ्या:
-      1. https://${data.subdomain}.mahagp.in/admin येथे आपले व्यवस्थापक पॅनेल भेट द्या
+      1. https://${data.subdomain}.mahagp.in/admin-login येथे आपले व्यवस्थापक पॅनेल भेट द्या
       2. वरील क्रेडेन्शियल्ससह लॉगिन करा
       3. आपली गावाची वेबसाइट सानुकूलित करण्यास सुरुवात करा
       4. आपल्या गावाची माहिती, घोषणा आणि चित्रे जोडा
@@ -135,7 +135,7 @@ function generateEmailHTML(data: SubdomainEmailData): string {
           <ul style="margin: 0; padding-left: 20px; color: #374151;">
             <li style="margin-bottom: 8px;"><strong>सबडोमेन:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${data.subdomain}.mahagp.in</code></li>
             <li style="margin-bottom: 8px;"><strong>गाव:</strong> ${data.villageName}</li>
-            <li style="margin-bottom: 8px;"><strong>व्यवस्थापक URL:</strong> <a href="https://${data.subdomain}.mahagp.in/admin" style="color: #3b82f6; text-decoration: none;">https://${data.subdomain}.mahagp.in/admin</a></li>
+            <li style="margin-bottom: 8px;"><strong>व्यवस्थापक URL:</strong> <a href="https://${data.subdomain}.mahagp.in/admin-login" style="color: #3b82f6; text-decoration: none;">https://${data.subdomain}.mahagp.in/admin-login</a></li>
           </ul>
         </div>
         
@@ -150,7 +150,7 @@ function generateEmailHTML(data: SubdomainEmailData): string {
         <div style="background: #d1fae5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
           <h3 style="margin: 0 0 15px 0; color: #065f46; font-size: 18px;">🚀 पुढील पायऱ्या</h3>
           <ol style="margin: 0; padding-left: 20px; color: #374151;">
-            <li style="margin-bottom: 8px;"><a href="https://${data.subdomain}.mahagp.in/admin" style="color: #10b981; text-decoration: none;">https://${data.subdomain}.mahagp.in/admin</a> येथे आपले व्यवस्थापक पॅनेल भेट द्या</li>
+            <li style="margin-bottom: 8px;"><a href="https://${data.subdomain}.mahagp.in/admin-login" style="color: #10b981; text-decoration: none;">https://${data.subdomain}.mahagp.in/admin-login</a> येथे आपले व्यवस्थापक पॅनेल भेट द्या</li>
             <li style="margin-bottom: 8px;">वरील क्रेडेन्शियल्ससह लॉगिन करा</li>
             <li style="margin-bottom: 8px;">आपली गावाची वेबसाइट सानुकूलित करण्यास सुरुवात करा</li>
             <li style="margin-bottom: 8px;">आपल्या गावाची माहिती, घोषणा आणि चित्रे जोडा</li>
@@ -169,7 +169,7 @@ function generateEmailHTML(data: SubdomainEmailData): string {
         </div>
         
         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-          <a href="https://${data.subdomain}.mahagp.in/admin" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">आपले व्यवस्थापक पॅनेल एक्सेस करा</a>
+          <a href="https://${data.subdomain}.mahagp.in/admin-login" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">आपले व्यवस्थापक पॅनेल एक्सेस करा</a>
         </div>
         
         <p style="color: #6b7280; font-size: 14px; margin-top: 30px; text-align: center;">
