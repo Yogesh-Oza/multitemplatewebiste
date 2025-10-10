@@ -126,6 +126,7 @@ model Program {
   description String
   descriptionEn String
   date        DateTime
+  time        String?
   location    String?
   category    String?
   imageUrl    String?
@@ -144,7 +145,8 @@ model Gallery {
   titleEn     String
   description String
   descriptionEn String
-  imageUrl    String
+  type        String // photo, video
+  mediaUrl    String // URL to the image or video file
   category    String?
   isActive    Boolean @default(true)
   order       Int    @default(0)
@@ -196,6 +198,56 @@ model Contact {
   updatedAt   DateTime @updatedAt
 
   @@map("contacts")
+}
+
+model OfficeDetails {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  address     String
+  addressEn   String
+  phone       String
+  email       String
+  workingHours String
+  workingHoursEn String
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("office_details")
+}
+
+model TeamMember {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  nameEn      String
+  designation String // सरपंच, उपसरपंच, ग्रामसेवक
+  designationEn String // Sarpanch, Up-Sarpanch, Gramsevak
+  phone       String
+  email       String?
+  imageUrl    String?
+  isActive    Boolean @default(true)
+  order       Int @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+model MapSettings {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  embedUrl    String // Google Maps embed URL
+  latitude    String?
+  longitude   String?
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("map_settings")
 }
 
 model IncomeExpense {
@@ -311,6 +363,9 @@ model Subdomain {
   gallery       Gallery[]
   facilities    Facility[]
   contacts      Contact[]
+  officeDetails OfficeDetails[]
+  teamMembers   TeamMember[]
+  mapSettings   MapSettings[]
   incomeExpense IncomeExpense[]
   departments   Department[]
   governmentSchemes GovernmentScheme[]

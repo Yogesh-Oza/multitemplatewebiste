@@ -98,6 +98,8 @@ export default function ProgramsPage() {
   const handleSave = async () => {
     if (!editingProgram) return;
 
+    console.log('Saving program:', editingProgram);
+
     try {
       if (isAdding) {
         const response = await fetch('/api/programs', {
@@ -108,12 +110,17 @@ export default function ProgramsPage() {
           body: JSON.stringify(editingProgram),
         });
 
+        console.log('Create response status:', response.status);
+
         if (response.ok) {
           const newProgram = await response.json();
+          console.log('Created program:', newProgram);
           setPrograms(prev => [...prev, newProgram]);
           toast.success('नवीन कार्यक्रम जोडले');
         } else {
-          throw new Error('Failed to create program');
+          const errorData = await response.json();
+          console.error('Create failed:', errorData);
+          throw new Error(errorData.error || 'Failed to create program');
         }
       } else {
         const response = await fetch(`/api/programs/${editingProgram.id}`, {
@@ -124,14 +131,19 @@ export default function ProgramsPage() {
           body: JSON.stringify(editingProgram),
         });
 
+        console.log('Update response status:', response.status);
+
         if (response.ok) {
           const updatedProgram = await response.json();
+          console.log('Updated program:', updatedProgram);
           setPrograms(prev => prev.map(program => 
             program.id === updatedProgram.id ? updatedProgram : program
           ));
           toast.success('कार्यक्रम अपडेट केले');
         } else {
-          throw new Error('Failed to update program');
+          const errorData = await response.json();
+          console.error('Update failed:', errorData);
+          throw new Error(errorData.error || 'Failed to update program');
         }
       }
 
@@ -166,13 +178,46 @@ export default function ProgramsPage() {
     setIsAdding(false);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setEditingProgram(prev => prev ? { ...prev, imageUrl } : null);
-    toast.success('प्रतिमा अपलोड केली');
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('कृपया फक्त प्रतिमा फाइल निवडा');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('फाइल आकार 10MB पेक्षा कमी असावा');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setEditingProgram(prev => prev ? { ...prev, imageUrl: result.imageUrl } : null);
+        toast.success('प्रतिमा अपलोड केली');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'अपलोड अयशस्वी');
+      }
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast.error(err.message || 'अपलोड अयशस्वी');
+    } finally {
+      // reset input so same file can be reselected
+      (event.target as HTMLInputElement).value = '';
+    }
   };
 
   const getStatusBadge = (status: string) => {

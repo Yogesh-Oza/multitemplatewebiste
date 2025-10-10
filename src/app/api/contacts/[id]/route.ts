@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { validateSubdomain } from '@/lib/subdomain';
 
 export async function PUT(
   request: NextRequest,
@@ -19,22 +19,13 @@ export async function PUT(
     const body = await request.json();
     const { type, name, nameEn, designation, designationEn, phone, email, address, addressEn, workingHours, workingHoursEn, isActive } = body;
 
-    // Verify the contact belongs to this subdomain
-    const existingContact = await prisma.contact.findFirst({
-      where: { 
-        id,
-        subdomainId 
-      }
-    });
-
-    if (!existingContact) {
-      return NextResponse.json({ 
-        message: 'Contact not found or does not belong to this subdomain' 
-      }, { status: 404 });
-    }
+    console.log('Contacts API - Update data:', body);
 
     const contact = await prisma.contact.update({
-      where: { id },
+      where: { 
+        id: id,
+        subdomainId // Ensure the contact belongs to this subdomain
+      },
       data: {
         type,
         name,
@@ -47,9 +38,11 @@ export async function PUT(
         addressEn,
         workingHours,
         workingHoursEn,
-        isActive,
+        isActive: isActive !== undefined ? isActive : true,
       },
     });
+
+    console.log('Contacts API - Updated contact:', contact);
 
     return NextResponse.json(contact);
   } catch (error) {
@@ -75,23 +68,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
-    // Verify the contact belongs to this subdomain
-    const existingContact = await prisma.contact.findFirst({
-      where: { 
-        id,
-        subdomainId 
-      }
-    });
-
-    if (!existingContact) {
-      return NextResponse.json({ 
-        message: 'Contact not found or does not belong to this subdomain' 
-      }, { status: 404 });
-    }
-
     await prisma.contact.delete({
-      where: { id },
+      where: { 
+        id: id,
+        subdomainId // Ensure the contact belongs to this subdomain
+      },
     });
 
     return NextResponse.json({ message: 'Contact deleted successfully' });

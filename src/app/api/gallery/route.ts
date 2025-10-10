@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { validateSubdomain } from '@/lib/subdomain';
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, titleEn, description, descriptionEn, imageUrl, category, isActive, order } = body;
+    const { title, titleEn, description, descriptionEn, type, mediaUrl, category, isActive, order } = body;
+
+    console.log('Gallery API - Create data:', body);
 
     const galleryItem = await prisma.gallery.create({
       data: {
@@ -46,13 +48,16 @@ export async function POST(request: NextRequest) {
         titleEn,
         description,
         descriptionEn,
-        imageUrl,
+        type,
+        mediaUrl,
         category,
         isActive: isActive !== undefined ? isActive : true,
         order: order || 0,
         subdomainId,
       },
     });
+
+    console.log('Gallery API - Created gallery item:', galleryItem);
 
     return NextResponse.json(galleryItem);
   } catch (error) {

@@ -78,6 +78,8 @@ export default function CulturalHeritagePage() {
   const handleSave = async () => {
     if (!editingItem) return;
 
+    console.log('Saving cultural heritage:', editingItem);
+
     try {
       if (isAdding) {
         const response = await fetch('/api/cultural-heritage', {
@@ -88,12 +90,17 @@ export default function CulturalHeritagePage() {
           body: JSON.stringify(editingItem),
         });
 
+        console.log('Create response status:', response.status);
+
         if (response.ok) {
           const newItem = await response.json();
+          console.log('Created heritage item:', newItem);
           setHeritage(prev => [...prev, newItem]);
           toast.success('नवीन आयटम जोडले');
         } else {
-          throw new Error('Failed to create heritage item');
+          const errorData = await response.json();
+          console.error('Create failed:', errorData);
+          throw new Error(errorData.error || 'Failed to create heritage item');
         }
       } else {
         const response = await fetch(`/api/cultural-heritage/${editingItem.id}`, {
@@ -104,14 +111,19 @@ export default function CulturalHeritagePage() {
           body: JSON.stringify(editingItem),
         });
 
+        console.log('Update response status:', response.status);
+
         if (response.ok) {
           const updatedItem = await response.json();
+          console.log('Updated heritage item:', updatedItem);
           setHeritage(prev => prev.map(item => 
             item.id === updatedItem.id ? updatedItem : item
           ));
           toast.success('आयटम अपडेट केले');
         } else {
-          throw new Error('Failed to update heritage item');
+          const errorData = await response.json();
+          console.error('Update failed:', errorData);
+          throw new Error(errorData.error || 'Failed to update heritage item');
         }
       }
 
@@ -146,13 +158,46 @@ export default function CulturalHeritagePage() {
     setIsAdding(false);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const image = URL.createObjectURL(file);
-    setEditingItem(prev => prev ? { ...prev, image } : null);
-    toast.success('प्रतिमा अपलोड केली');
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('कृपया फक्त प्रतिमा फाइल निवडा');
+      return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('फाइल आकार 10MB पेक्षा कमी असावा');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setEditingItem(prev => prev ? { ...prev, image: result.imageUrl } : null);
+        toast.success('प्रतिमा अपलोड केली');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'अपलोड अयशस्वी');
+      }
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast.error(err.message || 'अपलोड अयशस्वी');
+    } finally {
+      // reset input so same file can be reselected
+      (event.target as HTMLInputElement).value = '';
+    }
   };
 
   if (isLoading) {

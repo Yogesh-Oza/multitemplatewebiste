@@ -3,6 +3,7 @@ import { AboutSection } from '@/components/sections/about-section';
 import { HistorySection } from '@/components/sections/history-section';
 import { AnnouncementsSection } from '@/components/sections/announcements-section';
 import { CulturalHeritageSection } from '@/components/sections/cultural-heritage-section';
+import { ProgramsSection } from '@/components/sections/programs-section';
 
 export default function HomePage() {
   return (
@@ -12,6 +13,7 @@ export default function HomePage() {
       <HistorySection />
       <AnnouncementsSection />
       <CulturalHeritageSection />
+      <ProgramsSection />
     </>
   );
 }

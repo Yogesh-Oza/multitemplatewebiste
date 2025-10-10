@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,35 +9,18 @@ import { Palette, Music, Camera, BookOpen, Users, Calendar, MapPin, ChevronRight
 import Image from 'next/image';
 import Link from 'next/link';
 
-const CULTURAL_HERITAGE = [
-  {
-    id: 1,
-    title: 'गणपती उत्सव',
-    date: 'सप्टेंबर २०२४',
-    description: 'गावातील सर्वात महत्त्वाचा सांस्कृतिक उत्सव. १० दिवसांचा उत्सव साजरा केला जातो.',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    category: 'उत्सव',
-    type: 'festival',
-  },
-  {
-    id: 2,
-    title: 'लोकनृत्य कला',
-    date: 'सतत',
-    description: 'परंपरागत लोकनृत्यांचे प्रशिक्षण आणि प्रदर्शन. युवक-युवतींना शिकवले जाते.',
-    image: 'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    category: 'कला',
-    type: 'art',
-  },
-  {
-    id: 3,
-    title: 'हस्तकला केंद्र',
-    date: 'सतत',
-    description: 'परंपरागत हस्तकलांचे प्रशिक्षण केंद्र. मातीची भांडी, कापड विणणे इत्यादी.',
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    category: 'हस्तकला',
-    type: 'craft',
-  },
-] as const;
+interface CulturalHeritageItem {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  image: string;
+  category: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const TRADITIONAL_ARTS = [
   {
@@ -62,6 +46,27 @@ const TRADITIONAL_ARTS = [
 ];
 
 export function CulturalHeritageSection() {
+  const [heritageItems, setHeritageItems] = useState<CulturalHeritageItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHeritageItems = async () => {
+      try {
+        const response = await fetch('/api/cultural-heritage');
+        if (response.ok) {
+          const data = await response.json();
+          setHeritageItems(data.filter((item: CulturalHeritageItem) => item.isActive));
+        }
+      } catch (error) {
+        console.error('Error fetching cultural heritage:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeritageItems();
+  }, []);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -83,18 +88,6 @@ export function CulturalHeritageSection() {
     },
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'festival':
-        return 'bg-orange-500';
-      case 'art':
-        return 'bg-purple-500';
-      case 'craft':
-        return 'bg-green-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
 
   return (
     <section className="py-20 bg-gradient-to-br from-orange-50 to-yellow-50">
@@ -128,54 +121,67 @@ export function CulturalHeritageSection() {
           viewport={{ once: true }}
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
         >
-          {CULTURAL_HERITAGE.map((heritage) => (
-            <motion.div key={heritage.id} variants={itemVariants}>
-              <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group overflow-hidden">
-                <div className="relative">
-                  <div className="h-56 w-full overflow-hidden">
-                    <Image
-                      src={heritage.image}
-                      alt={heritage.title}
-                      width={400}
-                      height={220}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+          {loading ? (
+            // Loading skeleton
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="bg-gray-200 h-56 w-full rounded-lg mb-4"></div>
+                <div className="bg-gray-200 h-4 w-3/4 rounded mb-2"></div>
+                <div className="bg-gray-200 h-3 w-1/2 rounded mb-4"></div>
+                <div className="bg-gray-200 h-3 w-full rounded"></div>
+              </div>
+            ))
+          ) : heritageItems.length > 0 ? (
+            heritageItems.map((heritage) => (
+              <motion.div key={heritage.id} variants={itemVariants}>
+                <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group overflow-hidden">
+                  <div className="relative">
+                    <div className="h-56 w-full overflow-hidden">
+                      <Image
+                        src={heritage.image || '/images/placeholder-heritage.jpg'}
+                        alt={heritage.title}
+                        width={400}
+                        height={220}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="absolute top-4 left-4">
+                      <Badge 
+                        className="bg-orange-500 text-white border-0"
+                      >
+                        {heritage.category}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="absolute top-4 left-4">
-                    <Badge 
-                      className={`${getTypeColor(heritage.type)} text-white border-0`}
+                  
+                  <CardContent className="p-6 text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
+                      {heritage.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 leading-relaxed mb-4">
+                      {heritage.description}
+                    </p>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors"
                     >
-                      {heritage.category}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
-                    {heritage.title}
-                  </h3>
-                  
-                  <div className="flex items-center justify-center mb-3 text-gray-500">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{heritage.date}</span>
-                  </div>
-                  
-                  <p className="text-gray-600 leading-relaxed mb-4">
-                    {heritage.description}
-                  </p>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors"
-                  >
-                    अधिक माहिती
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                      अधिक माहिती
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <div className="text-gray-500 text-lg">
+                सांस्कृतिक वारसा माहिती उपलब्ध नाही
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Traditional Arts Section */}

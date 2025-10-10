@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { validateSubdomain } from '@/lib/subdomain';
 
 export async function PUT(
   request: NextRequest,
@@ -17,35 +17,29 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { title, titleEn, description, descriptionEn, imageUrl, category, isActive, order } = body;
+    const { title, titleEn, description, descriptionEn, type, mediaUrl, category, isActive, order } = body;
 
-    // Verify the gallery item belongs to this subdomain
-    const existingItem = await prisma.gallery.findFirst({
-      where: { 
-        id,
-        subdomainId 
-      }
-    });
-
-    if (!existingItem) {
-      return NextResponse.json({ 
-        message: 'Gallery item not found or does not belong to this subdomain' 
-      }, { status: 404 });
-    }
+    console.log('Gallery API - Update data:', body);
 
     const galleryItem = await prisma.gallery.update({
-      where: { id },
+      where: { 
+        id: id,
+        subdomainId // Ensure the gallery item belongs to this subdomain
+      },
       data: {
         title,
         titleEn,
         description,
         descriptionEn,
-        imageUrl,
+        type,
+        mediaUrl,
         category,
-        isActive,
-        order,
+        isActive: isActive !== undefined ? isActive : true,
+        order: order || 0,
       },
     });
+
+    console.log('Gallery API - Updated gallery item:', galleryItem);
 
     return NextResponse.json(galleryItem);
   } catch (error) {
@@ -71,23 +65,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
-    // Verify the gallery item belongs to this subdomain
-    const existingItem = await prisma.gallery.findFirst({
-      where: { 
-        id,
-        subdomainId 
-      }
-    });
-
-    if (!existingItem) {
-      return NextResponse.json({ 
-        message: 'Gallery item not found or does not belong to this subdomain' 
-      }, { status: 404 });
-    }
-
     await prisma.gallery.delete({
-      where: { id },
+      where: { 
+        id: id,
+        subdomainId // Ensure the gallery item belongs to this subdomain
+      },
     });
 
     return NextResponse.json({ message: 'Gallery item deleted successfully' });

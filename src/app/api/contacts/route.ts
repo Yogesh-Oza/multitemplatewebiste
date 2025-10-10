@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, name, nameEn, designation, designationEn, phone, email, address, addressEn, workingHours, workingHoursEn, isActive } = body;
 
+    console.log('Contacts API - Create data:', body);
+
     const contact = await prisma.contact.create({
       data: {
         type,
@@ -57,6 +59,8 @@ export async function POST(request: NextRequest) {
         subdomainId,
       },
     });
+
+    console.log('Contacts API - Created contact:', contact);
 
     return NextResponse.json(contact);
   } catch (error) {

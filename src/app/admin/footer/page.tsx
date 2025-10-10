@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Facebook, Twitter, Instagram, Plus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface SocialMediaLink {
   platform: string;
@@ -83,13 +84,13 @@ export default function FooterContentPage() {
       });
 
       if (response.ok) {
-        alert('Footer content saved successfully!');
+        toast.success('Footer content saved successfully!');
       } else {
-        alert('Failed to save footer content');
+        toast.error('Failed to save footer content');
       }
     } catch (error) {
       console.error('Error saving footer content:', error);
-      alert('Error saving footer content');
+      toast.error('Error saving footer content');
     } finally {
       setIsSaving(false);
     }

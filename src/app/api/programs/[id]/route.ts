@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { validateSubdomain } from '@/lib/subdomain';
 
 export async function PUT(
   request: NextRequest,
@@ -17,36 +17,30 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { title, titleEn, description, descriptionEn, date, location, category, imageUrl, status } = body;
+    const { title, titleEn, description, descriptionEn, date, time, location, category, imageUrl, status } = body;
 
-    // Verify the program belongs to this subdomain
-    const existingProgram = await prisma.program.findFirst({
-      where: { 
-        id,
-        subdomainId 
-      }
-    });
-
-    if (!existingProgram) {
-      return NextResponse.json({ 
-        message: 'Program not found or does not belong to this subdomain' 
-      }, { status: 404 });
-    }
+    console.log('Programs API - Update data:', body);
 
     const program = await prisma.program.update({
-      where: { id },
+      where: { 
+        id: id,
+        subdomainId // Ensure the program belongs to this subdomain
+      },
       data: {
         title,
         titleEn,
         description,
         descriptionEn,
         date: new Date(date),
+        time,
         location,
         category,
         imageUrl,
         status,
       },
     });
+
+    console.log('Programs API - Updated program:', program);
 
     return NextResponse.json(program);
   } catch (error) {
@@ -72,23 +66,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
-    // Verify the program belongs to this subdomain
-    const existingProgram = await prisma.program.findFirst({
-      where: { 
-        id,
-        subdomainId 
-      }
-    });
-
-    if (!existingProgram) {
-      return NextResponse.json({ 
-        message: 'Program not found or does not belong to this subdomain' 
-      }, { status: 404 });
-    }
-
     await prisma.program.delete({
-      where: { id },
+      where: { 
+        id: id,
+        subdomainId // Ensure the program belongs to this subdomain
+      },
     });
 
     return NextResponse.json({ message: 'Program deleted successfully' });

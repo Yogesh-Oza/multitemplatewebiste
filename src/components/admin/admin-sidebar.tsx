@@ -48,6 +48,12 @@ const adminNavItems = [
     description: 'गावाचा इतिहास आणि परंपरा'
   },
   {
+    href: '/admin/cultural-heritage',
+    label: 'सांस्कृतिक वारसा',
+    icon: Globe,
+    description: 'सांस्कृतिक उत्सव आणि परंपरागत कला'
+  },
+  {
     href: '/admin/programs',
     label: 'कार्यक्रम',
     icon: Calendar,
@@ -82,12 +88,6 @@ const adminNavItems = [
     label: 'सोई-सुविधा',
     icon: Wrench,
     description: 'सुविधा व्यवस्थापन'
-  },
-  {
-    href: '/admin/cultural-heritage',
-    label: 'सांस्कृतिक वारसा',
-    icon: Globe,
-    description: 'सांस्कृतिक उत्सव आणि परंपरागत कला'
   },
   {
     href: '/admin/contact',

@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, titleEn, description, descriptionEn, date, location, category, imageUrl, status } = body;
+    const { title, titleEn, description, descriptionEn, date, time, location, category, imageUrl, status } = body;
+
+    console.log('Programs API - Received data:', body);
 
     const program = await prisma.program.create({
       data: {
@@ -47,6 +49,7 @@ export async function POST(request: NextRequest) {
         description,
         descriptionEn,
         date: new Date(date),
+        time,
         location,
         category,
         imageUrl,
@@ -54,6 +57,8 @@ export async function POST(request: NextRequest) {
         subdomainId,
       },
     });
+
+    console.log('Programs API - Created program:', program);
 
     return NextResponse.json(program);
   } catch (error) {

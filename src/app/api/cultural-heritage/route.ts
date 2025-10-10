@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
   try {
     const { isValid, subdomainId } = await validateSubdomain(request);
     
+    console.log('Cultural Heritage API - Subdomain validation:', { isValid, subdomainId });
+    
     if (!isValid) {
       return NextResponse.json({ 
         message: 'Invalid or inactive subdomain' 
@@ -39,6 +41,8 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { title, titleEn, description, descriptionEn, image, category } = body;
+    
+    console.log('Cultural Heritage API - Received data:', { title, image, category });
 
     const heritage = await prisma.culturalHeritage.create({
       data: {
@@ -52,6 +56,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log('Cultural Heritage API - Created heritage:', heritage.id);
     return NextResponse.json(heritage);
   } catch (error) {
     console.error('Error creating cultural heritage:', error);
