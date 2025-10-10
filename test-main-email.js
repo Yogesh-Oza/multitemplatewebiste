@@ -25,7 +25,7 @@ async function sendTestEmail() {
     
     const mailOptions = {
       from: process.env.HOSTINGER_USER || 'admin@mahagp.in',
-      to: 'aniruddhamahamulkar@gmail.com',
+      to: 'yogeshoza33333@gmail.com',
       subject: '🧪 Test Email - Gram Panchayat System (Main Address)',
       text: `
 Hello!
