@@ -20,8 +20,18 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   // Check if we're on the root business landing page
   const isBusinessLanding = pathname === '/';
   
-  if (isAdminRoute || isSubdomainRegister || isBusinessLanding) {
-    // For admin routes, subdomain-register, and business landing page, render children without header/footer
+  // Check if we're on a subdomain route (subdomain pages have their own layout)
+  const isSubdomainRoute = pathname.startsWith('/subdomain/');
+  
+  // Check if we're accessing through a subdomain (when hostname contains a subdomain)
+  const isSubdomainAccess = typeof window !== 'undefined' && 
+    window.location.hostname.includes('.') && 
+    !window.location.hostname.includes('localhost:3000') && 
+    !window.location.hostname.includes('mahagp.in') &&
+    window.location.hostname !== 'localhost';
+  
+  if (isAdminRoute || isSubdomainRegister || isBusinessLanding || isSubdomainRoute || isSubdomainAccess) {
+    // For admin routes, subdomain-register, business landing page, subdomain routes, and subdomain access, render children without header/footer
     return <>{children}</>;
   }
   
