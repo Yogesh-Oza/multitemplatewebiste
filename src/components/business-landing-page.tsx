@@ -40,7 +40,6 @@ import Image from 'next/image';
 
 export function BusinessLandingPage() {
   const [activeTemplate, setActiveTemplate] = useState('gram-panchayat');
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   const templates = [
     {
@@ -239,13 +238,15 @@ export function BusinessLandingPage() {
               </Button>
 
               <Button
+                asChild
                 variant="outline"
                 size="lg"
                 className="bg-white/80 backdrop-blur-sm border-white/20 text-gray-700 px-8 py-4 text-lg font-semibold rounded-full hover:bg-white/90 transition-all duration-300"
-                onClick={() => setIsVideoPlaying(true)}
               >
-                <Play className="h-5 w-5 mr-2" />
-                डेमो पहा
+                <Link href="https://demo.mahagp.in/" target="_blank" rel="noopener noreferrer">
+                  <Play className="h-5 w-5 mr-2" />
+                  डेमो पहा
+                </Link>
               </Button>
             </motion.div>
 
