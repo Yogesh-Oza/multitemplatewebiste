@@ -37,7 +37,7 @@ export default function FooterContentPage() {
     ],
     officeName: 'ग्रामपंचायत कार्यालय',
     address: 'गाव, तालुका, जिल्हा\nमहाराष्ट्र, भारत',
-    phone: '+91 12345 67890',
+    phone: '+91 77439 66987',
     email: 'info@grampanchayat.com',
     website: 'mahagp.in'
   });
@@ -205,7 +205,7 @@ export default function FooterContentPage() {
                   id="phone"
                   value={footerContent.phone}
                   onChange={(e) => setFooterContent({ ...footerContent, phone: e.target.value })}
-                  placeholder="+91 12345 67890"
+                  placeholder="+91 77439 66987"
                 />
               </div>
               

@@ -31,7 +31,7 @@ export function Footer() {
     ],
     officeName: 'ग्रामपंचायत कार्यालय',
     address: 'गाव, तालुका, जिल्हा\nमहाराष्ट्र, भारत',
-    phone: '+91 12345 67890',
+    phone: '+91 77439 66987',
     email: 'info@grampanchayat.com',
     website: 'mahagp.in'
   });
@@ -208,7 +208,7 @@ export function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              © 2024 ग्रामपंचायत. सर्व हक्क राखीव.
+              © 2024 MahaGP.in. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">

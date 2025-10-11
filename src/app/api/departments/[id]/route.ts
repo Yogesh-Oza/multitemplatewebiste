@@ -17,7 +17,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { name, nameEn, description, descriptionEn, head, headEn, phone, email, address, addressEn, workingHours, workingHoursEn, isActive } = body;
+    const { name, nameEn, description, descriptionEn, head, headEn, phone, email, address, addressEn, workingHours, workingHoursEn, imageUrl, services, servicesEn, isActive } = body;
 
     // Verify the department belongs to this subdomain
     const existingDepartment = await prisma.department.findFirst({
@@ -48,6 +48,9 @@ export async function PUT(
         addressEn,
         workingHours,
         workingHoursEn,
+        imageUrl: imageUrl || null,
+        services: services || [],
+        servicesEn: servicesEn || [],
         isActive,
       },
     });

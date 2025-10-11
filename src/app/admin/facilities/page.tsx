@@ -33,15 +33,8 @@ interface Facility {
   descriptionEn: string;
   category: string;
   location: string;
-  locationEn: string;
-  contactPerson: string;
-  contactPersonEn: string;
-  phone: string;
+  contactInfo: string;
   workingHours: string;
-  workingHoursEn: string;
-  status: 'working' | 'maintenance' | 'out_of_order';
-  lastMaintenance: string;
-  nextMaintenance: string;
   imageUrl: string;
   isActive: boolean;
 }
@@ -51,11 +44,6 @@ const categories = [
   'पाणी', 'वीज', 'स्वच्छता', 'वाहतूक', 'संचार', 'शिक्षण', 'आरोग्य', 'अन्य'
 ];
 
-const statusOptions = [
-  { value: 'working', label: 'कार्यरत', color: 'bg-green-500', icon: CheckCircle },
-  { value: 'maintenance', label: 'दुरुस्ती', color: 'bg-yellow-500', icon: AlertCircle },
-  { value: 'out_of_order', label: 'बंद', color: 'bg-red-500', icon: XCircle }
-];
 
 export default function FacilitiesPage() {
   const [facilities, setFacilities] = useState<Facility[]>([]);
@@ -98,15 +86,8 @@ export default function FacilitiesPage() {
       descriptionEn: '',
       category: 'पाणी',
       location: '',
-      locationEn: '',
-      contactPerson: '',
-      contactPersonEn: '',
-      phone: '',
+      contactInfo: '',
       workingHours: '',
-      workingHoursEn: '',
-      status: 'working',
-      lastMaintenance: '',
-      nextMaintenance: '',
       imageUrl: '',
       isActive: true
     });
@@ -184,13 +165,35 @@ export default function FacilitiesPage() {
     setIsAdding(false);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setEditingFacility(prev => prev ? { ...prev, imageUrl } : null);
-    toast.success('प्रतिमा अपलोड केली');
+    try {
+      // Show loading state
+      toast.loading('प्रतिमा अपलोड होत आहे...');
+
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload to server
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setEditingFacility(prev => prev ? { ...prev, imageUrl: result.imageUrl } : null);
+        toast.success('प्रतिमा अपलोड केली');
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('प्रतिमा अपलोड करताना त्रुटी आली');
+    }
   };
 
   const handleToggleActive = (id: string) => {
@@ -204,13 +207,15 @@ export default function FacilitiesPage() {
     ? facilities 
     : facilities.filter(facility => facility.category === selectedCategory);
 
-  const getStatusBadge = (status: string) => {
-    const statusOption = statusOptions.find(s => s.value === status);
-    const Icon = statusOption?.icon || CheckCircle;
+  const getStatusBadge = (isActive: boolean) => {
+    const statusOption = isActive 
+      ? { value: 'active', label: 'सक्रिय', color: 'bg-green-500', icon: CheckCircle }
+      : { value: 'inactive', label: 'निष्क्रिय', color: 'bg-red-500', icon: XCircle };
+    const Icon = statusOption.icon;
     return (
-      <Badge className={`${statusOption?.color} text-white flex items-center space-x-1`}>
+      <Badge className={`${statusOption.color} text-white flex items-center space-x-1`}>
         <Icon className="h-3 w-3" />
-        <span>{statusOption?.label}</span>
+        <span>{statusOption.label}</span>
       </Badge>
     );
   };
@@ -236,7 +241,7 @@ export default function FacilitiesPage() {
             {facilities.length} सुविधा
           </Badge>
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            {facilities.filter(f => f.status === 'working').length} कार्यरत
+            {facilities.filter(f => f.isActive).length} सक्रिय
           </Badge>
           <Button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4 mr-2" />
@@ -281,7 +286,7 @@ export default function FacilitiesPage() {
                 className="w-full h-48 object-cover"
               />
               <div className="absolute top-2 right-2">
-                {getStatusBadge(facility.status)}
+                {getStatusBadge(facility.isActive)}
               </div>
               <div className="absolute bottom-2 left-2">
                 <Badge className="bg-white text-gray-800">
@@ -300,7 +305,7 @@ export default function FacilitiesPage() {
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <Phone className="h-4 w-4 mr-2" />
-                  {facility.phone}
+                  {facility.contactInfo}
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <Clock className="h-4 w-4 mr-2" />
@@ -308,16 +313,6 @@ export default function FacilitiesPage() {
                 </div>
               </div>
 
-              <div className="mb-4">
-                <p className="text-xs font-medium text-gray-700 mb-1">अंतिम दुरुस्ती:</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(facility.lastMaintenance).toLocaleDateString('mr-IN')}
-                </p>
-                <p className="text-xs font-medium text-gray-700 mb-1 mt-2">पुढील दुरुस्ती:</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(facility.nextMaintenance).toLocaleDateString('mr-IN')}
-                </p>
-              </div>
 
               <div className="flex space-x-2">
                 <Button
@@ -415,26 +410,11 @@ export default function FacilitiesPage() {
                   </select>
                 </div>
                 <div>
-                  <Label htmlFor="status">स्थिती</Label>
-                  <select
-                    id="status"
-                    value={editingFacility.status}
-                    onChange={(e) => setEditingFacility({...editingFacility, status: e.target.value as any})}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    {statusOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="phone">फोन</Label>
+                  <Label htmlFor="contactInfo">संपर्क माहिती</Label>
                   <Input
-                    id="phone"
-                    value={editingFacility.phone}
-                    onChange={(e) => setEditingFacility({...editingFacility, phone: e.target.value})}
+                    id="contactInfo"
+                    value={editingFacility.contactInfo}
+                    onChange={(e) => setEditingFacility({...editingFacility, contactInfo: e.target.value})}
                     placeholder="+91 98765 43210"
                   />
                 </div>
@@ -450,79 +430,18 @@ export default function FacilitiesPage() {
                     placeholder="गाव मध्यभागी"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="locationEn">स्थळ (इंग्रजी)</Label>
-                  <Input
-                    id="locationEn"
-                    value={editingFacility.locationEn}
-                    onChange={(e) => setEditingFacility({...editingFacility, locationEn: e.target.value})}
-                    placeholder="Village Center"
-                  />
-                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="contactPerson">संपर्क व्यक्ती (मराठी)</Label>
-                  <Input
-                    id="contactPerson"
-                    value={editingFacility.contactPerson}
-                    onChange={(e) => setEditingFacility({...editingFacility, contactPerson: e.target.value})}
-                    placeholder="श्री. राम पाटील"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contactPersonEn">संपर्क व्यक्ती (इंग्रजी)</Label>
-                  <Input
-                    id="contactPersonEn"
-                    value={editingFacility.contactPersonEn}
-                    onChange={(e) => setEditingFacility({...editingFacility, contactPersonEn: e.target.value})}
-                    placeholder="Mr. Ram Patil"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="workingHours">कार्यवेळ</Label>
+                <Input
+                  id="workingHours"
+                  value={editingFacility.workingHours}
+                  onChange={(e) => setEditingFacility({...editingFacility, workingHours: e.target.value})}
+                  placeholder="सकाळी ६:०० ते संध्याकाळी ८:००"
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="workingHours">कार्यवेळ (मराठी)</Label>
-                  <Input
-                    id="workingHours"
-                    value={editingFacility.workingHours}
-                    onChange={(e) => setEditingFacility({...editingFacility, workingHours: e.target.value})}
-                    placeholder="सकाळी ६:०० ते संध्याकाळी ८:००"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="workingHoursEn">कार्यवेळ (इंग्रजी)</Label>
-                  <Input
-                    id="workingHoursEn"
-                    value={editingFacility.workingHoursEn}
-                    onChange={(e) => setEditingFacility({...editingFacility, workingHoursEn: e.target.value})}
-                    placeholder="6:00 AM to 8:00 PM"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="lastMaintenance">अंतिम दुरुस्ती</Label>
-                  <Input
-                    id="lastMaintenance"
-                    type="date"
-                    value={editingFacility.lastMaintenance}
-                    onChange={(e) => setEditingFacility({...editingFacility, lastMaintenance: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="nextMaintenance">पुढील दुरुस्ती</Label>
-                  <Input
-                    id="nextMaintenance"
-                    type="date"
-                    value={editingFacility.nextMaintenance}
-                    onChange={(e) => setEditingFacility({...editingFacility, nextMaintenance: e.target.value})}
-                  />
-                </div>
-              </div>
 
               <div>
                 <Label htmlFor="image">प्रतिमा</Label>

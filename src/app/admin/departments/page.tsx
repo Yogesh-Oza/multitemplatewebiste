@@ -31,10 +31,8 @@ interface Department {
   nameEn: string;
   description: string;
   descriptionEn: string;
-  headName: string;
-  headNameEn: string;
-  designation: string;
-  designationEn: string;
+  head: string;
+  headEn: string;
   phone: string;
   email: string;
   address: string;
@@ -100,10 +98,8 @@ export default function DepartmentsPage() {
       nameEn: '',
       description: '',
       descriptionEn: '',
-      headName: '',
-      headNameEn: '',
-      designation: '',
-      designationEn: '',
+      head: '',
+      headEn: '',
       phone: '',
       email: '',
       address: '',
@@ -189,13 +185,35 @@ export default function DepartmentsPage() {
     setIsAdding(false);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setEditingDepartment(prev => prev ? { ...prev, imageUrl } : null);
-    toast.success('प्रतिमा अपलोड केली');
+    try {
+      // Show loading state
+      toast.loading('प्रतिमा अपलोड होत आहे...');
+
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload to server
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setEditingDepartment(prev => prev ? { ...prev, imageUrl: result.imageUrl } : null);
+        toast.success('प्रतिमा अपलोड केली');
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('प्रतिमा अपलोड करताना त्रुटी आली');
+    }
   };
 
   const handleToggleActive = (id: string) => {
@@ -277,7 +295,7 @@ export default function DepartmentsPage() {
               <div className="space-y-2 mb-4">
                 <div className="flex items-center text-sm text-gray-500">
                   <Users className="h-4 w-4 mr-2" />
-                  {department.headName}
+                  {department.head}
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <Phone className="h-4 w-4 mr-2" />
@@ -390,45 +408,25 @@ export default function DepartmentsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="headName">प्रमुख नाव (मराठी)</Label>
+                  <Label htmlFor="head">प्रमुख नाव (मराठी)</Label>
                   <Input
-                    id="headName"
-                    value={editingDepartment.headName}
-                    onChange={(e) => setEditingDepartment({...editingDepartment, headName: e.target.value})}
+                    id="head"
+                    value={editingDepartment.head}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, head: e.target.value})}
                     placeholder="डॉ. प्रिया शर्मा"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="headNameEn">प्रमुख नाव (इंग्रजी)</Label>
+                  <Label htmlFor="headEn">प्रमुख नाव (इंग्रजी)</Label>
                   <Input
-                    id="headNameEn"
-                    value={editingDepartment.headNameEn}
-                    onChange={(e) => setEditingDepartment({...editingDepartment, headNameEn: e.target.value})}
+                    id="headEn"
+                    value={editingDepartment.headEn}
+                    onChange={(e) => setEditingDepartment({...editingDepartment, headEn: e.target.value})}
                     placeholder="Dr. Priya Sharma"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="designation">पद (मराठी)</Label>
-                  <Input
-                    id="designation"
-                    value={editingDepartment.designation}
-                    onChange={(e) => setEditingDepartment({...editingDepartment, designation: e.target.value})}
-                    placeholder="आरोग्य अधिकारी"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="designationEn">पद (इंग्रजी)</Label>
-                  <Input
-                    id="designationEn"
-                    value={editingDepartment.designationEn}
-                    onChange={(e) => setEditingDepartment({...editingDepartment, designationEn: e.target.value})}
-                    placeholder="Health Officer"
-                  />
-                </div>
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

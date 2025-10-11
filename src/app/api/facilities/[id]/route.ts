@@ -41,11 +41,11 @@ export async function PUT(
         description,
         descriptionEn,
         category,
-        location,
-        contactInfo,
-        workingHours,
+        location: location || null,
+        contactInfo: contactInfo || null,
+        workingHours: workingHours || null,
         isActive,
-        imageUrl,
+        imageUrl: imageUrl || null,
       },
     });
 

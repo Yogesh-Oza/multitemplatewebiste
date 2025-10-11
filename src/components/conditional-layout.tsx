@@ -14,6 +14,9 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   // Check if we're on an admin route
   const isAdminRoute = pathname.startsWith('/admin');
   
+  // Check if we're on super admin routes
+  const isSuperAdminRoute = pathname.startsWith('/super-admin') || pathname === '/super-admin-login';
+  
   // Check if we're on subdomain-register page
   const isSubdomainRegister = pathname === '/subdomain-register';
   
@@ -30,8 +33,8 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
     !window.location.hostname.includes('mahagp.in') &&
     window.location.hostname !== 'localhost';
   
-  if (isAdminRoute || isSubdomainRegister || isBusinessLanding || isSubdomainRoute || isSubdomainAccess) {
-    // For admin routes, subdomain-register, business landing page, subdomain routes, and subdomain access, render children without header/footer
+  if (isAdminRoute || isSuperAdminRoute || isSubdomainRegister || isBusinessLanding || isSubdomainRoute || isSubdomainAccess) {
+    // For admin routes, super admin routes, subdomain-register, business landing page, subdomain routes, and subdomain access, render children without header/footer
     return <>{children}</>;
   }
   

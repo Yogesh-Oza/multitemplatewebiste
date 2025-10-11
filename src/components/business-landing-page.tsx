@@ -545,13 +545,13 @@ export function BusinessLandingPage() {
               <h4 className="font-semibold mb-4">संपर्क</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>info@mahagp.in</li>
-                <li>+91 12345 67890</li>
+                <li>+91 77439 66987</li>
                 <li>महाराष्ट्र, भारत</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 महागप.इन. सर्व हक्क राखीव.</p>
+            <p>&copy; 2024 MahaGP.in. All rights reserved.</p>
           </div>
         </div>
       </footer>

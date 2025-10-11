@@ -57,14 +57,14 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
       
       आपली गावाची वेबसाइट यशस्वीरित्या तयार झाली आहे!
       
-      वेबसाइट माहिती:
-      - सबडोमेन: ${data.subdomain}.mahagp.in
-      - गाव: ${data.villageName}
-      - व्यवस्थापक URL: https://${data.subdomain}.mahagp.in/admin-login
+      Website Information:
+      - Subdomain: ${data.subdomain}.mahagp.in
+      - Village: ${data.villageName}
+      - Admin URL: https://${data.subdomain}.mahagp.in/admin-login
       
-      लॉगिन क्रेडेन्शियल्स:
-      - वापरकर्ता नाव: ${data.adminUsername}
-      - पासवर्ड: ${data.adminPassword}
+      Login Credentials:
+      - Username: ${data.adminUsername}
+      - Password: ${data.adminPassword}
       
       पुढील पायऱ्या:
       1. https://${data.subdomain}.mahagp.in/admin-login येथे आपले व्यवस्थापक पॅनेल भेट द्या
@@ -77,8 +77,8 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
       - DNS कॉन्फिगर केल्यानंतर आपली वेबसाइट लाइव्ह होईल
       - आपल्याला कोणतीही मदत हवी असल्यास समर्थनाशी संपर्क साधा
       
-      शुभेच्छा,
-      महागप टीम
+      Best regards,
+      MahaGP Team
     `;
 
     const htmlContent = generateEmailHTML(data);
@@ -131,19 +131,19 @@ function generateEmailHTML(data: SubdomainEmailData): string {
         </p>
         
         <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
-          <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 18px;">🌐 वेबसाइट माहिती</h3>
+          <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 18px;">🌐 Website Information</h3>
           <ul style="margin: 0; padding-left: 20px; color: #374151;">
-            <li style="margin-bottom: 8px;"><strong>सबडोमेन:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${data.subdomain}.mahagp.in</code></li>
-            <li style="margin-bottom: 8px;"><strong>गाव:</strong> ${data.villageName}</li>
-            <li style="margin-bottom: 8px;"><strong>व्यवस्थापक URL:</strong> <a href="https://${data.subdomain}.mahagp.in/admin-login" style="color: #3b82f6; text-decoration: none;">https://${data.subdomain}.mahagp.in/admin-login</a></li>
+            <li style="margin-bottom: 8px;"><strong>Subdomain:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">${data.subdomain}.mahagp.in</code></li>
+            <li style="margin-bottom: 8px;"><strong>Village:</strong> ${data.villageName}</li>
+            <li style="margin-bottom: 8px;"><strong>Admin URL:</strong> <a href="https://${data.subdomain}.mahagp.in/admin-login" style="color: #3b82f6; text-decoration: none;">https://${data.subdomain}.mahagp.in/admin-login</a></li>
           </ul>
         </div>
         
         <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-          <h3 style="margin: 0 0 15px 0; color: #92400e; font-size: 18px;">🔐 लॉगिन क्रेडेन्शियल्स</h3>
+          <h3 style="margin: 0 0 15px 0; color: #92400e; font-size: 18px;">🔐 Login Credentials</h3>
           <ul style="margin: 0; padding-left: 20px; color: #374151;">
-            <li style="margin-bottom: 8px;"><strong>वापरकर्ता नाव:</strong> <code style="background: #fbbf24; padding: 2px 6px; border-radius: 4px;">${data.adminUsername}</code></li>
-            <li style="margin-bottom: 8px;"><strong>पासवर्ड:</strong> <code style="background: #fbbf24; padding: 2px 6px; border-radius: 4px;">${data.adminPassword}</code></li>
+            <li style="margin-bottom: 8px;"><strong>Username:</strong> <code style="background: #fbbf24; padding: 2px 6px; border-radius: 4px;">${data.adminUsername}</code></li>
+            <li style="margin-bottom: 8px;"><strong>Password:</strong> <code style="background: #fbbf24; padding: 2px 6px; border-radius: 4px;">${data.adminPassword}</code></li>
           </ul>
         </div>
         
@@ -169,13 +169,13 @@ function generateEmailHTML(data: SubdomainEmailData): string {
         </div>
         
         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-          <a href="https://${data.subdomain}.mahagp.in/admin-login" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">आपले व्यवस्थापक पॅनेल एक्सेस करा</a>
+          <a href="https://${data.subdomain}.mahagp.in/admin-login" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Access Your Admin Panel</a>
         </div>
         
         <p style="color: #6b7280; font-size: 14px; margin-top: 30px; text-align: center;">
-          शुभेच्छा,<br>
-          <strong>महागप टीम</strong><br>
-          <em>डिजिटल ग्रामपंचायतांना सक्षम करणे</em>
+          Best regards,<br>
+          <strong>MahaGP Team</strong><br>
+          <em>Empowering Digital Gram Panchayats</em>
         </p>
       </div>
     </div>

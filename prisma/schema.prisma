@@ -286,6 +286,7 @@ model Department {
   workingHoursEn String?
   services     String[]
   servicesEn   String[]
+  imageUrl    String?
   isActive    Boolean @default(true)
   subdomainId String? @db.ObjectId
   subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
@@ -330,7 +331,7 @@ model AdminUser {
   username  String @unique
   email     String @unique
   password  String
-  role      String @default("admin") // admin, editor
+  role      String @default("admin") // super_admin, admin, editor
   isActive  Boolean @default(true)
   subdomainId String? @db.ObjectId
   subdomain Subdomain? @relation(fields: [subdomainId], references: [id])

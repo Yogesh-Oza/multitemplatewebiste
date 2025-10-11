@@ -16,6 +16,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Protect super admin routes
+  const isSuperAdmin = pathname.startsWith('/super-admin');
+  const isSuperAdminLogin = pathname === '/super-admin-login';
+
+  if (isSuperAdmin && !isSuperAdminLogin) {
+    const token = await getToken({ req: request as any, secret });
+    if (!token || (token as any).role !== 'super_admin') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/super-admin-login';
+      url.searchParams.set('callbackUrl', request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Protect admin routes (but allow the login page)
   const isAdminBase = pathname.startsWith('/admin');
   const isAdminLogin = pathname === '/admin/login' || pathname === '/admin-login';
