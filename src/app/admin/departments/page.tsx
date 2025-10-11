@@ -292,12 +292,16 @@ export default function DepartmentsPage() {
               <div className="mb-4">
                 <p className="text-xs font-medium text-gray-700 mb-2">सेवा:</p>
                 <div className="flex flex-wrap gap-1">
-                  {department.services.slice(0, 3).map((service, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {service}
-                    </Badge>
-                  ))}
-                  {department.services.length > 3 && (
+                  {department.services && department.services.length > 0 ? (
+                    department.services.slice(0, 3).map((service, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {service}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-xs text-gray-500">सेवा उपलब्ध नाही</span>
+                  )}
+                  {department.services && department.services.length > 3 && (
                     <Badge variant="outline" className="text-xs">
                       +{department.services.length - 3} अधिक
                     </Badge>

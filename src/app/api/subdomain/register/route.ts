@@ -17,11 +17,22 @@ export async function POST(request: NextRequest) {
       email, 
       phone, 
       address, 
-      description 
+      description,
+      districtId,
+      districtName,
+      subDistrictId,
+      subDistrictName,
+      villageId,
+      villageNameLocal
     } = body;
 
+    console.log('Received form data:', body);
+    console.log('District ID:', districtId);
+    console.log('Sub-District ID:', subDistrictId);
+    console.log('Village ID:', villageId);
+
     // Validate required fields
-    if (!subdomain || !villageName || !villageNameEn || !contactPerson || !email || !phone || !address) {
+    if (!subdomain || !villageName || !villageNameEn || !contactPerson || !email || !phone || !districtId || !subDistrictId || !villageId) {
       return NextResponse.json(
         { error: 'कृपया सर्व आवश्यक फील्ड भरा' },
         { status: 400 }
@@ -146,6 +157,12 @@ export async function POST(request: NextRequest) {
           phone: cleanPhone,
           address,
           description: description || '',
+          districtId: districtId || '',
+          districtName: districtName || '',
+          subDistrictId: subDistrictId || '',
+          subDistrictName: subDistrictName || '',
+          villageId: villageId || '',
+          villageNameLocal: villageNameLocal || '',
           adminUsername,
            adminPassword: hashedPassword, // Store hashed password
            status: 'active', // Immediately activated

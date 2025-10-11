@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Globe, Mail, User, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
+import { DISTRICTS, SUB_DISTRICTS, VILLAGES, getSubDistrictsByDistrict, getVillagesBySubDistrict } from '@/lib/village-constants';
 
 interface SubdomainFormData {
   subdomain: string;
@@ -19,6 +20,12 @@ interface SubdomainFormData {
   phone: string;
   address: string;
   description: string;
+  districtId: string;
+  districtName: string;
+  subDistrictId: string;
+  subDistrictName: string;
+  villageId: string;
+  villageNameLocal: string;
 }
 
 export default function SubdomainRegisterPage() {
@@ -30,7 +37,13 @@ export default function SubdomainRegisterPage() {
     email: '',
     phone: '',
     address: '',
-    description: ''
+    description: '',
+    districtId: '',
+    districtName: '',
+    subDistrictId: '',
+    subDistrictName: '',
+    villageId: '',
+    villageNameLocal: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -161,7 +174,7 @@ export default function SubdomainRegisterPage() {
     }
 
     // Validate required fields
-    if (!formData.villageName.trim() || !formData.villageNameEn.trim() || !formData.contactPerson.trim() || !formData.address.trim()) {
+    if (!formData.villageName.trim() || !formData.villageNameEn.trim() || !formData.contactPerson.trim() || !formData.districtId || !formData.subDistrictId || !formData.villageId) {
       toast.error('कृपया सर्व आवश्यक फील्ड भरा');
       return;
     }
@@ -175,6 +188,7 @@ export default function SubdomainRegisterPage() {
     setIsSubmitting(true);
     
     try {
+      console.log('Form data being sent:', formData);
       const response = await fetch('/api/subdomain/register', {
         method: 'POST',
         headers: {
@@ -380,32 +394,99 @@ export default function SubdomainRegisterPage() {
                 </div>
               </div>
 
-              {/* Address */}
+              {/* District Selection */}
               <div className="space-y-2">
-                <Label htmlFor="address" className="flex items-center gap-2">
+                <Label htmlFor="districtId" className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  गावाचा पत्ता
+                  जिल्हा / District Name
                 </Label>
-                <Textarea
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  placeholder="तालुका, जिल्हा, राज्यासह पूर्ण गावाचा पत्ता"
-                  rows={3}
+                <select
+                  id="districtId"
+                  value={formData.districtId}
+                  onChange={(e) => {
+                    const selectedDistrict = DISTRICTS.find(d => d.id === e.target.value);
+                    setFormData({
+                      ...formData, 
+                      districtId: e.target.value,
+                      districtName: selectedDistrict?.name || '',
+                      subDistrictId: '', // Reset sub-district when district changes
+                      subDistrictName: '',
+                      villageId: '', // Reset village when district changes
+                      villageNameLocal: ''
+                    });
+                  }}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
-                />
+                >
+                  <option value="">जिल्हा निवडा / Select District</option>
+                  {DISTRICTS.map((district) => (
+                    <option key={district.id} value={district.id}>
+                      {district.name} ({district.nameMarathi})
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Description */}
+              {/* Sub-District Selection */}
               <div className="space-y-2">
-                <Label htmlFor="description">गावाचे वर्णन (पर्यायी)</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="आपल्या गावाबद्दल, त्याच्या इतिहासाबद्दल किंवा विशेष वैशिष्ट्यांबद्दल संक्षिप्त वर्णन"
-                  rows={3}
-                />
+                <Label htmlFor="subDistrictId" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  तालुका / Sub-District Name
+                </Label>
+                <select
+                  id="subDistrictId"
+                  value={formData.subDistrictId}
+                  onChange={(e) => {
+                    const selectedSubDistrict = SUB_DISTRICTS.find(sd => sd.id === e.target.value);
+                    setFormData({
+                      ...formData, 
+                      subDistrictId: e.target.value,
+                      subDistrictName: selectedSubDistrict?.name || '',
+                      villageId: '', // Reset village when sub-district changes
+                      villageNameLocal: ''
+                    });
+                  }}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                  disabled={!formData.districtId}
+                >
+                  <option value="">तालुका निवडा / Select Sub-District</option>
+                  {formData.districtId && getSubDistrictsByDistrict(formData.districtId).map((subDistrict) => (
+                    <option key={subDistrict.id} value={subDistrict.id}>
+                      {subDistrict.name} ({subDistrict.nameMarathi})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Village Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="villageId" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  गावाचे नाव / Village Name
+                </Label>
+                <select
+                  id="villageId"
+                  value={formData.villageId}
+                  onChange={(e) => {
+                    const selectedVillage = VILLAGES.find(v => v.id === e.target.value);
+                    setFormData({
+                      ...formData, 
+                      villageId: e.target.value,
+                      villageNameLocal: selectedVillage?.nameMarathi || ''
+                    });
+                  }}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                  disabled={!formData.subDistrictId}
+                >
+                  <option value="">गाव निवडा / Select Village</option>
+                  {formData.subDistrictId && getVillagesBySubDistrict(formData.subDistrictId).map((village) => (
+                    <option key={village.id} value={village.id}>
+                      {village.name} ({village.nameMarathi})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Submit Button */}

@@ -42,30 +42,35 @@ export async function POST(request: NextRequest) {
       title, titleEn, description, descriptionEn, category, 
       eligibility, eligibilityEn, benefits, benefitsEn, 
       documents, documentsEn, applicationProcess, applicationProcessEn, 
-      contactInfo, contactInfoEn, website, isActive 
+      contactInfo, contactInfoEn, website, imageUrl, startDate, endDate, isActive 
     } = body;
 
+    const schemeData = {
+      title,
+      titleEn,
+      description,
+      descriptionEn,
+      category,
+      eligibility,
+      eligibilityEn,
+      benefits,
+      benefitsEn,
+      documents: documents || '',
+      documentsEn: documentsEn || '',
+      applicationProcess,
+      applicationProcessEn,
+      contactInfo,
+      contactInfoEn: contactInfoEn || '',
+      website,
+      imageUrl: imageUrl || '',
+      startDate: startDate || '',
+      endDate: endDate || '',
+      isActive: isActive !== undefined ? isActive : true,
+      subdomainId,
+    };
+
     const scheme = await prisma.governmentScheme.create({
-      data: {
-        title,
-        titleEn,
-        description,
-        descriptionEn,
-        category,
-        eligibility,
-        eligibilityEn,
-        benefits,
-        benefitsEn,
-        documents,
-        documentsEn,
-        applicationProcess,
-        applicationProcessEn,
-        contactInfo,
-        contactInfoEn,
-        website,
-        isActive: isActive !== undefined ? isActive : true,
-        subdomainId,
-      },
+      data: schemeData,
     });
 
     return NextResponse.json(scheme);

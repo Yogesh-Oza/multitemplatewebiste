@@ -21,7 +21,7 @@ export async function PUT(
       title, titleEn, description, descriptionEn, category, 
       eligibility, eligibilityEn, benefits, benefitsEn, 
       documents, documentsEn, applicationProcess, applicationProcessEn, 
-      contactInfo, contactInfoEn, website, isActive 
+      contactInfo, contactInfoEn, website, imageUrl, startDate, endDate, isActive 
     } = body;
 
     // Verify the scheme belongs to this subdomain
@@ -55,8 +55,11 @@ export async function PUT(
         applicationProcess,
         applicationProcessEn,
         contactInfo,
-        contactInfoEn,
+        contactInfoEn: contactInfoEn || '',
         website,
+        imageUrl,
+        startDate,
+        endDate,
         isActive,
       },
     });

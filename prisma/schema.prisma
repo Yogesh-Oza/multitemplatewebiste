@@ -284,6 +284,8 @@ model Department {
   addressEn   String?
   workingHours String?
   workingHoursEn String?
+  services     String[]
+  servicesEn   String[]
   isActive    Boolean @default(true)
   subdomainId String? @db.ObjectId
   subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
@@ -311,6 +313,9 @@ model GovernmentScheme {
   contactInfo String
   contactInfoEn String
   website     String?
+  imageUrl    String?
+  startDate   String?
+  endDate     String?
   isActive    Boolean @default(true)
   subdomainId String? @db.ObjectId
   subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
@@ -345,6 +350,12 @@ model Subdomain {
   phone         String
   address       String
   description   String?
+  districtId    String?
+  districtName  String?
+  subDistrictId String?
+  subDistrictName String?
+  villageId     String?
+  villageNameLocal String?
   adminUsername String
   adminPassword String
   status        String @default("pending") // pending, active, suspended

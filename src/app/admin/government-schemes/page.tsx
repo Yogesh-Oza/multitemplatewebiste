@@ -38,9 +38,10 @@ interface GovernmentScheme {
   benefitsEn: string;
   applicationProcess: string;
   applicationProcessEn: string;
-  requiredDocuments: string;
-  requiredDocumentsEn: string;
+  documents: string;
+  documentsEn: string;
   contactInfo: string;
+  contactInfoEn: string;
   website: string;
   status: 'active' | 'inactive' | 'upcoming';
   startDate: string;
@@ -110,9 +111,10 @@ export default function GovernmentSchemesPage() {
       benefitsEn: '',
       applicationProcess: '',
       applicationProcessEn: '',
-      requiredDocuments: '',
-      requiredDocumentsEn: '',
+      documents: '',
+      documentsEn: '',
       contactInfo: '',
+      contactInfoEn: '',
       website: '',
       status: 'active',
       startDate: '',
@@ -124,6 +126,7 @@ export default function GovernmentSchemesPage() {
 
   const handleSave = async () => {
     if (!editingScheme) return;
+
 
     try {
       if (isAdding) {
@@ -193,13 +196,44 @@ export default function GovernmentSchemesPage() {
     setIsAdding(false);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setEditingScheme(prev => prev ? { ...prev, imageUrl } : null);
-    toast.success('प्रतिमा अपलोड केली');
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('कृपया केवळ प्रतिमा फाइल निवडा');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('प्रतिमा फाइल 5MB पेक्षा लहान असावी');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEditingScheme(prev => prev ? { ...prev, imageUrl: data.imageUrl } : null);
+        toast.success('प्रतिमा अपलोड केली');
+      } else {
+        const errorData = await response.json();
+        console.error('Upload failed:', errorData);
+        throw new Error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('प्रतिमा अपलोड करताना त्रुटी आली');
+    }
   };
 
   const filteredSchemes = selectedCategory === 'सर्व' 
@@ -275,11 +309,17 @@ export default function GovernmentSchemesPage() {
         {filteredSchemes.map((scheme) => (
           <Card key={scheme.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
             <div className="relative">
-              <img
-                src={scheme.imageUrl}
-                alt={scheme.title}
-                className="w-full h-48 object-cover"
-              />
+              {scheme.imageUrl ? (
+                <img
+                  src={scheme.imageUrl}
+                  alt={scheme.title}
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">प्रतिमा नाही</span>
+                </div>
+              )}
               <div className="absolute top-2 right-2">
                 {getStatusBadge(scheme.status)}
               </div>
@@ -304,7 +344,11 @@ export default function GovernmentSchemesPage() {
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <Calendar className="h-4 w-4 mr-2" />
-                  {new Date(scheme.startDate).toLocaleDateString('mr-IN')} - {new Date(scheme.endDate).toLocaleDateString('mr-IN')}
+                  {scheme.startDate && scheme.endDate ? (
+                    `${new Date(scheme.startDate).toLocaleDateString('mr-IN')} - ${new Date(scheme.endDate).toLocaleDateString('mr-IN')}`
+                  ) : (
+                    'तारीख निर्दिष्ट नाही'
+                  )}
                 </div>
               </div>
 
@@ -504,7 +548,7 @@ export default function GovernmentSchemesPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="contactInfo">संपर्क माहिती</Label>
+                  <Label htmlFor="contactInfo">संपर्क माहिती (मराठी)</Label>
                   <Input
                     id="contactInfo"
                     value={editingScheme.contactInfo}
@@ -512,6 +556,18 @@ export default function GovernmentSchemesPage() {
                     placeholder="ग्रामसेवक कार्यालय"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="contactInfoEn">संपर्क माहिती (इंग्रजी)</Label>
+                  <Input
+                    id="contactInfoEn"
+                    value={editingScheme.contactInfoEn}
+                    onChange={(e) => setEditingScheme({...editingScheme, contactInfoEn: e.target.value})}
+                    placeholder="Gramsevak Office"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="website">वेबसाइट</Label>
                   <Input
