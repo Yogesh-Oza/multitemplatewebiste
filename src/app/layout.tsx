@@ -10,18 +10,18 @@ import { ConditionalLayout } from '../components/conditional-layout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ग्रामपंचायत - आमच्या गावात स्वागत आहे',
-  description: 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख. सर्वांसाठी विकास आणि समृद्धी.',
-  keywords: 'ग्रामपंचायत, गाव, महाराष्ट्र, स्थानिक स्वराज्य, ग्राम विकास',
-  authors: [{ name: 'ग्रामपंचायत' }],
-  creator: 'ग्रामपंचायत',
-  publisher: 'ग्रामपंचायत',
+  title: 'महाग्रामपंचायत - ग्रामपंचायत वेबसाइट टेम्प्लेट',
+  description: 'ग्रामपंचायतांसाठी तयार केलेले वेबसाइट टेम्प्लेट. सहज सेटअप, मराठी-इंग्रजी समर्थन, व्यवस्थापक पैनल आणि सबडोमेन सिस्टम.',
+  keywords: 'ग्रामपंचायत वेबसाइट, टेम्प्लेट, महाराष्ट्र, स्थानिक स्वराज्य, वेबसाइट निर्मिती',
+  authors: [{ name: 'महाग्रामपंचायत' }],
+  creator: 'महाग्रामपंचायत',
+  publisher: 'महाग्रामपंचायत',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://grampanchayat.com'),
+  metadataBase: new URL('https://mahagp.in'),
   alternates: {
     canonical: '/',
     languages: {
@@ -30,10 +30,10 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'ग्रामपंचायत - आमच्या गावात स्वागत आहे',
-    description: 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
-    url: 'https://grampanchayat.com',
-    siteName: 'ग्रामपंचायत',
+    title: 'महाग्रामपंचायत - ग्रामपंचायत वेबसाइट टेम्प्लेट',
+    description: 'ग्रामपंचायतांसाठी तयार केलेले वेबसाइट टेम्प्लेट. सहज सेटअप, मराठी-इंग्रजी समर्थन, व्यवस्थापक पैनल आणि सबडोमेन सिस्टम.',
+    url: 'https://mahagp.in',
+    siteName: 'महाग्रामपंचायत',
     locale: 'mr_IN',
     type: 'website',
     images: [
@@ -41,14 +41,14 @@ export const metadata: Metadata = {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'ग्रामपंचायत - आमच्या गावात स्वागत आहे',
+        alt: 'महाग्रामपंचायत - ग्रामपंचायत वेबसाइट टेम्प्लेट',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ग्रामपंचायत - आमच्या गावात स्वागत आहे',
-    description: 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+    title: 'महाग्रामपंचायत - ग्रामपंचायत वेबसाइट टेम्प्लेट',
+    description: 'ग्रामपंचायतांसाठी तयार केलेले वेबसाइट टेम्प्लेट. सहज सेटअप, मराठी-इंग्रजी समर्थन, व्यवस्थापक पैनल आणि सबडोमेन सिस्टम.',
     images: ['/images/twitter-image.jpg'],
   },
   robots: {

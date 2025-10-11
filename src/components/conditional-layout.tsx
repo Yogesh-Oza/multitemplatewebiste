@@ -17,8 +17,11 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   // Check if we're on subdomain-register page
   const isSubdomainRegister = pathname === '/subdomain-register';
   
-  if (isAdminRoute || isSubdomainRegister) {
-    // For admin routes and subdomain-register, render children without header/footer
+  // Check if we're on the root business landing page
+  const isBusinessLanding = pathname === '/';
+  
+  if (isAdminRoute || isSubdomainRegister || isBusinessLanding) {
+    // For admin routes, subdomain-register, and business landing page, render children without header/footer
     return <>{children}</>;
   }
   

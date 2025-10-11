@@ -26,7 +26,6 @@ import {
   Phone,
   MapPin,
   Calendar,
-  Image,
   FileText,
   BarChart3,
   Heart,
