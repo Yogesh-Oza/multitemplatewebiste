@@ -16,26 +16,46 @@ interface HistoryCard {
   icon: string;
 }
 
+interface TimelineItem {
+  id: string;
+  year: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  side: string;
+}
+
 export function HistorySection() {
   const [historyCards, setHistoryCards] = useState<HistoryCard[]>([]);
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchHistoryCards = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/history-cards');
-        if (response.ok) {
-          const data = await response.json();
-          setHistoryCards(data);
+        const [historyResponse, timelineResponse] = await Promise.all([
+          fetch('/api/history-cards'),
+          fetch('/api/timeline-items')
+        ]);
+
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json();
+          setHistoryCards(historyData);
+        }
+
+        if (timelineResponse.ok) {
+          const timelineData = await timelineResponse.json();
+          setTimelineItems(timelineData);
         }
       } catch (error) {
-        console.error('Error fetching history cards:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHistoryCards();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -154,32 +174,7 @@ export function HistorySection() {
 
             {/* Timeline Items */}
             <div className="space-y-12">
-              {[
-                {
-                  year: '1950',
-                  title: 'गावाची स्थापना',
-                  description: 'आमच्या गावाची स्थापना आणि पहिले निवासी',
-                  side: 'left',
-                },
-                {
-                  year: '1970',
-                  title: 'पहिली ग्रामपंचायत',
-                  description: 'लोकशाही व्यवस्थेची सुरुवात आणि स्थानिक स्वराज्य',
-                  side: 'right',
-                },
-                {
-                  year: '1990',
-                  title: 'शिक्षणाची सुरुवात',
-                  description: 'पहिले शाळा आणि शिक्षणाच्या सुविधांची सुरुवात',
-                  side: 'left',
-                },
-                {
-                  year: '2010',
-                  title: 'डिजिटल युग',
-                  description: 'तंत्रज्ञानाचा वापर आणि आधुनिकीकरण',
-                  side: 'right',
-                },
-              ].map((item, index) => (
+              {timelineItems.length > 0 ? timelineItems.map((item, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: item.side === 'left' ? -50 : 50 }}
@@ -196,6 +191,9 @@ export function HistorySection() {
                         <div className="text-2xl font-bold text-blue-600 mb-2">{item.year}</div>
                         <h4 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h4>
                         <p className="text-gray-600">{item.description}</p>
+                        {item.titleEn && (
+                          <p className="text-sm text-gray-500 italic mt-2">{item.titleEn}</p>
+                        )}
                       </CardContent>
                     </Card>
                   </div>
@@ -205,7 +203,12 @@ export function HistorySection() {
                   
                   <div className="w-1/2"></div>
                 </motion.div>
-              ))}
+              )) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">कोणतेही टाइमलाइन आयटम नाहीत</p>
+                  <p className="text-gray-400 text-sm mt-2">प्रशासक पैनलमधून टाइमलाइन आयटम जोडा</p>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

@@ -380,7 +380,7 @@ export default function ContactPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">संपर्क व्यवस्थापन</h1>
-          <p className="text-gray-600 mt-1">कार्यालय माहिती, ग्रामबॉडी आणि नकाशा व्यवस्थापन</p>
+          <p className="text-gray-600 mt-1">कार्यालय माहिती, ग्राम पंचायत कार्यकारणी आणि नकाशा व्यवस्थापन</p>
         </div>
         <div className="flex items-center space-x-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
@@ -494,7 +494,7 @@ export default function ContactPage() {
             <div>
               <CardTitle className="flex items-center space-x-2">
                 <Users className="h-5 w-5 text-green-600" />
-                <span>ग्रामबॉडी</span>
+                <span>ग्राम पंचायत कार्यकारणी</span>
               </CardTitle>
               <CardDescription>गावाच्या विकासासाठी समर्पित आणि अनुभवी नेतृत्व</CardDescription>
             </div>

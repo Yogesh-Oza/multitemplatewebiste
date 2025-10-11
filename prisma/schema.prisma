@@ -51,6 +51,24 @@ model HistoryCard {
   @@map("history_cards")
 }
 
+model TimelineItem {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  year        String
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  side        String @default("left") // left, right
+  order       Int    @default(0)
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("timeline_items")
+}
+
 model Announcement {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -371,6 +389,7 @@ model Subdomain {
   culturalHeritage CulturalHeritage[]
   heroImages    HeroImage[]
   historyCards  HistoryCard[]
+  timelineItems TimelineItem[]
   programs      Program[]
   gallery       Gallery[]
   facilities    Facility[]
@@ -403,4 +422,45 @@ model FooterContent {
   updatedAt   DateTime @updatedAt
 
   @@map("footer_content")
+}
+
+// Village Data Models
+model District {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String @unique
+  nameMarathi String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  subDistricts SubDistrict[]
+  
+  @@map("districts")
+}
+
+model SubDistrict {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String @unique
+  nameMarathi String
+  districtId  String @db.ObjectId
+  district    District @relation(fields: [districtId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  villages Village[]
+  
+  @@map("sub_districts")
+}
+
+model Village {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  nameMarathi   String
+  subDistrictId String @db.ObjectId
+  subDistrict   SubDistrict @relation(fields: [subDistrictId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("villages")
 }

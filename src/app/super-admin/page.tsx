@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { 
   Users, 
   Globe, 
@@ -17,9 +18,14 @@ import {
   Trash2,
   Plus,
   Search,
-  Filter
+  Filter,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
+import UserManagementModal from '@/components/admin/user-management-modal';
+import SubdomainManagementModal from '@/components/admin/subdomain-management-modal';
+import SubdomainRegisterModal from '@/components/admin/subdomain-register-modal';
+import ConfirmationModal from '@/components/admin/confirmation-modal';
 
 interface AdminUser {
   id: string;
@@ -44,6 +50,8 @@ interface Subdomain {
   contactPerson: string;
   email: string;
   phone: string;
+  address: string;
+  adminUsername: string;
   status: string;
   isActive: boolean;
   createdAt: string;
@@ -54,6 +62,52 @@ export default function SuperAdminPage() {
   const [subdomains, setSubdomains] = useState<Subdomain[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'subdomains'>('overview');
+  
+  // Modal states
+  const [userModal, setUserModal] = useState<{
+    isOpen: boolean;
+    mode: 'view' | 'edit' | 'add';
+    user: AdminUser | null;
+  }>({
+    isOpen: false,
+    mode: 'view',
+    user: null
+  });
+  
+  const [subdomainModal, setSubdomainModal] = useState<{
+    isOpen: boolean;
+    mode: 'view' | 'edit' | 'add';
+    subdomain: Subdomain | null;
+  }>({
+    isOpen: false,
+    mode: 'view',
+    subdomain: null
+  });
+  
+  const [subdomainRegisterModal, setSubdomainRegisterModal] = useState(false);
+  
+  // Confirmation modal states
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    type: 'user' | 'subdomain';
+    title: string;
+    description: string;
+    itemName: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    type: 'user',
+    title: '',
+    description: '',
+    itemName: '',
+    onConfirm: () => {}
+  });
+  
+  // Search and filter states
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [subdomainSearchTerm, setSubdomainSearchTerm] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('all');
+  const [subdomainStatusFilter, setSubdomainStatusFilter] = useState('all');
 
   useEffect(() => {
     fetchData();
@@ -97,6 +151,104 @@ export default function SuperAdminPage() {
       case 'pending': return 'bg-yellow-500';
       default: return 'bg-gray-500';
     }
+  };
+
+  // Filter functions
+  const filteredUsers = adminUsers.filter(user => {
+    const matchesSearch = user.username.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                         user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+    const matchesRole = userRoleFilter === 'all' || user.role === userRoleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  const filteredSubdomains = subdomains.filter(subdomain => {
+    const matchesSearch = subdomain.villageName.toLowerCase().includes(subdomainSearchTerm.toLowerCase()) ||
+                         subdomain.subdomain.toLowerCase().includes(subdomainSearchTerm.toLowerCase()) ||
+                         subdomain.contactPerson.toLowerCase().includes(subdomainSearchTerm.toLowerCase());
+    const matchesStatus = subdomainStatusFilter === 'all' || subdomain.status === subdomainStatusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  // Modal handlers
+  const openUserModal = (mode: 'view' | 'edit' | 'add', user: AdminUser | null = null) => {
+    setUserModal({ isOpen: true, mode, user });
+  };
+
+  const closeUserModal = () => {
+    setUserModal({ isOpen: false, mode: 'view', user: null });
+  };
+
+  const openSubdomainModal = (mode: 'view' | 'edit' | 'add', subdomain: Subdomain | null = null) => {
+    setSubdomainModal({ isOpen: true, mode, subdomain });
+  };
+
+  const closeSubdomainModal = () => {
+    setSubdomainModal({ isOpen: false, mode: 'view', subdomain: null });
+  };
+
+  const handleUserUpdated = () => {
+    fetchData();
+  };
+
+  const handleSubdomainUpdated = () => {
+    fetchData();
+  };
+
+  // Delete confirmation handlers
+  const handleDeleteUser = (user: AdminUser) => {
+    setConfirmationModal({
+      isOpen: true,
+      type: 'user',
+      title: 'Delete User',
+      description: 'This will permanently delete the user and all associated data.',
+      itemName: `${user.username} (${user.email})`,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/super-admin/users/${user.id}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.error || 'Failed to delete user'}`);
+            return;
+          }
+
+          fetchData();
+          setConfirmationModal(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          alert('An error occurred while deleting the user');
+        }
+      }
+    });
+  };
+
+  const handleDeleteSubdomain = (subdomain: Subdomain) => {
+    setConfirmationModal({
+      isOpen: true,
+      type: 'subdomain',
+      title: 'Delete Subdomain',
+      description: 'This will permanently delete the subdomain and ALL associated data.',
+      itemName: `${subdomain.subdomain}.mahagp.in`,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/super-admin/subdomains/${subdomain.id}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.error || 'Failed to delete subdomain'}`);
+            return;
+          }
+
+          fetchData();
+          setConfirmationModal(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          alert('An error occurred while deleting the subdomain');
+        }
+      }
+    });
   };
 
   if (loading) {
@@ -298,13 +450,45 @@ export default function SuperAdminPage() {
                   <CardTitle>Admin Users</CardTitle>
                   <CardDescription>Manage all admin users and their permissions</CardDescription>
                 </div>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add User
-                </Button>
               </div>
             </CardHeader>
             <CardContent>
+              {/* Search and Filter Controls */}
+              <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search users by name or email..."
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={userRoleFilter}
+                    onChange={(e) => setUserRoleFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Roles</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="admin">Admin</option>
+                    <option value="editor">Editor</option>
+                  </select>
+                  {userSearchTerm && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUserSearchTerm('')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -318,7 +502,7 @@ export default function SuperAdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {adminUsers.map((user) => (
+                    {filteredUsers.map((user) => (
                       <tr key={user.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <div>
@@ -350,19 +534,43 @@ export default function SuperAdminPage() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openUserModal('view', user)}
+                              title="View User"
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openUserModal('edit', user)}
+                              title="Edit User"
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleDeleteUser(user)}
+                              title="Delete User"
+                              disabled={user.role === 'super_admin'}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </td>
                       </tr>
                     ))}
+                    {filteredUsers.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-gray-500">
+                          No users found matching your criteria.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -379,13 +587,49 @@ export default function SuperAdminPage() {
                   <CardTitle>Subdomains</CardTitle>
                   <CardDescription>Manage all village subdomains</CardDescription>
                 </div>
-                <Button>
+                <Button onClick={() => setSubdomainRegisterModal(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Subdomain
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
+              {/* Search and Filter Controls */}
+              <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search subdomains by village name or contact..."
+                      value={subdomainSearchTerm}
+                      onChange={(e) => setSubdomainSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={subdomainStatusFilter}
+                    onChange={(e) => setSubdomainStatusFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                  {subdomainSearchTerm && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSubdomainSearchTerm('')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -399,7 +643,7 @@ export default function SuperAdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {subdomains.map((subdomain) => (
+                    {filteredSubdomains.map((subdomain) => (
                       <tr key={subdomain.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <div>
@@ -428,19 +672,42 @@ export default function SuperAdminPage() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openSubdomainModal('view', subdomain)}
+                              title="View Subdomain"
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openSubdomainModal('edit', subdomain)}
+                              title="Edit Subdomain"
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleDeleteSubdomain(subdomain)}
+                              title="Delete Subdomain"
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </td>
                       </tr>
                     ))}
+                    {filteredSubdomains.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-gray-500">
+                          No subdomains found matching your criteria.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -448,6 +715,48 @@ export default function SuperAdminPage() {
           </Card>
         )}
       </div>
+
+      {/* User Management Modal */}
+      <UserManagementModal
+        isOpen={userModal.isOpen}
+        onClose={closeUserModal}
+        mode={userModal.mode}
+        user={userModal.user}
+        onUserUpdated={handleUserUpdated}
+        subdomains={subdomains.map(s => ({
+          id: s.id,
+          subdomain: s.subdomain,
+          villageName: s.villageName,
+          status: s.status
+        }))}
+      />
+
+      {/* Subdomain Management Modal */}
+      <SubdomainManagementModal
+        isOpen={subdomainModal.isOpen}
+        onClose={closeSubdomainModal}
+        mode={subdomainModal.mode}
+        subdomain={subdomainModal.subdomain}
+        onSubdomainUpdated={handleSubdomainUpdated}
+      />
+
+      {/* Subdomain Register Modal */}
+      <SubdomainRegisterModal
+        isOpen={subdomainRegisterModal}
+        onClose={() => setSubdomainRegisterModal(false)}
+        onSubdomainCreated={handleSubdomainUpdated}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        onClose={() => setConfirmationModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmationModal.onConfirm}
+        type={confirmationModal.type}
+        title={confirmationModal.title}
+        description={confirmationModal.description}
+        itemName={confirmationModal.itemName}
+      />
     </div>
   );
 }

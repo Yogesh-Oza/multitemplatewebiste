@@ -363,7 +363,7 @@ export function ContactSection() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">ग्रामबॉडी</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">ग्राम पंचायत कार्यकारणी</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               गावाच्या विकासासाठी समर्पित आणि अनुभवी नेतृत्व
             </p>

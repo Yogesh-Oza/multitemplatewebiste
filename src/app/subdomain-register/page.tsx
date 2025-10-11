@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Globe, Mail, User, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
-import { DISTRICTS, SUB_DISTRICTS, VILLAGES, getSubDistrictsByDistrict, getVillagesBySubDistrict } from '@/lib/village-constants';
+import { useVillageData } from '@/hooks/useVillageData';
 
 interface SubdomainFormData {
   subdomain: string;
@@ -50,6 +50,21 @@ export default function SubdomainRegisterPage() {
   const [submissionData, setSubmissionData] = useState<any>(null);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [isCheckingAvailability, setIsCheckingAvailability] = useState<{[key: string]: boolean}>({});
+  const [villageSearchTerm, setVillageSearchTerm] = useState('');
+
+  // Use the village data hook
+  const {
+    districts,
+    subDistricts,
+    villages,
+    loading: villageLoading,
+    error: villageError,
+    fetchSubDistricts,
+    fetchVillages,
+    clearSubDistricts,
+    clearVillages
+  } = useVillageData();
+
 
   const validateSubdomain = (subdomain: string) => {
     const regex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
@@ -103,7 +118,6 @@ export default function SubdomainRegisterPage() {
         setValidationErrors(prev => ({ ...prev, [field]: '' }));
       }
     } catch (error) {
-      console.error('Availability check failed:', error);
     } finally {
       setIsCheckingAvailability(prev => ({ ...prev, [field]: false }));
     }
@@ -188,7 +202,6 @@ export default function SubdomainRegisterPage() {
     setIsSubmitting(true);
     
     try {
-      console.log('Form data being sent:', formData);
       const response = await fetch('/api/subdomain/register', {
         method: 'POST',
         headers: {
@@ -275,6 +288,7 @@ export default function SubdomainRegisterPage() {
             आपला स्वतःचा सबडोमेन मिळवा आणि आपली ग्रामपंचायत वेबसाइट तयार करण्यास सुरुवात करा
           </p>
         </div>
+
 
         <Card>
           <CardHeader>
@@ -404,7 +418,7 @@ export default function SubdomainRegisterPage() {
                   id="districtId"
                   value={formData.districtId}
                   onChange={(e) => {
-                    const selectedDistrict = DISTRICTS.find(d => d.id === e.target.value);
+                    const selectedDistrict = districts.find(d => d.id === e.target.value);
                     setFormData({
                       ...formData, 
                       districtId: e.target.value,
@@ -414,17 +428,28 @@ export default function SubdomainRegisterPage() {
                       villageId: '', // Reset village when district changes
                       villageNameLocal: ''
                     });
+                    // Clear sub-districts and villages when district changes
+                    clearSubDistricts();
+                    clearVillages();
+                    // Fetch sub-districts for selected district
+                    if (e.target.value) {
+                      fetchSubDistricts(e.target.value);
+                    }
                   }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
+                  disabled={villageLoading.districts}
                 >
                   <option value="">जिल्हा निवडा / Select District</option>
-                  {DISTRICTS.map((district) => (
+                  {districts.map((district) => (
                     <option key={district.id} value={district.id}>
                       {district.name} ({district.nameMarathi})
                     </option>
                   ))}
                 </select>
+                {villageLoading.districts && (
+                  <p className="text-sm text-blue-500">Loading districts...</p>
+                )}
               </div>
 
               {/* Sub-District Selection */}
@@ -437,7 +462,7 @@ export default function SubdomainRegisterPage() {
                   id="subDistrictId"
                   value={formData.subDistrictId}
                   onChange={(e) => {
-                    const selectedSubDistrict = SUB_DISTRICTS.find(sd => sd.id === e.target.value);
+                    const selectedSubDistrict = subDistricts.find(sd => sd.id === e.target.value);
                     setFormData({
                       ...formData, 
                       subDistrictId: e.target.value,
@@ -445,18 +470,27 @@ export default function SubdomainRegisterPage() {
                       villageId: '', // Reset village when sub-district changes
                       villageNameLocal: ''
                     });
+                    // Clear villages when sub-district changes
+                    clearVillages();
+                    // Fetch villages for selected sub-district
+                    if (e.target.value) {
+                      fetchVillages(e.target.value, villageSearchTerm);
+                    }
                   }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
-                  disabled={!formData.districtId}
+                  disabled={!formData.districtId || villageLoading.subDistricts}
                 >
                   <option value="">तालुका निवडा / Select Sub-District</option>
-                  {formData.districtId && getSubDistrictsByDistrict(formData.districtId).map((subDistrict) => (
+                  {subDistricts.map((subDistrict) => (
                     <option key={subDistrict.id} value={subDistrict.id}>
                       {subDistrict.name} ({subDistrict.nameMarathi})
                     </option>
                   ))}
                 </select>
+                {villageLoading.subDistricts && (
+                  <p className="text-sm text-blue-500">Loading sub-districts...</p>
+                )}
               </div>
 
               {/* Village Selection */}
@@ -465,11 +499,32 @@ export default function SubdomainRegisterPage() {
                   <MapPin className="h-4 w-4" />
                   गावाचे नाव / Village Name
                 </Label>
+                
+                {/* Village Search Input */}
+                {formData.subDistrictId && (
+                  <div className="mb-2">
+                    <input
+                      type="text"
+                      placeholder="Search villages..."
+                      value={villageSearchTerm}
+                      onChange={(e) => {
+                        setVillageSearchTerm(e.target.value);
+                        // Debounce the search
+                        setTimeout(() => {
+                          if (formData.subDistrictId) {
+                            fetchVillages(formData.subDistrictId, e.target.value);
+                          }
+                        }, 300);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    />
+                  </div>
+                )}
                 <select
                   id="villageId"
                   value={formData.villageId}
                   onChange={(e) => {
-                    const selectedVillage = VILLAGES.find(v => v.id === e.target.value);
+                    const selectedVillage = villages.find(v => v.id === e.target.value);
                     setFormData({
                       ...formData, 
                       villageId: e.target.value,
@@ -478,15 +533,21 @@ export default function SubdomainRegisterPage() {
                   }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
-                  disabled={!formData.subDistrictId}
+                  disabled={!formData.subDistrictId || villageLoading.villages}
                 >
                   <option value="">गाव निवडा / Select Village</option>
-                  {formData.subDistrictId && getVillagesBySubDistrict(formData.subDistrictId).map((village) => (
+                  {villages.map((village) => (
                     <option key={village.id} value={village.id}>
                       {village.name} ({village.nameMarathi})
                     </option>
                   ))}
                 </select>
+                {villageLoading.villages && (
+                  <p className="text-sm text-blue-500">Loading villages...</p>
+                )}
+                {villageSearchTerm && villages.length === 0 && !villageLoading.villages && (
+                  <p className="text-sm text-gray-500">No villages found matching "{villageSearchTerm}"</p>
+                )}
               </div>
 
               {/* Submit Button */}

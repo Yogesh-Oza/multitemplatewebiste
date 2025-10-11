@@ -26,10 +26,6 @@ export async function POST(request: NextRequest) {
       villageNameLocal
     } = body;
 
-    console.log('Received form data:', body);
-    console.log('District ID:', districtId);
-    console.log('Sub-District ID:', subDistrictId);
-    console.log('Village ID:', villageId);
 
     // Validate required fields
     if (!subdomain || !villageName || !villageNameEn || !contactPerson || !email || !phone || !districtId || !subDistrictId || !villageId) {
