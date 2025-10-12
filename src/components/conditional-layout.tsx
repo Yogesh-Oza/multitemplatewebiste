@@ -12,7 +12,7 @@ interface ConditionalLayoutProps {
 
 export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
-  const [shouldShow, setShouldShow] = useState(true);
+  const [shouldShow, setShouldShow] = useState(false); // Start with false to prevent flash
   
   useEffect(() => {
     // Use robust subdomain detection

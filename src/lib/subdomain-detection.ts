@@ -18,8 +18,8 @@ export interface SubdomainInfo {
 export function detectSubdomain(hostname?: string): SubdomainInfo {
   const currentHostname = hostname || (typeof window !== 'undefined' ? window.location.hostname : '');
   
-  // Localhost detection
-  const isLocalhost = currentHostname.includes('localhost') || currentHostname === '127.0.0.1';
+  // Localhost detection - only exact localhost, not subdomains
+  const isLocalhost = currentHostname === 'localhost' || currentHostname === '127.0.0.1';
   
   // Main domain detection (mahagp.in) - only exact match
   const isMainDomain = currentHostname === 'mahagp.in' || currentHostname === 'localhost';
@@ -58,17 +58,6 @@ export function detectSubdomain(hostname?: string): SubdomainInfo {
 export function shouldShowHeaderFooter(pathname: string, hostname?: string): boolean {
   const subdomainInfo = detectSubdomain(hostname);
   
-  // Debug logging in development
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-    console.log('Subdomain Detection Debug:', {
-      hostname: hostname || window.location.hostname,
-      pathname,
-      subdomainInfo,
-      isMainDomain: subdomainInfo.isMainDomain,
-      isSubdomain: subdomainInfo.isSubdomain,
-      isLocalhost: subdomainInfo.isLocalhost
-    });
-  }
   
   // Admin routes - no header/footer
   if (pathname.startsWith('/admin') || 
