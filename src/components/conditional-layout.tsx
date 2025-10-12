@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { useEffect, useState } from 'react';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -10,6 +11,17 @@ interface ConditionalLayoutProps {
 
 export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
+  const [isSubdomainAccess, setIsSubdomainAccess] = useState(false);
+  
+  useEffect(() => {
+    // Check if we're accessing through a subdomain
+    const hostname = window.location.hostname;
+    const isSubdomain = hostname.includes('.') && 
+      !hostname.includes('localhost:3000') && 
+      !hostname.includes('mahagp.in') &&
+      hostname !== 'localhost';
+    setIsSubdomainAccess(isSubdomain);
+  }, []);
   
   // Check if we're on an admin route
   const isAdminRoute = pathname.startsWith('/admin');
@@ -25,13 +37,6 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   
   // Check if we're on a subdomain route (subdomain pages have their own layout)
   const isSubdomainRoute = pathname.startsWith('/subdomain/');
-  
-  // Check if we're accessing through a subdomain (when hostname contains a subdomain)
-  const isSubdomainAccess = typeof window !== 'undefined' && 
-    window.location.hostname.includes('.') && 
-    !window.location.hostname.includes('localhost:3000') && 
-    !window.location.hostname.includes('mahagp.in') &&
-    window.location.hostname !== 'localhost';
   
   if (isAdminRoute || isSuperAdminRoute || isSubdomainRegister || isBusinessLanding || isSubdomainRoute || isSubdomainAccess) {
     // For admin routes, super admin routes, subdomain-register, business landing page, subdomain routes, and subdomain access, render children without header/footer
