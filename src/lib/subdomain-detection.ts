@@ -83,14 +83,14 @@ export function shouldShowHeaderFooter(pathname: string, hostname?: string): boo
     return false;
   }
   
-  // Subdomain routes - show header/footer
+  // Subdomain routes - DON'T show header/footer here (SubdomainLayout handles it)
   if (subdomainInfo.isSubdomain) {
-    return true;
+    return false;
   }
   
-  // Localhost subdomain routes - show header/footer
-  if (subdomainInfo.isLocalhost && pathname.startsWith('/subdomain/')) {
-    return true;
+  // Subdomain routes (rewritten by middleware) - DON'T show header/footer here (SubdomainLayout handles it)
+  if (pathname.startsWith('/subdomain/')) {
+    return false;
   }
   
   // Default: show header/footer for other routes
