@@ -1,17 +1,5 @@
-import { HeroSection } from '@/components/sections/hero-section';
-import { AboutSection } from '@/components/sections/about-section';
-import { AnnouncementsSection } from '@/components/sections/announcements-section';
-import { HistorySection } from '@/components/sections/history-section';
-import { CulturalHeritageSection } from '@/components/sections/cultural-heritage-section';
+import { BusinessLandingPage } from '@/components/business-landing-page';
 
 export default function HomePage() {
-  return (
-    <>
-      <HeroSection />
-      <AboutSection />
-      <AnnouncementsSection />
-      <HistorySection />
-      <CulturalHeritageSection />
-    </>
-  );
+  return <BusinessLandingPage />;
 }
