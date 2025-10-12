@@ -62,7 +62,9 @@ interface MapSettings {
 const teamDesignations = [
   { value: 'सरपंच', label: 'सरपंच', labelEn: 'Sarpanch' },
   { value: 'उपसरपंच', label: 'उपसरपंच', labelEn: 'Up-Sarpanch' },
-  { value: 'ग्रामसेवक', label: 'ग्रामसेवक', labelEn: 'Gramsevak' }
+  { value: 'ग्राम पंचायत अधिकारी', label: 'ग्राम पंचायत अधिकारी', labelEn: 'Gram Panchayat Officer' },
+  { value: 'ग्राम पंचायत सदस्य', label: 'ग्राम पंचायत सदस्य', labelEn: 'Gram Panchayat Member' },
+  { value: 'प्रतिष्ठित नागरिक', label: 'प्रतिष्ठित नागरिक', labelEn: 'Distinguished Citizen' }
 ];
 
 export default function ContactPage() {

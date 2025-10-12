@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Globe, Mail, User, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVillageData } from '@/hooks/useVillageData';
+import { InfiniteSelect } from '@/components/ui/infinite-select';
 
 interface SubdomainFormData {
   subdomain: string;
@@ -51,6 +52,8 @@ export default function SubdomainRegisterPage() {
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [isCheckingAvailability, setIsCheckingAvailability] = useState<{[key: string]: boolean}>({});
   const [villageSearchTerm, setVillageSearchTerm] = useState('');
+  const [subDistrictSearchTerm, setSubDistrictSearchTerm] = useState('');
+  const [districtSearchTerm, setDistrictSearchTerm] = useState('');
 
   // Use the village data hook
   const {
@@ -59,8 +62,11 @@ export default function SubdomainRegisterPage() {
     villages,
     loading: villageLoading,
     error: villageError,
+    pagination,
+    fetchDistricts,
     fetchSubDistricts,
     fetchVillages,
+    clearDistricts,
     clearSubDistricts,
     clearVillages
   } = useVillageData();
@@ -162,6 +168,30 @@ export default function SubdomainRegisterPage() {
     
     if (error) {
       setValidationErrors(prev => ({ ...prev, [field]: error }));
+    }
+  };
+
+  // Handle infinite scroll for districts
+  const handleDistrictLoadMore = () => {
+    if (pagination.districts?.hasMore && !villageLoading.districts) {
+      const nextPage = (pagination.districts?.page || 1) + 1;
+      fetchDistricts(nextPage, true, districtSearchTerm);
+    }
+  };
+
+  // Handle infinite scroll for sub-districts
+  const handleSubDistrictLoadMore = () => {
+    if (pagination.subDistricts?.hasMore && !villageLoading.subDistricts) {
+      const nextPage = (pagination.subDistricts?.page || 1) + 1;
+      fetchSubDistricts(formData.districtId, nextPage, true);
+    }
+  };
+
+  // Handle infinite scroll for villages
+  const handleVillageLoadMore = () => {
+    if (pagination.villages?.hasMore && !villageLoading.villages) {
+      const nextPage = (pagination.villages?.page || 1) + 1;
+      fetchVillages(formData.subDistrictId, villageSearchTerm, nextPage, true);
     }
   };
 
@@ -414,14 +444,18 @@ export default function SubdomainRegisterPage() {
                   <MapPin className="h-4 w-4" />
                   जिल्हा / District Name
                 </Label>
-                <select
-                  id="districtId"
+                <InfiniteSelect
+                  options={districts.map(d => ({
+                    id: d.id,
+                    name: d.name,
+                    nameMarathi: d.nameMarathi
+                  }))}
                   value={formData.districtId}
-                  onChange={(e) => {
-                    const selectedDistrict = districts.find(d => d.id === e.target.value);
+                  onChange={(value) => {
+                    const selectedDistrict = districts.find(d => d.id === value);
                     setFormData({
                       ...formData, 
-                      districtId: e.target.value,
+                      districtId: value,
                       districtName: selectedDistrict?.name || '',
                       subDistrictId: '', // Reset sub-district when district changes
                       subDistrictName: '',
@@ -432,24 +466,23 @@ export default function SubdomainRegisterPage() {
                     clearSubDistricts();
                     clearVillages();
                     // Fetch sub-districts for selected district
-                    if (e.target.value) {
-                      fetchSubDistricts(e.target.value);
+                    if (value) {
+                      fetchSubDistricts(value);
                     }
                   }}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                  disabled={villageLoading.districts}
-                >
-                  <option value="">जिल्हा निवडा / Select District</option>
-                  {districts.map((district) => (
-                    <option key={district.id} value={district.id}>
-                      {district.name} ({district.nameMarathi})
-                    </option>
-                  ))}
-                </select>
-                {villageLoading.districts && (
-                  <p className="text-sm text-blue-500">Loading districts...</p>
-                )}
+                  placeholder="जिल्हा निवडा / Select District"
+                  loading={villageLoading.districts}
+                  hasMore={pagination.districts?.hasMore || false}
+                  onLoadMore={handleDistrictLoadMore}
+                  searchTerm={districtSearchTerm}
+                  onSearchChange={(term) => {
+                    setDistrictSearchTerm(term);
+                    // Reset and fetch with search term
+                    clearDistricts();
+                    fetchDistricts(1, false, term);
+                  }}
+                  disabled={false}
+                />
               </div>
 
               {/* Sub-District Selection */}
@@ -458,14 +491,18 @@ export default function SubdomainRegisterPage() {
                   <MapPin className="h-4 w-4" />
                   तालुका / Sub-District Name
                 </Label>
-                <select
-                  id="subDistrictId"
+                <InfiniteSelect
+                  options={subDistricts.map(sd => ({
+                    id: sd.id,
+                    name: sd.name,
+                    nameMarathi: sd.nameMarathi
+                  }))}
                   value={formData.subDistrictId}
-                  onChange={(e) => {
-                    const selectedSubDistrict = subDistricts.find(sd => sd.id === e.target.value);
+                  onChange={(value) => {
+                    const selectedSubDistrict = subDistricts.find(sd => sd.id === value);
                     setFormData({
                       ...formData, 
-                      subDistrictId: e.target.value,
+                      subDistrictId: value,
                       subDistrictName: selectedSubDistrict?.name || '',
                       villageId: '', // Reset village when sub-district changes
                       villageNameLocal: ''
@@ -473,24 +510,23 @@ export default function SubdomainRegisterPage() {
                     // Clear villages when sub-district changes
                     clearVillages();
                     // Fetch villages for selected sub-district
-                    if (e.target.value) {
-                      fetchVillages(e.target.value, villageSearchTerm);
+                    if (value) {
+                      fetchVillages(value, villageSearchTerm);
                     }
                   }}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                  disabled={!formData.districtId || villageLoading.subDistricts}
-                >
-                  <option value="">तालुका निवडा / Select Sub-District</option>
-                  {subDistricts.map((subDistrict) => (
-                    <option key={subDistrict.id} value={subDistrict.id}>
-                      {subDistrict.name} ({subDistrict.nameMarathi})
-                    </option>
-                  ))}
-                </select>
-                {villageLoading.subDistricts && (
-                  <p className="text-sm text-blue-500">Loading sub-districts...</p>
-                )}
+                  placeholder="तालुका निवडा / Select Sub-District"
+                  loading={villageLoading.subDistricts}
+                  hasMore={pagination.subDistricts?.hasMore || false}
+                  onLoadMore={handleSubDistrictLoadMore}
+                  searchTerm={subDistrictSearchTerm}
+                  onSearchChange={(term) => {
+                    setSubDistrictSearchTerm(term);
+                    // Reset and fetch with search term
+                    clearSubDistricts();
+                    fetchSubDistricts(formData.districtId, 1, false);
+                  }}
+                  disabled={!formData.districtId}
+                />
               </div>
 
               {/* Village Selection */}
@@ -499,55 +535,34 @@ export default function SubdomainRegisterPage() {
                   <MapPin className="h-4 w-4" />
                   गावाचे नाव / Village Name
                 </Label>
-                
-                {/* Village Search Input */}
-                {formData.subDistrictId && (
-                  <div className="mb-2">
-                    <input
-                      type="text"
-                      placeholder="Search villages..."
-                      value={villageSearchTerm}
-                      onChange={(e) => {
-                        setVillageSearchTerm(e.target.value);
-                        // Debounce the search
-                        setTimeout(() => {
-                          if (formData.subDistrictId) {
-                            fetchVillages(formData.subDistrictId, e.target.value);
-                          }
-                        }, 300);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                  </div>
-                )}
-                <select
-                  id="villageId"
+                <InfiniteSelect
+                  options={villages.map(v => ({
+                    id: v.id,
+                    name: v.name,
+                    nameMarathi: v.nameMarathi
+                  }))}
                   value={formData.villageId}
-                  onChange={(e) => {
-                    const selectedVillage = villages.find(v => v.id === e.target.value);
+                  onChange={(value) => {
+                    const selectedVillage = villages.find(v => v.id === value);
                     setFormData({
                       ...formData, 
-                      villageId: e.target.value,
+                      villageId: value,
                       villageNameLocal: selectedVillage?.nameMarathi || ''
                     });
                   }}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                  disabled={!formData.subDistrictId || villageLoading.villages}
-                >
-                  <option value="">गाव निवडा / Select Village</option>
-                  {villages.map((village) => (
-                    <option key={village.id} value={village.id}>
-                      {village.name} ({village.nameMarathi})
-                    </option>
-                  ))}
-                </select>
-                {villageLoading.villages && (
-                  <p className="text-sm text-blue-500">Loading villages...</p>
-                )}
-                {villageSearchTerm && villages.length === 0 && !villageLoading.villages && (
-                  <p className="text-sm text-gray-500">No villages found matching "{villageSearchTerm}"</p>
-                )}
+                  placeholder="गाव निवडा / Select Village"
+                  loading={villageLoading.villages}
+                  hasMore={pagination.villages?.hasMore || false}
+                  onLoadMore={handleVillageLoadMore}
+                  searchTerm={villageSearchTerm}
+                  onSearchChange={(term) => {
+                    setVillageSearchTerm(term);
+                    // Reset and fetch with search term
+                    clearVillages();
+                    fetchVillages(formData.subDistrictId, term, 1, false);
+                  }}
+                  disabled={!formData.subDistrictId}
+                />
               </div>
 
               {/* Submit Button */}

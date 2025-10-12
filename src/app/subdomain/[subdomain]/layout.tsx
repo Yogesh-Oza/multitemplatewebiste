@@ -3,6 +3,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useEffect, useState } from 'react';
+import { shouldRenderSubdomainLayout } from '@/lib/subdomain-detection';
 
 export default function SubdomainLayout({
   children,
@@ -12,15 +13,9 @@ export default function SubdomainLayout({
   const [shouldRenderLayout, setShouldRenderLayout] = useState(true);
 
   useEffect(() => {
-    // Check if we're accessing through a subdomain
-    const hostname = window.location.hostname;
-    const isSubdomain = hostname.includes('.') && 
-      !hostname.includes('localhost:3000') && 
-      !hostname.includes('mahagp.in') &&
-      hostname !== 'localhost';
-    
-    // Only render layout if we're actually on a subdomain
-    setShouldRenderLayout(isSubdomain);
+    // Use robust subdomain detection
+    const shouldRender = shouldRenderSubdomainLayout(window.location.hostname);
+    setShouldRenderLayout(shouldRender);
   }, []);
 
   if (!shouldRenderLayout) {

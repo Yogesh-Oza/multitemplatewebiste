@@ -232,7 +232,7 @@ export function BusinessLandingPage() {
               >
                 <Link href="/subdomain-register">
                   <Globe className="h-5 w-5 mr-2" />
-                  मोफत सुरु करा
+                  आता सुरु करा
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Link>
               </Button>
