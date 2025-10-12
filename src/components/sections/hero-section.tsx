@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Users, History, Info } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface HeroImage {
   id: string;
@@ -113,14 +114,18 @@ export function HeroSection() {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-4 text-lg shadow-theme-primary">
-                आमच्याबद्दल जाणून घ्या
-                <ChevronRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-gray-900 hover:bg-gray-100 hover:text-gray-900 px-8 py-4 text-lg">
-                <History className="mr-2 h-5 w-5" />
-                इतिहास पहा
-              </Button>
+              <Link href="/about">
+                <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-4 text-lg shadow-theme-primary">
+                  आमच्याबद्दल जाणून घ्या
+                  <ChevronRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/history">
+                <Button size="lg" variant="outline" className="border-white text-gray-900 hover:bg-gray-100 hover:text-gray-900 px-8 py-4 text-lg">
+                  <History className="mr-2 h-5 w-5" />
+                  इतिहास पहा
+                </Button>
+              </Link>
             </motion.div>
           </div>
         </div>
