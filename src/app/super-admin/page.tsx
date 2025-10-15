@@ -137,7 +137,7 @@ export default function SuperAdminPage() {
   const [villageSearchTerm, setVillageSearchTerm] = useState('');
 
   const handleDistrictLoadMore = async () => {
-    const nextPage = (pagination?.districts?.currentPage || 1) + 1;
+    const nextPage = (pagination?.districts?.page || 1) + 1;
     if (pagination?.districts?.hasMore) {
       await fetchDistricts(nextPage, true, districtSearchTerm);
     }
@@ -145,7 +145,7 @@ export default function SuperAdminPage() {
 
   const handleSubDistrictLoadMore = async () => {
     if (!selectedDistrictId) return;
-    const nextPage = (pagination?.subDistricts?.currentPage || 1) + 1;
+    const nextPage = (pagination?.subDistricts?.page || 1) + 1;
     if (pagination?.subDistricts?.hasMore) {
       await fetchSubDistricts(selectedDistrictId, nextPage, true);
     }
@@ -153,7 +153,7 @@ export default function SuperAdminPage() {
 
   const handleVillageLoadMore = async () => {
     if (!selectedSubDistrictId) return;
-    const nextPage = (pagination?.villages?.currentPage || 1) + 1;
+    const nextPage = (pagination?.villages?.page || 1) + 1;
     if (pagination?.villages?.hasMore) {
       await fetchVillages(selectedSubDistrictId, villageSearchTerm, nextPage, true);
     }
