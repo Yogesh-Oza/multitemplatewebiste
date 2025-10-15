@@ -351,19 +351,19 @@ export default function SubdomainManagementModal({
                     disabled={loading}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="adminPassword">
-                    Admin Password {mode === 'edit' && '(leave blank to keep current)'}
-                  </Label>
-                  <Input
-                    id="adminPassword"
-                    type="password"
-                    value={formData.adminPassword}
-                    onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                    required={mode === 'add'}
-                    disabled={loading}
-                  />
-                </div>
+                {mode === 'add' && (
+                  <div>
+                    <Label htmlFor="adminPassword">Admin Password</Label>
+                    <Input
+                      id="adminPassword"
+                      type="password"
+                      value={formData.adminPassword}
+                      onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                )}
                 <div className="md:col-span-2">
                   <Label htmlFor="address">Address</Label>
                   <Textarea
