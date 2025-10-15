@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { InfiniteSelect } from '@/components/ui/infinite-select';
 import { 
   Users, 
   Globe, 
@@ -26,6 +27,7 @@ import UserManagementModal from '@/components/admin/user-management-modal';
 import SubdomainManagementModal from '@/components/admin/subdomain-management-modal';
 import SubdomainRegisterModal from '@/components/admin/subdomain-register-modal';
 import ConfirmationModal from '@/components/admin/confirmation-modal';
+import { useVillageData } from '@/hooks/useVillageData';
 
 interface AdminUser {
   id: string;
@@ -108,6 +110,55 @@ export default function SuperAdminPage() {
   const [subdomainSearchTerm, setSubdomainSearchTerm] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
   const [subdomainStatusFilter, setSubdomainStatusFilter] = useState('all');
+  // Additional filters for subdomains (API-driven)
+  const [selectedDistrictId, setSelectedDistrictId] = useState('');
+  const [selectedSubDistrictId, setSelectedSubDistrictId] = useState('');
+  const [selectedVillageId, setSelectedVillageId] = useState('');
+  // Sorting
+  const [subdomainSortKey, setSubdomainSortKey] = useState<'createdAt' | 'villageName' | 'subdomain' | 'status'>('createdAt');
+  const [subdomainSortDir, setSubdomainSortDir] = useState<'asc' | 'desc'>('desc');
+  // Village data for filters (same sources as registration page)
+  const {
+    districts,
+    subDistricts,
+    villages,
+    loading: villageLoading,
+    pagination,
+    fetchDistricts,
+    fetchSubDistricts,
+    fetchVillages,
+    clearSubDistricts,
+    clearVillages
+  } = useVillageData();
+
+  // Infinite select helpers and search terms
+  const [districtSearchTerm, setDistrictSearchTerm] = useState('');
+  const [subDistrictSearchTerm, setSubDistrictSearchTerm] = useState('');
+  const [villageSearchTerm, setVillageSearchTerm] = useState('');
+
+  const handleDistrictLoadMore = async () => {
+    const nextPage = (pagination?.districts?.currentPage || 1) + 1;
+    if (pagination?.districts?.hasMore) {
+      await fetchDistricts(nextPage, true, districtSearchTerm);
+    }
+  };
+
+  const handleSubDistrictLoadMore = async () => {
+    if (!selectedDistrictId) return;
+    const nextPage = (pagination?.subDistricts?.currentPage || 1) + 1;
+    if (pagination?.subDistricts?.hasMore) {
+      await fetchSubDistricts(selectedDistrictId, nextPage, true);
+    }
+  };
+
+  const handleVillageLoadMore = async () => {
+    if (!selectedSubDistrictId) return;
+    const nextPage = (pagination?.villages?.currentPage || 1) + 1;
+    if (pagination?.villages?.hasMore) {
+      await fetchVillages(selectedSubDistrictId, villageSearchTerm, nextPage, true);
+    }
+  };
+
 
   useEffect(() => {
     fetchData();
@@ -161,12 +212,33 @@ export default function SuperAdminPage() {
     return matchesSearch && matchesRole;
   });
 
+  // Helper: resolve selected names for matching against subdomain records
+  const selectedDistrictName = districts.find(d => d.id === selectedDistrictId)?.name || '';
+  const selectedSubDistrictName = subDistricts.find(sd => sd.id === selectedSubDistrictId)?.name || '';
+  const selectedVillageName = villages.find(v => v.id === selectedVillageId)?.name || '';
+
   const filteredSubdomains = subdomains.filter(subdomain => {
     const matchesSearch = subdomain.villageName.toLowerCase().includes(subdomainSearchTerm.toLowerCase()) ||
                          subdomain.subdomain.toLowerCase().includes(subdomainSearchTerm.toLowerCase()) ||
                          subdomain.contactPerson.toLowerCase().includes(subdomainSearchTerm.toLowerCase());
     const matchesStatus = subdomainStatusFilter === 'all' || subdomain.status === subdomainStatusFilter;
-    return matchesSearch && matchesStatus;
+    const sAny = subdomain as any;
+    const matchesDistrict = !selectedDistrictName || (sAny.districtName || '') === selectedDistrictName;
+    const matchesSubDistrict = !selectedSubDistrictName || (sAny.subDistrictName || '') === selectedSubDistrictName;
+    const matchesVillage = !selectedVillageName || (sAny.villageNameLocal || '') === selectedVillageName;
+    return matchesSearch && matchesStatus && matchesDistrict && matchesSubDistrict && matchesVillage;
+  });
+
+  const sortedSubdomains = [...filteredSubdomains].sort((a, b) => {
+    const dir = subdomainSortDir === 'asc' ? 1 : -1;
+    if (subdomainSortKey === 'createdAt') {
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      return (aTime - bTime) * dir;
+    }
+    const aVal = (a as any)[subdomainSortKey] || '';
+    const bVal = (b as any)[subdomainSortKey] || '';
+    return String(aVal).localeCompare(String(bVal)) * dir;
   });
 
   // Modal handlers
@@ -595,7 +667,7 @@ export default function SuperAdminPage() {
             </CardHeader>
             <CardContent>
               {/* Search and Filter Controls */}
-              <div className="mb-6 flex flex-col sm:flex-row gap-4">
+              <div className="mb-6 flex flex-col gap-4">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -607,7 +679,7 @@ export default function SuperAdminPage() {
                     />
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                   <select
                     value={subdomainStatusFilter}
                     onChange={(e) => setSubdomainStatusFilter(e.target.value)}
@@ -618,15 +690,111 @@ export default function SuperAdminPage() {
                     <option value="pending">Pending</option>
                     <option value="suspended">Suspended</option>
                   </select>
-                  {subdomainSearchTerm && (
+                  <InfiniteSelect
+                    options={districts.map(d => ({ id: d.id, name: d.name, nameMarathi: d.nameMarathi }))}
+                    value={selectedDistrictId}
+                    onChange={(value) => {
+                      setSelectedDistrictId(value);
+                      setSelectedSubDistrictId('');
+                      setSelectedVillageId('');
+                      clearSubDistricts();
+                      clearVillages();
+                      if (value) fetchSubDistricts(value);
+                    }}
+                    placeholder="जिल्हा / District"
+                    loading={villageLoading.districts}
+                    hasMore={pagination.districts?.hasMore || false}
+                    onLoadMore={handleDistrictLoadMore}
+                    searchTerm={districtSearchTerm}
+                    onSearchChange={(term) => {
+                      setDistrictSearchTerm(term);
+                      fetchDistricts(1, false, term);
+                    }}
+                  />
+                  <InfiniteSelect
+                    options={subDistricts.map(sd => ({ id: sd.id, name: sd.name, nameMarathi: sd.nameMarathi }))}
+                    value={selectedSubDistrictId}
+                    onChange={(value) => {
+                      setSelectedSubDistrictId(value);
+                      setSelectedVillageId('');
+                      clearVillages();
+                      if (value) fetchVillages(value);
+                    }}
+                    placeholder="तालुका / Sub-District"
+                    loading={villageLoading.subDistricts}
+                    hasMore={pagination.subDistricts?.hasMore || false}
+                    onLoadMore={handleSubDistrictLoadMore}
+                    searchTerm={subDistrictSearchTerm}
+                    onSearchChange={(term) => {
+                      setSubDistrictSearchTerm(term);
+                    }}
+                    disabled={!selectedDistrictId}
+                  />
+                  <InfiniteSelect
+                    options={villages.map(v => ({ id: v.id, name: v.name, nameMarathi: v.nameMarathi }))}
+                    value={selectedVillageId}
+                    onChange={(value) => setSelectedVillageId(value)}
+                    placeholder="गाव / Village"
+                    loading={villageLoading.villages}
+                    hasMore={pagination.villages?.hasMore || false}
+                    onLoadMore={handleVillageLoadMore}
+                    searchTerm={villageSearchTerm}
+                    onSearchChange={(term) => {
+                      setVillageSearchTerm(term);
+                      if (selectedSubDistrictId) fetchVillages(selectedSubDistrictId, term, 1, false);
+                    }}
+                    disabled={!selectedSubDistrictId}
+                  />
+                </div>
+                <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+                  <div className="flex gap-2">
+                    <select
+                      value={subdomainSortKey}
+                      onChange={(e) => setSubdomainSortKey(e.target.value as any)}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="createdAt">Sort by: Created</option>
+                      <option value="villageName">Sort by: Village Name</option>
+                      <option value="subdomain">Sort by: Subdomain</option>
+                      <option value="status">Sort by: Status</option>
+                    </select>
+                    <select
+                      value={subdomainSortDir}
+                      onChange={(e) => setSubdomainSortDir(e.target.value as any)}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="asc">Asc</option>
+                      <option value="desc">Desc</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    {subdomainSearchTerm && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSubdomainSearchTerm('')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setSubdomainSearchTerm('')}
+                      onClick={() => {
+                        setSubdomainStatusFilter('all');
+                        setSelectedDistrictId('');
+                        setSelectedSubDistrictId('');
+                        setSelectedVillageId('');
+                        clearSubDistricts();
+                        clearVillages();
+                        setSubdomainSearchTerm('');
+                        setSubdomainSortKey('createdAt');
+                        setSubdomainSortDir('desc');
+                      }}
                     >
-                      <X className="h-4 w-4" />
+                      Reset
                     </Button>
-                  )}
+                  </div>
                 </div>
               </div>
 
@@ -643,7 +811,7 @@ export default function SuperAdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredSubdomains.map((subdomain) => (
+                    {sortedSubdomains.map((subdomain) => (
                       <tr key={subdomain.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <div>
