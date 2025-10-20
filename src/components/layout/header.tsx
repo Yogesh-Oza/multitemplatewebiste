@@ -56,12 +56,16 @@ export function Header({ villageName, villageNameEn }: HeaderProps) {
           <div className="flex items-center gap-3">
             {/* Digital India logo */}
             <Image
-              src="/images/gov-logos/satyamev_jayate_logo.png"
-              alt="Satyamev Jayate"
-              width={32}
+              src="/images/gov-logos/digital-india.png"
+              alt="Digital India"
+              width={80}
               height={32}
               className="h-8 w-auto object-contain"
               priority
+              unoptimized={false}
+              onError={(e) => {
+                console.error('Failed to load Digital India logo:', e);
+              }}
             />
             <div className="h-6 w-px bg-white/30 hidden sm:block"></div>
             <span className="font-medium text-white">
@@ -74,12 +78,16 @@ export function Header({ villageName, villageNameEn }: HeaderProps) {
             </span>
             
             <Image
-              src="/images/gov-logos/digital-india.png"
-              alt="Digital India"
-              width={80}
+              src="/images/gov-logos/satyamev_jayate_logo.png"
+              alt="Satyamev Jayate"
+              width={32}
               height={32}
               className="h-8 w-auto object-contain"
               priority
+              unoptimized={false}
+              onError={(e) => {
+                console.error('Failed to load Satyamev Jayate logo:', e);
+              }}
             />
           </div>
         </div>

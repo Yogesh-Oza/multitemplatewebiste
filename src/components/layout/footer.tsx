@@ -230,10 +230,10 @@ export function Footer() {
         <div className="container py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/gov-logos/satyamev_jayate_logo.png"
-              alt="Government of Maharashtra"
-              width={40}
-              height={40}
+              src="/images/gov-logos/digital-india.png"
+              alt="Digital India"
+              width={80}
+              height={32}
               className="h-10 w-auto object-contain flex-shrink-0"
             />
             <div className="text-sm text-white">
@@ -246,7 +246,13 @@ export function Footer() {
               <div>पत्ता: {footerContent.address.replace('\n', ', ')}</div>
               <div>दूरध्वनी: {footerContent.phone}</div>
             </div>
-
+            <Image
+              src="/images/gov-logos/satyamev_jayate_logo.png"
+              alt="Government of Maharashtra"
+              width={40}
+              height={40}
+              className="h-10 w-auto object-contain flex-shrink-0"
+            />
           </div>
         </div>
       </div>
