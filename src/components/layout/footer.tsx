@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -221,6 +222,31 @@ export function Footer() {
                 साइटमॅप
               </Link>
             </div>
+          </div>
+        </div>
+      </div>
+      {/* Ownership and government branding band */}
+      <div className="w-full border-b border-black bg-black">
+        <div className="container py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/images/gov-logos/satyamev_jayate_logo.png"
+              alt="Government of Maharashtra"
+              width={40}
+              height={40}
+              className="h-10 w-auto object-contain flex-shrink-0"
+            />
+            <div className="text-sm text-white">
+              <div className="font-semibold">शासन महाराष्ट्र • ग्रामीण विकास विभाग</div>
+              <div className="text-gray-300">या संकेतस्थळाचे मालक: {footerContent.officeName}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-gray-400 text-right">
+              <div>पत्ता: {footerContent.address.replace('\n', ', ')}</div>
+              <div>दूरध्वनी: {footerContent.phone}</div>
+            </div>
+
           </div>
         </div>
       </div>

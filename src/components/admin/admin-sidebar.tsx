@@ -18,7 +18,12 @@ import {
   Wrench,
   Phone,
   BookOpen,
-  Layout
+  Layout,
+  FolderOpen,
+  MessageSquare,
+  BarChart3,
+  Search,
+  Sitemap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -100,6 +105,37 @@ const adminNavItems = [
     label: 'फुटर',
     icon: Layout,
     description: 'फुटर सामग्री व्यवस्थापन'
+  },
+  // New sections
+  {
+    href: '/admin/projects',
+    label: 'प्रकल्प',
+    icon: FolderOpen,
+    description: 'विकास प्रकल्प व्यवस्थापन'
+  },
+  {
+    href: '/admin/government-resolutions',
+    label: 'शासकीय ठराव',
+    icon: FileText,
+    description: 'शासकीय ठराव आणि परिपत्रके'
+  },
+  {
+    href: '/admin/feedback',
+    label: 'फीडबॅक',
+    icon: MessageSquare,
+    description: 'नागरिक फीडबॅक व्यवस्थापन'
+  },
+  {
+    href: '/admin/dashboard-metrics',
+    label: 'डॅशबोर्ड',
+    icon: BarChart3,
+    description: 'डॅशबोर्ड मेट्रिक्स व्यवस्थापन'
+  },
+  {
+    href: '/admin/search-sitemap',
+    label: 'शोध आणि साइटमॅप',
+    icon: Search,
+    description: 'शोध आणि साइटमॅप व्यवस्थापन'
   },
   {
     href: '/admin/settings',

@@ -393,7 +393,7 @@ export function BusinessLandingPage() {
               <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <div className="ml-4 text-sm text-gray-600">
-                {activeTemplate === 'gram-panchayat' ? 'pune.mahagp.in' : `${activeTemplate}.mahagp.in`}
+                {activeTemplate === 'gram-panchayat' ? 'demo.mahagp.in' : `${activeTemplate}.mahagp.in`}
               </div>
             </div>
             <div className="p-8">

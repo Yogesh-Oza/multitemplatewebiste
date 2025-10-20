@@ -402,6 +402,14 @@ model Subdomain {
   governmentSchemes GovernmentScheme[]
   homepageSettings HomepageSettings[]
   footerContent   FooterContent[]
+  governmentResolutions GovernmentResolution[]
+  projects         Project[]
+  complaints       Complaint[]
+  employment       Employment[]
+  educationItems   EducationItem[]
+  environmentInitiatives EnvironmentInitiative[]
+  dashboardMetrics DashboardMetric[]
+  socialFeeds      SocialFeed[]
 
   @@map("subdomains")
 }
@@ -422,6 +430,178 @@ model FooterContent {
   updatedAt   DateTime @updatedAt
 
   @@map("footer_content")
+}
+
+// New Government Guideline Models
+model GovernmentResolution {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  number      String
+  date        DateTime
+  department  String
+  departmentEn String
+  fileUrl     String
+  category    String
+  categoryEn  String
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("government_resolutions")
+}
+
+model Project {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  startDate     DateTime
+  endDate       DateTime?
+  status        String @default("upcoming") // upcoming, ongoing, completed
+  budget        Float?
+  photosBefore  String[] // Array of image URLs
+  photosAfter   String[] // Array of image URLs
+  impactMetrics Json     // Array of metrics: [{label: "Families Benefited", value: 150}]
+  category      String
+  categoryEn    String
+  isFeatured    Boolean @default(false)
+  order         Int    @default(0)
+  subdomainId   String? @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Complaint {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  type        String // grievance, suggestion, complaint
+  subject     String
+  description String
+  citizenName String
+  phone       String
+  email       String?
+  status      String @default("pending") // pending, in_progress, resolved, closed
+  priority    String @default("medium") // low, medium, high, urgent
+  trackingCode String @unique
+  escalatedTo String?
+  history     Json   // Array of status updates: [{status: "pending", date: "2024-01-01", note: "Received"}]
+  attachments String[] // Array of file URLs
+  isPublic    Boolean @default(false)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("complaints")
+}
+
+model Employment {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  type        String // job, tender, contract, training
+  title       String
+  titleEn     String
+  organization String
+  organizationEn String
+  location    String
+  locationEn  String
+  lastDate    DateTime?
+  link        String?
+  description String
+  descriptionEn String
+  category    String
+  categoryEn  String
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("employment")
+}
+
+model EducationItem {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  type        String // school, scholarship, program, award
+  title       String
+  titleEn     String
+  description String
+  descriptionEn String
+  links       String[] // Array of URLs
+  images      String[] // Array of image URLs
+  date        DateTime?
+  tags        String[] // Array of tags
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("education_items")
+}
+
+model EnvironmentInitiative {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  type        String // tree, plastic-free, water, solar, waste
+  typeEn      String
+  metrics     Json   // Array of metrics: [{label: "Trees Planted", value: 500}]
+  startDate   DateTime
+  endDate     DateTime?
+  status      String @default("active") // active, completed, paused
+  images      String[] // Array of image URLs
+  description String
+  descriptionEn String
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("environment_initiatives")
+}
+
+model DashboardMetric {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  key         String
+  label       String
+  labelEn     String
+  value       Float
+  unit        String
+  period      String // month, year
+  source      String
+  order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("dashboard_metrics")
+}
+
+model SocialFeed {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  platform    String // facebook, twitter, instagram, youtube
+  url         String
+  handle      String
+  isActive    Boolean @default(true)
+  order       Int    @default(0)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("social_feeds")
 }
 
 // Village Data Models

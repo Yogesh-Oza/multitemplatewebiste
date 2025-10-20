@@ -12,6 +12,14 @@ export const NAVIGATION_ITEMS = [
   { href: '/contact', label: 'संपर्क', labelEn: 'Contact' },
 ] as const;
 
+export const NEW_NAVIGATION_ITEMS = [
+  { href: '/projects', label: 'प्रकल्प', labelEn: 'Projects' },
+  { href: '/gr', label: 'शासकीय ठराव', labelEn: 'Government Resolutions' },
+  { href: '/feedback', label: 'फीडबॅक', labelEn: 'Feedback' },
+  { href: '/dashboard', label: 'डॅशबोर्ड', labelEn: 'Dashboard' },
+  { href: '/sitemap', label: 'साइटमॅप', labelEn: 'Sitemap' },
+] as const;
+
 export const VILLAGE_STATS = [
   { value: '227', label: 'कुटुंबे', labelEn: 'Families', icon: '👨‍👩‍👧‍👦' },
   { value: '1958', label: 'लोकसंख्या', labelEn: 'Population', icon: '👥' },

@@ -5,6 +5,9 @@ import { AboutSection } from '@/components/sections/about-section';
 import { AnnouncementsSection } from '@/components/sections/announcements-section';
 import { HistorySection } from '@/components/sections/history-section';
 import { CulturalHeritageSection } from '@/components/sections/cultural-heritage-section';
+import { WelcomeVideoSection } from '@/components/sections/welcome-video-section';
+import { WeatherSection } from '@/components/sections/weather-section';
+import { PragatiMeterSection } from '@/components/sections/pragati-meter-section';
 import { SubdomainValidator } from '@/components/subdomain-validator';
 
 const prisma = new PrismaClient();
@@ -53,7 +56,13 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
     <SubdomainValidator subdomain={subdomain}>
       <HeroSection />
       
+      <WeatherSection />
+      
       <AboutSection />
+      
+      <PragatiMeterSection />
+      
+      <WelcomeVideoSection />
       
       <AnnouncementsSection />
       

@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X, Globe, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { SearchModal } from '@/components/search/search-modal';
 import { NAVIGATION_ITEMS } from '@/lib/constants';
 
 interface HeaderProps {
@@ -15,10 +17,45 @@ interface HeaderProps {
 
 export function Header({ villageName, villageNameEn }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      {/* Government branding strip */}
+      <div className="w-full border-b bg-black">
+        <div className="container flex h-12 items-center justify-between text-xs sm:text-sm">
+          <div className="flex items-center gap-3">
+            {/* Digital India logo */}
+            <Image
+              src="/images/gov-logos/satyamev_jayate_logo.png"
+              alt="Satyamev Jayate"
+              width={32}
+              height={32}
+              className="h-8 w-auto object-contain"
+              priority
+            />
+            <div className="h-6 w-px bg-white/30 hidden sm:block"></div>
+            <span className="font-medium text-white">
+              शासन महाराष्ट्र • ग्रामीण विकास विभाग
+            </span>
+          </div>
+          <div className="hidden md:flex items-center gap-3">
+            <span className="text-white/90 font-medium">
+              अधिकृत ग्रामपंचायत संकेतस्थळ
+            </span>
+            
+            <Image
+              src="/images/gov-logos/digital-india.png"
+              alt="Digital India"
+              width={80}
+              height={32}
+              className="h-8 w-auto object-contain"
+              priority
+            />
+          </div>
+        </div>
+      </div>
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
@@ -52,7 +89,18 @@ export function Header({ villageName, villageNameEn }: HeaderProps) {
           })}
         </nav>
 
-        {/* Desktop Actions - Removed for cleaner design */}
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsSearchOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden lg:inline">शोध</span>
+          </Button>
+        </div>
 
         {/* Mobile Menu */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -89,10 +137,29 @@ export function Header({ villageName, villageNameEn }: HeaderProps) {
                 })}
               </nav>
 
-              {/* Login button removed for cleaner design */}
+              {/* Mobile Search */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsSearchOpen(true);
+                }}
+                className="flex items-center gap-2 w-full justify-center"
+              >
+                <Search className="h-4 w-4" />
+                <span>शोध</span>
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
+
+        {/* Search Modal */}
+        <SearchModal
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          subdomain={villageName || 'default'}
+        />
       </div>
     </header>
   );
