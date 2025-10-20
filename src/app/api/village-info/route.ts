@@ -86,7 +86,8 @@ export async function POST(request: NextRequest) {
     const { title, description, titleEn, descriptionEn, stats,
       sectionOneTitle, sectionOneBody,
       sectionTwoTitle, sectionTwoBody,
-      sectionThreeTitle, sectionThreeBody } = body;
+      sectionThreeTitle, sectionThreeBody,
+      villageLogo, villageName, villageNameEn } = body;
 
     // Store stats as array directly
     const statsData = stats && Array.isArray(stats) ? stats : [];
@@ -111,6 +112,9 @@ export async function POST(request: NextRequest) {
           sectionTwoBody: sectionTwoBody ?? '',
           sectionThreeTitle: sectionThreeTitle ?? '',
           sectionThreeBody: sectionThreeBody ?? '',
+          villageLogo: villageLogo ?? '',
+          villageName: villageName ?? '',
+          villageNameEn: villageNameEn ?? '',
           stats: statsData,
         },
       });
@@ -128,6 +132,9 @@ export async function POST(request: NextRequest) {
           sectionTwoBody: sectionTwoBody ?? '',
           sectionThreeTitle: sectionThreeTitle ?? '',
           sectionThreeBody: sectionThreeBody ?? '',
+          villageLogo: villageLogo ?? '',
+          villageName: villageName ?? '',
+          villageNameEn: villageNameEn ?? '',
           stats: statsData,
           subdomainId,
         },

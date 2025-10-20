@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Plus, Trash2, Users, Home, MapPin, TrendingUp, RefreshCw } from 'lucide-react';
+import { Save, Plus, Trash2, Users, Home, MapPin, TrendingUp, RefreshCw, Video, Play, Upload, FileVideo, Link } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Stat {
@@ -22,6 +22,9 @@ interface VillageInfo {
   id?: string;
   title: string;
   description: string;
+  villageLogo?: string;
+  villageName?: string;
+  villageNameEn?: string;
   sectionOneTitle?: string;
   sectionOneBody?: string;
   sectionTwoTitle?: string;
@@ -29,6 +32,14 @@ interface VillageInfo {
   sectionThreeTitle?: string;
   sectionThreeBody?: string;
   stats: Stat[];
+  welcomeVideo?: {
+    url: string;
+    title: string;
+    description: string;
+    isActive: boolean;
+    type: 'youtube' | 'upload';
+    uploadedFile?: string;
+  };
 }
 
 interface VillageInfoFormProps {
@@ -99,6 +110,9 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
   const [formData, setFormData] = useState<VillageInfo>({
     title: villageData?.title || 'आमच्या गावाबद्दल',
     description: villageData?.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+    villageLogo: villageData?.villageLogo || '',
+    villageName: villageData?.villageName || '',
+    villageNameEn: villageData?.villageNameEn || '',
     sectionOneTitle: villageData?.sectionOneTitle || 'आमचे गाव',
     sectionOneBody: villageData?.sectionOneBody || 'आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.',
     sectionTwoTitle: villageData?.sectionTwoTitle || 'स्थान',
@@ -106,6 +120,14 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
     sectionThreeTitle: villageData?.sectionThreeTitle || 'विकास',
     sectionThreeBody: villageData?.sectionThreeBody || 'आमच्या गावाचा सतत विकास होत आहे. शिक्षण, आरोग्य, रोजगार आणि मूलभूत सुविधांसाठी सर्व प्रयत्न केले जात आहेत.',
     stats: transformStats(villageData?.stats),
+    welcomeVideo: villageData?.welcomeVideo || {
+      url: '',
+      title: 'गावाचे स्वागत व्हिडिओ',
+      description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
+      isActive: false,
+      type: 'youtube',
+      uploadedFile: ''
+    },
   });
 
   // Update form data when villageData changes
@@ -114,6 +136,9 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       setFormData({
         title: villageData.title || 'आमच्या गावाबद्दल',
         description: villageData.description || 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख',
+        villageLogo: villageData.villageLogo || '',
+        villageName: villageData.villageName || '',
+        villageNameEn: villageData.villageNameEn || '',
         sectionOneTitle: villageData.sectionOneTitle || 'आमचे गाव',
         sectionOneBody: villageData.sectionOneBody || 'आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.',
         sectionTwoTitle: villageData.sectionTwoTitle || 'स्थान',
@@ -121,6 +146,14 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         sectionThreeTitle: villageData.sectionThreeTitle || 'विकास',
         sectionThreeBody: villageData.sectionThreeBody || 'आमच्या गावाचा सतत विकास होत आहे. शिक्षण, आरोग्य, रोजगार आणि मूलभूत सुविधांसाठी सर्व प्रयत्न केले जात आहेत.',
         stats: transformStats(villageData.stats),
+        welcomeVideo: villageData.welcomeVideo || {
+          url: '',
+          title: 'गावाचे स्वागत व्हिडिओ',
+          description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
+          isActive: false,
+          type: 'youtube',
+          uploadedFile: ''
+        },
       });
     }
   }, [villageData]);
@@ -150,6 +183,62 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       ...prev,
       stats: Array.isArray(prev.stats) ? prev.stats.filter((_, i) => i !== index) : []
     }));
+  };
+
+  const handleVideoUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({
+          ...prev,
+          welcomeVideo: {
+            ...prev.welcomeVideo!,
+            uploadedFile: data.url,
+            type: 'upload'
+          }
+        }));
+        toast.success('व्हिडिओ अपलोड केले!');
+      } else {
+        toast.error('व्हिडिओ अपलोड करताना त्रुटी आली');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('व्हिडिओ अपलोड करताना त्रुटी आली');
+    }
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({
+          ...prev,
+          villageLogo: data.url
+        }));
+        toast.success('लोगो अपलोड केले!');
+      } else {
+        toast.error('लोगो अपलोड करताना त्रुटी आली');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('लोगो अपलोड करताना त्रुटी आली');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -205,6 +294,72 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Village Branding */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Home className="h-5 w-5 mr-2" />
+            गाव ब्रँडिंग
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="villageName">गावाचे नाव (हेडरसाठी)</Label>
+              <Input
+                id="villageName"
+                value={formData.villageName || ''}
+                onChange={(e) => handleInputChange('villageName', e.target.value)}
+                placeholder="गावाचे नाव"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                हे नाव हेडरमध्ये दिसेल
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="villageNameEn">गावाचे नाव (इंग्रजी)</Label>
+              <Input
+                id="villageNameEn"
+                value={formData.villageNameEn || ''}
+                onChange={(e) => handleInputChange('villageNameEn', e.target.value)}
+                placeholder="Village Name"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="villageLogo">गावाचे लोगो</Label>
+            <div className="mt-2">
+              <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                <Upload className="h-5 w-5 mr-2" />
+                <span className="text-sm font-medium">लोगो अपलोड करा</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleLogoUpload(file);
+                    }
+                  }}
+                />
+              </label>
+              <p className="text-xs text-gray-500 mt-1">JPG, PNG, WebP, कमाल 5MB</p>
+              
+              {formData.villageLogo && (
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                  <div className="flex items-center space-x-2 text-sm text-green-700">
+                    <Home className="h-4 w-4" />
+                    <span>लोगो अपलोड केले: {formData.villageLogo.split('/').pop()}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Basic Information */}
       <Card>
         <CardHeader>
@@ -268,6 +423,187 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
               <Textarea rows={5} value={formData.sectionThreeBody} onChange={(e) => handleInputChange('sectionThreeBody' as any, e.target.value)} />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Welcome Video */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Video className="h-5 w-5 mr-2" />
+            गावाचे स्वागत व्हिडिओ
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Video Type Selection */}
+          <div className="flex space-x-4 mb-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                name="videoType"
+                value="youtube"
+                checked={formData.welcomeVideo?.type === 'youtube'}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  welcomeVideo: {
+                    ...prev.welcomeVideo!,
+                    type: 'youtube',
+                    uploadedFile: ''
+                  }
+                }))}
+                className="rounded"
+              />
+              <Link className="h-4 w-4" />
+              <span className="text-sm">YouTube URL</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                name="videoType"
+                value="upload"
+                checked={formData.welcomeVideo?.type === 'upload'}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  welcomeVideo: {
+                    ...prev.welcomeVideo!,
+                    type: 'upload',
+                    url: ''
+                  }
+                }))}
+                className="rounded"
+              />
+              <FileVideo className="h-4 w-4" />
+              <span className="text-sm">व्हिडिओ अपलोड</span>
+            </label>
+          </div>
+
+          {/* YouTube URL Option */}
+          {formData.welcomeVideo?.type === 'youtube' && (
+            <div>
+              <Label htmlFor="videoUrl">YouTube URL</Label>
+              <Input
+                id="videoUrl"
+                value={formData.welcomeVideo?.url || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  welcomeVideo: {
+                    ...prev.welcomeVideo!,
+                    url: e.target.value
+                  }
+                }))}
+                placeholder="https://www.youtube.com/watch?v=9W5Vw34xayM"
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                YouTube, Vimeo किंवा इतर व्हिडिओ प्लॅटफॉर्मचा URL
+              </p>
+            </div>
+          )}
+
+          {/* Video Upload Option */}
+          {formData.welcomeVideo?.type === 'upload' && (
+            <div>
+              <Label>व्हिडिओ फाइल अपलोड</Label>
+              <div className="mt-2">
+                <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <Upload className="h-5 w-5 mr-2" />
+                  <span className="text-sm font-medium">व्हिडिओ अपलोड करा</span>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleVideoUpload(file);
+                      }
+                    }}
+                  />
+                </label>
+                <p className="text-xs text-gray-500 mt-1">MP4, MOV, AVI, कमाल 100MB</p>
+                
+                {formData.welcomeVideo?.uploadedFile && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                    <div className="flex items-center space-x-2 text-sm text-green-700">
+                      <FileVideo className="h-4 w-4" />
+                      <span>व्हिडिओ अपलोड केले: {formData.welcomeVideo.uploadedFile.split('/').pop()}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Video Title and Description */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="videoTitle">व्हिडिओ शीर्षक</Label>
+              <Input
+                id="videoTitle"
+                value={formData.welcomeVideo?.title || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  welcomeVideo: {
+                    ...prev.welcomeVideo!,
+                    title: e.target.value
+                  }
+                }))}
+                placeholder="गावाचे स्वागत व्हिडिओ"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="videoDescription">व्हिडिओ वर्णन</Label>
+              <Textarea
+                id="videoDescription"
+                value={formData.welcomeVideo?.description || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  welcomeVideo: {
+                    ...prev.welcomeVideo!,
+                    description: e.target.value
+                  }
+                }))}
+                placeholder="सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप"
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.welcomeVideo?.isActive || false}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  welcomeVideo: {
+                    ...prev.welcomeVideo!,
+                    isActive: e.target.checked
+                  }
+                }))}
+                className="rounded"
+              />
+              <span className="text-sm">व्हिडिओ सक्रिय करा</span>
+            </label>
+          </div>
+
+          {/* Video Preview */}
+          {(formData.welcomeVideo?.url || formData.welcomeVideo?.uploadedFile) && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-medium mb-2">व्हिडिओ प्रीव्ह्यू</h4>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Play className="h-4 w-4" />
+                <span>
+                  {formData.welcomeVideo?.type === 'youtube' 
+                    ? `YouTube URL: ${formData.welcomeVideo.url}`
+                    : `अपलोड केलेला व्हिडिओ: ${formData.welcomeVideo?.uploadedFile?.split('/').pop()}`
+                  }
+                </span>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

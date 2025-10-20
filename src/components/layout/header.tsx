@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -15,10 +15,38 @@ interface HeaderProps {
   villageNameEn?: string;
 }
 
+interface VillageData {
+  villageLogo?: string;
+  villageName?: string;
+  villageNameEn?: string;
+}
+
 export function Header({ villageName, villageNameEn }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [villageData, setVillageData] = useState<VillageData>({});
   const pathname = usePathname();
+
+  // Fetch village data for dynamic branding
+  useEffect(() => {
+    const fetchVillageData = async () => {
+      try {
+        const response = await fetch('/api/village-info');
+        if (response.ok) {
+          const data = await response.json();
+          setVillageData({
+            villageLogo: data.villageLogo,
+            villageName: data.villageName,
+            villageNameEn: data.villageNameEn
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching village data:', error);
+      }
+    };
+
+    fetchVillageData();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -59,9 +87,20 @@ export function Header({ villageName, villageNameEn }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-full gradient-theme" />
+          {villageData.villageLogo ? (
+            <Image
+              src={villageData.villageLogo}
+              alt="Village Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full object-cover"
+              priority
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-full gradient-theme" />
+          )}
           <span className="text-xl font-bold text-gray-900">
-            {villageName || 'ग्रामपंचायत'}
+            {villageData.villageName || villageName || 'ग्रामपंचायत'}
           </span>
         </Link>
 
@@ -113,8 +152,20 @@ export function Header({ villageName, villageNameEn }: HeaderProps) {
           <SheetContent side="right" className="w-[300px] sm:w-[400px]">
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-2 pb-4 border-b">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600" />
-                <span className="text-lg font-bold text-gray-900">ग्रामपंचायत</span>
+                {villageData.villageLogo ? (
+                  <Image
+                    src={villageData.villageLogo}
+                    alt="Village Logo"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600" />
+                )}
+                <span className="text-lg font-bold text-gray-900">
+                  {villageData.villageName || villageName || 'ग्रामपंचायत'}
+                </span>
               </div>
               
               <nav className="flex flex-col space-y-2">

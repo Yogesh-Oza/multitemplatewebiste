@@ -17,6 +17,10 @@ model VillageInfo {
   titleEn     String
   description String
   descriptionEn String
+  // Village branding
+  villageLogo     String? // Village logo URL
+  villageName     String? // Custom village name for header
+  villageNameEn   String? // Custom village name in English
   // Additional dynamic sections (Marathi only)
   sectionOneTitle   String @default("")
   sectionOneBody    String @default("")
