@@ -42,7 +42,7 @@ export default function ProjectsAdminPage() {
     descriptionEn: '',
     startDate: '',
     endDate: '',
-    status: 'upcoming' as const,
+    status: 'upcoming' as 'upcoming' | 'ongoing' | 'completed',
     budget: '',
     category: '',
     categoryEn: '',

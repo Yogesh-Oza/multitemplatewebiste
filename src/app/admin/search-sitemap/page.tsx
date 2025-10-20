@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Sitemap, RefreshCw, Settings, BarChart3, FileText, Database } from 'lucide-react';
+import { Search, Map, RefreshCw, Settings, BarChart3, FileText, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ interface SearchStats {
   recentSearches: Array<{ query: string; timestamp: string; results: number }>;
 }
 
-interface SitemapStats {
+interface MapStats {
   totalPages: number;
   contentCounts: {
     announcements: number;
@@ -29,9 +29,9 @@ interface SitemapStats {
   lastUpdated: string;
 }
 
-export default function SearchSitemapAdminPage() {
+export default function SearchMapAdminPage() {
   const [searchStats, setSearchStats] = useState<SearchStats | null>(null);
-  const [sitemapStats, setSitemapStats] = useState<SitemapStats | null>(null);
+  const [sitemapStats, setMapStats] = useState<MapStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -71,7 +71,7 @@ export default function SearchSitemapAdminPage() {
       const sitemapResponse = await fetch('/api/sitemap');
       const sitemapData = await sitemapResponse.json();
       
-      const mockSitemapStats: SitemapStats = {
+      const mockMapStats: MapStats = {
         totalPages: 16,
         contentCounts: {
           announcements: 45,
@@ -88,7 +88,7 @@ export default function SearchSitemapAdminPage() {
       };
 
       setSearchStats(mockSearchStats);
-      setSitemapStats(mockSitemapStats);
+      setMapStats(mockMapStats);
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -112,7 +112,7 @@ export default function SearchSitemapAdminPage() {
     }
   };
 
-  const generateSitemap = async () => {
+  const generateMap = async () => {
     try {
       // This would trigger sitemap generation
       console.log('Generating sitemap...');
@@ -135,7 +135,7 @@ export default function SearchSitemapAdminPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Search & Sitemap Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Search & Map Management</h1>
           <p className="text-gray-600">Monitor search performance and manage sitemap</p>
         </div>
         <div className="flex gap-3">
@@ -225,14 +225,14 @@ export default function SearchSitemapAdminPage() {
         </div>
       )}
 
-      {/* Sitemap Statistics */}
+      {/* Map Statistics */}
       {sitemapStats && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Sitemap className="h-5 w-5 text-purple-600" />
-                Sitemap Overview
+                <Map className="h-5 w-5 text-purple-600" />
+                Map Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -299,14 +299,14 @@ export default function SearchSitemapAdminPage() {
                   <div className="flex items-center gap-3">
                     <FileText className="h-5 w-5 text-green-600" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">Sitemap</p>
+                      <p className="text-sm font-medium text-gray-900">Map</p>
                       <p className="text-xs text-gray-600">Generate fresh sitemap XML</p>
                     </div>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={generateSitemap}
+                    onClick={generateMap}
                     className="text-green-600 hover:text-green-700"
                   >
                     Generate
@@ -347,8 +347,8 @@ export default function SearchSitemapAdminPage() {
               className="flex items-center gap-2 h-20 flex-col"
               onClick={() => window.open('/sitemap', '_blank')}
             >
-              <Sitemap className="h-6 w-6" />
-              <span>View Sitemap</span>
+              <Map className="h-6 w-6" />
+              <span>View Map</span>
             </Button>
             
             <Button

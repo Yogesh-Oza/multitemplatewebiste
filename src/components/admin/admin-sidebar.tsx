@@ -23,7 +23,7 @@ import {
   MessageSquare,
   BarChart3,
   Search,
-  Sitemap
+  Map
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
