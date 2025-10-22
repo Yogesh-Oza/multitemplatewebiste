@@ -75,11 +75,27 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
       
       <WeatherSection />
       
-      <AboutSection villageInfo={subdomainData.villageInfo} />
+      <AboutSection villageInfo={subdomainData.villageInfo?.[0] ? {
+        ...subdomainData.villageInfo[0],
+        stats: Array.isArray(subdomainData.villageInfo[0].stats) 
+          ? subdomainData.villageInfo[0].stats as any[]
+          : []
+      } : null} />
       
-      <PragatiMeterSection dashboardMetrics={dashboardMetrics} />
+      <PragatiMeterSection dashboardMetrics={dashboardMetrics.map(metric => ({
+        ...metric,
+        target: 100, // Default target value
+        icon: 'TrendingUp', // Default icon
+        color: 'blue' // Default color
+      }))} />
       
-      <WelcomeVideoSection homepageSettings={homepageSettings} />
+      <WelcomeVideoSection homepageSettings={homepageSettings ? {
+        welcomeVideo: {
+          url: '',
+          title: homepageSettings.mainHeading,
+          description: homepageSettings.subtitle
+        }
+      } : null} />
       
       <AnnouncementsSection announcements={subdomainData.announcements} />
       
@@ -88,7 +104,11 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
         timelineItems={timelineItems} 
       />
       
-      <CulturalHeritageSection culturalHeritage={subdomainData.culturalHeritage} />
+      <CulturalHeritageSection culturalHeritage={subdomainData.culturalHeritage.map(item => ({
+        ...item,
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString()
+      }))} />
     </>
   );
 }

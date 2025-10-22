@@ -27,9 +27,17 @@ export default async function SubdomainAboutPage({ params }: AboutPageProps) {
     redirect(baseUrl);
   }
 
+  // Transform the data to match the expected interface
+  const villageInfo = subdomainData.villageInfo?.[0] ? {
+    ...subdomainData.villageInfo[0],
+    stats: Array.isArray(subdomainData.villageInfo[0].stats) 
+      ? subdomainData.villageInfo[0].stats as any[]
+      : []
+  } : null;
+
   return (
     <div className="min-h-screen">
-      <AboutSection villageInfo={subdomainData.villageInfo} />
+      <AboutSection villageInfo={villageInfo} />
     </div>
   );
 }

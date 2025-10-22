@@ -31,7 +31,16 @@ export default async function SubdomainProgramsPage({ params }: ProgramsPageProp
 
   return (
     <div className="min-h-screen">
-      <ProgramsSection programs={subdomainData.programs} />
+      <ProgramsSection programs={subdomainData.programs.map(program => ({
+        ...program,
+        date: program.date.toISOString(),
+        createdAt: program.createdAt.toISOString(),
+        updatedAt: program.updatedAt.toISOString(),
+        time: program.time || undefined,
+        location: program.location || undefined,
+        category: program.category || undefined,
+        imageUrl: program.imageUrl || undefined
+      }))} />
     </div>
   );
 }

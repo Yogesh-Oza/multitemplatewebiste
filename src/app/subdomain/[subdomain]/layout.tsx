@@ -41,19 +41,24 @@ export default async function SubdomainLayout({
         villageName={subdomainData.villageName}
         villageNameEn={subdomainData.villageNameEn}
         villageData={{
-          villageLogo: subdomainData.villageInfo?.villageLogo,
-          villageName: subdomainData.villageInfo?.villageName,
-          villageNameEn: subdomainData.villageInfo?.villageNameEn,
-          satyamevJayateLogoUrl: subdomainData.villageInfo?.satyamevJayateLogoUrl,
-          digitalIndiaLogoUrl: subdomainData.villageInfo?.digitalIndiaLogoUrl,
-          govDeptText: subdomainData.villageInfo?.govDeptText,
-          officialSiteText: subdomainData.villageInfo?.officialSiteText,
+          villageLogo: subdomainData.villageInfo?.[0]?.villageLogo || undefined,
+          villageName: subdomainData.villageInfo?.[0]?.villageName || undefined,
+          villageNameEn: subdomainData.villageInfo?.[0]?.villageNameEn || undefined,
+          satyamevJayateLogoUrl: subdomainData.villageInfo?.[0]?.satyamevJayateLogoUrl || undefined,
+          digitalIndiaLogoUrl: subdomainData.villageInfo?.[0]?.digitalIndiaLogoUrl || undefined,
+          govDeptText: subdomainData.villageInfo?.[0]?.govDeptText || undefined,
+          officialSiteText: subdomainData.villageInfo?.[0]?.officialSiteText || undefined,
         }}
       />
       <main className="flex-1">
         {children}
       </main>
-      <Footer footerContent={subdomainData.footerContent} />
+      <Footer footerContent={subdomainData.footerContent?.[0] ? {
+        ...subdomainData.footerContent[0],
+        socialMedia: Array.isArray(subdomainData.footerContent[0].socialMedia) 
+          ? subdomainData.footerContent[0].socialMedia as any[]
+          : []
+      } : null} />
     </div>
   );
 }
