@@ -6,9 +6,8 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const secret = process.env.NEXTAUTH_SECRET;
   
-  // Skip middleware for API routes, static files
+  // Skip middleware for static files only
   if (
-    pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon.ico') ||
     pathname === '/subdomain-register'
@@ -74,6 +73,13 @@ export async function middleware(request: NextRequest) {
     // For admin routes on subdomains, don't rewrite - let them use the main admin routes
     if (pathname.startsWith('/admin')) {
       return NextResponse.next();
+    }
+    
+    // For API routes on subdomains, add subdomain header for proper detection
+    if (pathname.startsWith('/api/')) {
+      const response = NextResponse.next();
+      response.headers.set('x-subdomain', subdomain);
+      return response;
     }
     
     // For other subdomain requests, rewrite to subdomain route

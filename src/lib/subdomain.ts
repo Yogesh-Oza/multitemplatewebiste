@@ -2,6 +2,12 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export function getSubdomainFromRequest(request: NextRequest): string | null {
+  // First check if middleware set a subdomain header
+  const subdomainHeader = request.headers.get('x-subdomain');
+  if (subdomainHeader) {
+    return subdomainHeader;
+  }
+  
   const hostname = request.headers.get('host') || '';
   
   // Remove port if present
