@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,10 @@ interface CulturalHeritageItem {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+interface CulturalHeritageSectionProps {
+  culturalHeritage: CulturalHeritageItem[];
 }
 
 const TRADITIONAL_ARTS = [
@@ -45,27 +48,7 @@ const TRADITIONAL_ARTS = [
   },
 ];
 
-export function CulturalHeritageSection() {
-  const [heritageItems, setHeritageItems] = useState<CulturalHeritageItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchHeritageItems = async () => {
-      try {
-        const response = await fetch('/api/cultural-heritage');
-        if (response.ok) {
-          const data = await response.json();
-          setHeritageItems(data.filter((item: CulturalHeritageItem) => item.isActive));
-        }
-      } catch (error) {
-        console.error('Error fetching cultural heritage:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHeritageItems();
-  }, []);
+export function CulturalHeritageSection({ culturalHeritage }: CulturalHeritageSectionProps) {
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -121,18 +104,8 @@ export function CulturalHeritageSection() {
           viewport={{ once: true }}
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
         >
-          {loading ? (
-            // Loading skeleton
-            Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="bg-gray-200 h-56 w-full rounded-lg mb-4"></div>
-                <div className="bg-gray-200 h-4 w-3/4 rounded mb-2"></div>
-                <div className="bg-gray-200 h-3 w-1/2 rounded mb-4"></div>
-                <div className="bg-gray-200 h-3 w-full rounded"></div>
-              </div>
-            ))
-          ) : heritageItems.length > 0 ? (
-            heritageItems.map((heritage) => (
+          {culturalHeritage.length > 0 ? (
+            culturalHeritage.map((heritage) => (
               <motion.div key={heritage.id} variants={itemVariants}>
                 <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group overflow-hidden">
                   <div className="relative">

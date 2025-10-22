@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Megaphone, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 interface Announcement {
   id: string;
@@ -20,48 +19,18 @@ interface Announcement {
   category: string;
 }
 
-export function AnnouncementsSection() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [loading, setLoading] = useState(true);
+interface AnnouncementsSectionProps {
+  announcements: Announcement[];
+}
 
-  useEffect(() => {
-    const fetchAnnouncements = async () => {
-      try {
-        const response = await fetch('/api/announcements');
-        if (response.ok) {
-          const data = await response.json();
-          // Normalize image field from API (image -> imageUrl)
-          const normalized = (Array.isArray(data) ? data : []).map((a: any) => ({
-            id: a.id,
-            title: a.title,
-            description: a.description,
-            date: typeof a.date === 'string' ? a.date : (a.date ? new Date(a.date).toISOString().slice(0,10) : ''),
-            imageUrl: a.imageUrl ?? a.image ?? undefined,
-            priority: a.priority ?? 'low',
-            status: a.status ?? 'active',
-            category: a.category ?? ''
-          }));
-          setAnnouncements(normalized);
-        }
-      } catch (error) {
-        console.error('Error fetching announcements:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAnnouncements();
-  }, []);
-
-  if (loading) {
+export function AnnouncementsSection({ announcements }: AnnouncementsSectionProps) {
+  if (announcements.length === 0) {
     return (
       <section id="announcements" className="py-16 bg-gray-50">
         <div className="container">
           <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
-            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">सूचना</h2>
+            <p className="text-gray-600">सध्या कोणतीही सूचना उपलब्ध नाही.</p>
           </div>
         </div>
       </section>

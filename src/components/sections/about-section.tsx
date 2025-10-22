@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Home, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
-import { useVillageInfo } from '@/hooks/useVillageInfo';
 
 interface Stat {
   value: string;
@@ -28,36 +27,11 @@ interface VillageInfo {
   stats: Stat[];
 }
 
-export function AboutSection() {
-  const { villageInfo, loading, error } = useVillageInfo();
+interface AboutSectionProps {
+  villageInfo: VillageInfo | null;
+}
 
-  if (loading) {
-    return (
-      <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
-        <div className="container">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
-        <div className="container">
-          <div className="text-center">
-            <p className="text-red-600">गावाची माहिती लोड करताना त्रुटी आली</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
+export function AboutSection({ villageInfo }: AboutSectionProps) {
   if (!villageInfo) {
     return (
       <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">

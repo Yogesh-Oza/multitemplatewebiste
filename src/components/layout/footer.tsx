@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
-import { useState, useEffect } from 'react';
 
 interface SocialMediaLink {
   platform: string;
@@ -19,10 +18,19 @@ interface FooterContent {
   phone: string;
   email: string;
   website: string;
+  footerSatyamevJayateLogoUrl?: string;
+  footerDigitalIndiaLogoUrl?: string;
+  footerGovDeptText?: string;
+  footerOwnershipText?: string;
 }
 
-export function Footer() {
-  const [footerContent, setFooterContent] = useState<FooterContent>({
+interface FooterProps {
+  footerContent?: FooterContent | null;
+}
+
+export function Footer({ footerContent }: FooterProps) {
+  // Use provided footer content or fallback to default, ensuring all required fields exist
+  const defaultContent = {
     description: 'एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गावाची ओळख. सर्वांसाठी विकास आणि समृद्धी.',
     socialMedia: [
       { platform: 'facebook', url: '#', icon: 'Facebook' },
@@ -35,32 +43,12 @@ export function Footer() {
     phone: '+91 77439 66987',
     email: 'info@grampanchayat.com',
     website: 'mahagp.in'
-  });
+  };
 
-  useEffect(() => {
-    fetchFooterContent();
-  }, []);
-
-  const fetchFooterContent = async () => {
-    try {
-      const response = await fetch('/api/footer-content');
-      if (response.ok) {
-        const data = await response.json();
-        if (data) {
-          setFooterContent({
-            description: data.description || footerContent.description,
-            socialMedia: data.socialMedia || footerContent.socialMedia,
-            officeName: data.officeName || footerContent.officeName,
-            address: data.address || footerContent.address,
-            phone: data.phone || footerContent.phone,
-            email: data.email || footerContent.email,
-            website: data.website || footerContent.website
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching footer content:', error);
-    }
+  const content = {
+    ...defaultContent,
+    ...footerContent,
+    socialMedia: footerContent?.socialMedia || defaultContent.socialMedia
   };
 
   const getSocialIcon = (iconName: string) => {
@@ -88,10 +76,10 @@ export function Footer() {
               <span className="text-xl font-bold">ग्रामपंचायत</span>
             </div>
             <p className="text-gray-300 leading-relaxed">
-              {footerContent.description}
+              {content.description}
             </p>
             <div className="flex space-x-4">
-              {footerContent.socialMedia.map((social, index) => (
+              {content.socialMedia.map((social, index) => (
                 <a 
                   key={index}
                   href={social.url} 
@@ -177,28 +165,28 @@ export function Footer() {
                 <MapPin className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-gray-300 whitespace-pre-line">
-                    {footerContent.officeName}<br />
-                    {footerContent.address}
+                    {content.officeName}<br />
+                    {content.address}
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                <p className="text-gray-300">{footerContent.phone}</p>
+                <p className="text-gray-300">{content.phone}</p>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                <p className="text-gray-300">{footerContent.email}</p>
+                <p className="text-gray-300">{content.email}</p>
               </div>
               <div className="flex items-center space-x-3">
                 <Globe className="h-5 w-5 text-blue-400 flex-shrink-0" />
                 <a 
-                  href={`https://${footerContent.website}`} 
+                  href={`https://${content.website}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  {footerContent.website}
+                  {content.website}
                 </a>
               </div>
             </div>
@@ -230,27 +218,31 @@ export function Footer() {
         <div className="container py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/gov-logos/digital-india.png"
-              alt="Digital India"
-              width={80}
-              height={32}
+              src={content.footerSatyamevJayateLogoUrl || "/images/gov-logos/satyamev_jayate_logo.png"}
+              alt="Government of Maharashtra"
+              width={40}
+              height={40}
               className="h-10 w-auto object-contain flex-shrink-0"
             />
             <div className="text-sm text-white">
-              <div className="font-semibold">शासन महाराष्ट्र • ग्रामीण विकास विभाग</div>
-              <div className="text-gray-300">या संकेतस्थळाचे मालक: {footerContent.officeName}</div>
+              <div className="font-semibold">
+                {content.footerGovDeptText || "शासन महाराष्ट्र • ग्रामीण विकास विभाग"}
+              </div>
+              <div className="text-gray-300">
+                {content.footerOwnershipText || `या संकेतस्थळाचे मालक: ${content.officeName}`}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-xs text-gray-400 text-right">
-              <div>पत्ता: {footerContent.address.replace('\n', ', ')}</div>
-              <div>दूरध्वनी: {footerContent.phone}</div>
+              <div>पत्ता: {content.address.replace('\n', ', ')}</div>
+              <div>दूरध्वनी: {content.phone}</div>
             </div>
             <Image
-              src="/images/gov-logos/satyamev_jayate_logo.png"
-              alt="Government of Maharashtra"
-              width={40}
-              height={40}
+              src={content.footerDigitalIndiaLogoUrl || "/images/gov-logos/digital-india.png"}
+              alt="Digital India"
+              width={80}
+              height={32}
               className="h-10 w-auto object-contain flex-shrink-0"
             />
           </div>

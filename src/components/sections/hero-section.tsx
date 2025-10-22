@@ -19,37 +19,13 @@ interface HomepageSettings {
   subtitle: string;
 }
 
-export function HeroSection() {
+interface HeroSectionProps {
+  heroImages: HeroImage[];
+  homepageSettings: HomepageSettings | null;
+}
+
+export function HeroSection({ heroImages, homepageSettings }: HeroSectionProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
-  const [homepageSettings, setHomepageSettings] = useState<HomepageSettings | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch hero images
-        const imagesResponse = await fetch('/api/hero-images');
-        if (imagesResponse.ok) {
-          const imagesData = await imagesResponse.json();
-          setHeroImages(imagesData);
-        }
-
-        // Fetch homepage settings
-        const settingsResponse = await fetch('/api/homepage-settings');
-        if (settingsResponse.ok) {
-          const settingsData = await settingsResponse.json();
-          setHomepageSettings(settingsData);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     if (heroImages.length > 0) {

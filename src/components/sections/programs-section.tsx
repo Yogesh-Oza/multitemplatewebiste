@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,38 +23,11 @@ interface Program {
   updatedAt: string;
 }
 
-export function ProgramsSection() {
-  const [programs, setPrograms] = useState<Program[]>([]);
-  const [loading, setLoading] = useState(true);
+interface ProgramsSectionProps {
+  programs: Program[];
+}
 
-  console.log('ProgramsSection component rendered');
-
-  useEffect(() => {
-    const fetchPrograms = async () => {
-      try {
-        console.log('Fetching programs...');
-        const response = await fetch('/api/programs');
-        console.log('Programs response status:', response.status);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Programs data received:', data);
-          const filteredPrograms = data.filter((program: Program) => program.status !== 'completed');
-          console.log('Filtered programs:', filteredPrograms);
-          setPrograms(filteredPrograms);
-        } else {
-          const errorData = await response.json();
-          console.error('Programs API error:', errorData);
-        }
-      } catch (error) {
-        console.error('Error fetching programs:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrograms();
-  }, []);
+export function ProgramsSection({ programs }: ProgramsSectionProps) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -79,20 +51,6 @@ export function ProgramsSection() {
     }
   };
 
-  if (loading) {
-    return (
-      <section id="programs" className="py-16 bg-white">
-        <div className="container">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   if (programs.length === 0) {
     return (
@@ -128,7 +86,6 @@ export function ProgramsSection() {
     },
   };
 
-  console.log('ProgramsSection rendering with:', { programs: programs.length, loading });
 
   return (
     <section id="programs" className="py-16 bg-white">

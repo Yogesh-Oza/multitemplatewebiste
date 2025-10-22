@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { description, socialMedia, officeName, address, phone, email, website } = body;
+    const { description, socialMedia, officeName, address, phone, email, website,
+      footerSatyamevJayateLogoUrl, footerDigitalIndiaLogoUrl, footerGovDeptText, footerOwnershipText } = body;
 
     // Check if footer content already exists for this subdomain
     const existingContent = await prisma.footerContent.findFirst({
@@ -57,6 +58,10 @@ export async function POST(request: NextRequest) {
           phone,
           email,
           website,
+          footerSatyamevJayateLogoUrl: footerSatyamevJayateLogoUrl ?? undefined,
+          footerDigitalIndiaLogoUrl: footerDigitalIndiaLogoUrl ?? undefined,
+          footerGovDeptText: footerGovDeptText ?? undefined,
+          footerOwnershipText: footerOwnershipText ?? undefined,
         },
       });
     } else {
@@ -70,6 +75,10 @@ export async function POST(request: NextRequest) {
           phone,
           email,
           website,
+          footerSatyamevJayateLogoUrl: footerSatyamevJayateLogoUrl ?? undefined,
+          footerDigitalIndiaLogoUrl: footerDigitalIndiaLogoUrl ?? undefined,
+          footerGovDeptText: footerGovDeptText ?? undefined,
+          footerOwnershipText: footerOwnershipText ?? undefined,
           subdomainId,
         },
       });

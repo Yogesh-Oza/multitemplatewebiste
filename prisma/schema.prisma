@@ -21,6 +21,11 @@ model VillageInfo {
   villageLogo     String? // Village logo URL
   villageName     String? // Custom village name for header
   villageNameEn   String? // Custom village name in English
+  // Government branding strip (village-specific, overrides defaults)
+  satyamevJayateLogoUrl String @default("/images/gov-logos/satyamev_jayate_logo.png")
+  digitalIndiaLogoUrl    String @default("/images/gov-logos/digital-india.png")
+  govDeptText            String @default("शासन महाराष्ट्र • ग्रामीण विकास विभाग")
+  officialSiteText       String @default("अधिकृत ग्रामपंचायत संकेतस्थळ")
   // Additional dynamic sections (Marathi only)
   sectionOneTitle   String @default("")
   sectionOneBody    String @default("")
@@ -428,6 +433,11 @@ model FooterContent {
   phone       String @default("+91 12345 67890")
   email       String @default("info@grampanchayat.com")
   website     String @default("mahagp.in")
+  // Government branding for footer
+  footerSatyamevJayateLogoUrl String @default("/images/gov-logos/satyamev_jayate_logo.png")
+  footerDigitalIndiaLogoUrl   String @default("/images/gov-logos/digital-india.png")
+  footerGovDeptText           String @default("शासन महाराष्ट्र • ग्रामीण विकास विभाग")
+  footerOwnershipText         String @default("या संकेतस्थळाचे मालक: ग्रामपंचायत कार्यालय")
   subdomainId String? @db.ObjectId
   subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
   createdAt   DateTime @default(now())

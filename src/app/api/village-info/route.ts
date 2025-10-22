@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
       sectionOneTitle, sectionOneBody,
       sectionTwoTitle, sectionTwoBody,
       sectionThreeTitle, sectionThreeBody,
-      villageLogo, villageName, villageNameEn } = body;
+      villageLogo, villageName, villageNameEn,
+      satyamevJayateLogoUrl, digitalIndiaLogoUrl, govDeptText, officialSiteText } = body;
 
     // Store stats as array directly
     const statsData = stats && Array.isArray(stats) ? stats : [];
@@ -115,6 +116,10 @@ export async function POST(request: NextRequest) {
           villageLogo: villageLogo ?? '',
           villageName: villageName ?? '',
           villageNameEn: villageNameEn ?? '',
+          satyamevJayateLogoUrl: satyamevJayateLogoUrl ?? undefined,
+          digitalIndiaLogoUrl: digitalIndiaLogoUrl ?? undefined,
+          govDeptText: govDeptText ?? undefined,
+          officialSiteText: officialSiteText ?? undefined,
           stats: statsData,
         },
       });
@@ -135,6 +140,10 @@ export async function POST(request: NextRequest) {
           villageLogo: villageLogo ?? '',
           villageName: villageName ?? '',
           villageNameEn: villageNameEn ?? '',
+          satyamevJayateLogoUrl: satyamevJayateLogoUrl ?? undefined,
+          digitalIndiaLogoUrl: digitalIndiaLogoUrl ?? undefined,
+          govDeptText: govDeptText ?? undefined,
+          officialSiteText: officialSiteText ?? undefined,
           stats: statsData,
           subdomainId,
         },

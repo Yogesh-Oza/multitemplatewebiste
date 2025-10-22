@@ -8,7 +8,6 @@ import { CulturalHeritageSection } from '@/components/sections/cultural-heritage
 import { WelcomeVideoSection } from '@/components/sections/welcome-video-section';
 import { WeatherSection } from '@/components/sections/weather-section';
 import { PragatiMeterSection } from '@/components/sections/pragati-meter-section';
-import { SubdomainValidator } from '@/components/subdomain-validator';
 
 const prisma = new PrismaClient();
 
@@ -21,7 +20,7 @@ interface SubdomainPageProps {
 export default async function SubdomainPage({ params }: SubdomainPageProps) {
   const { subdomain } = await params;
 
-  // Fetch subdomain data
+  // Fetch subdomain data with all required data for sections
   const subdomainData = await prisma.subdomain.findUnique({
     where: { subdomain },
     include: {
@@ -46,6 +45,21 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
     }
   });
 
+  // Fetch additional data needed by sections
+  const [homepageSettings, timelineItems, dashboardMetrics] = await Promise.all([
+    prisma.homepageSettings.findFirst({
+      where: { subdomainId: subdomainData?.id }
+    }),
+    prisma.timelineItem.findMany({
+      where: { subdomainId: subdomainData?.id, isActive: true },
+      orderBy: { year: 'asc' }
+    }),
+    prisma.dashboardMetric.findMany({
+      where: { subdomainId: subdomainData?.id },
+      orderBy: { order: 'asc' }
+    })
+  ]);
+
   if (!subdomainData || !subdomainData.isActive) {
     // Redirect to main site for invalid subdomains
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -53,23 +67,29 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
   }
 
   return (
-    <SubdomainValidator subdomain={subdomain}>
-      <HeroSection />
+    <>
+      <HeroSection 
+        heroImages={subdomainData.heroImages} 
+        homepageSettings={homepageSettings} 
+      />
       
       <WeatherSection />
       
-      <AboutSection />
+      <AboutSection villageInfo={subdomainData.villageInfo} />
       
-      <PragatiMeterSection />
+      <PragatiMeterSection dashboardMetrics={dashboardMetrics} />
       
-      <WelcomeVideoSection />
+      <WelcomeVideoSection homepageSettings={homepageSettings} />
       
-      <AnnouncementsSection />
+      <AnnouncementsSection announcements={subdomainData.announcements} />
       
-      <HistorySection />
+      <HistorySection 
+        historyCards={subdomainData.historyCards} 
+        timelineItems={timelineItems} 
+      />
       
-      <CulturalHeritageSection />
-    </SubdomainValidator>
+      <CulturalHeritageSection culturalHeritage={subdomainData.culturalHeritage} />
+    </>
   );
 }
 

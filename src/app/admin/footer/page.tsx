@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Facebook, Twitter, Instagram, Plus, Trash2 } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Plus, Trash2, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface SocialMediaLink {
   platform: string;
@@ -24,6 +25,10 @@ interface FooterContent {
   phone: string;
   email: string;
   website: string;
+  footerSatyamevJayateLogoUrl?: string;
+  footerDigitalIndiaLogoUrl?: string;
+  footerGovDeptText?: string;
+  footerOwnershipText?: string;
 }
 
 export default function FooterContentPage() {
@@ -43,6 +48,10 @@ export default function FooterContentPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploading, setUploading] = useState({
+    satyamev: false,
+    digitalIndia: false,
+  });
 
   useEffect(() => {
     fetchFooterContent();
@@ -61,7 +70,11 @@ export default function FooterContentPage() {
             address: data.address || footerContent.address,
             phone: data.phone || footerContent.phone,
             email: data.email || footerContent.email,
-            website: data.website || footerContent.website
+            website: data.website || footerContent.website,
+            footerSatyamevJayateLogoUrl: data.footerSatyamevJayateLogoUrl,
+            footerDigitalIndiaLogoUrl: data.footerDigitalIndiaLogoUrl,
+            footerGovDeptText: data.footerGovDeptText,
+            footerOwnershipText: data.footerOwnershipText
           });
         }
       }
@@ -124,6 +137,49 @@ export default function FooterContentPage() {
       ...footerContent,
       socialMedia: updatedSocialMedia
     });
+  };
+
+  const handleFileUpload = async (file: File, type: 'satyamev' | 'digitalIndia') => {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('कृपया फक्त प्रतिमा फाइल निवडा');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('फाइल आकार 5MB पेक्षा कमी असावा');
+      return;
+    }
+
+    setUploading(prev => ({ ...prev, [type]: true }));
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const fieldName = type === 'satyamev' ? 'footerSatyamevJayateLogoUrl' : 'footerDigitalIndiaLogoUrl';
+        setFooterContent(prev => ({ ...prev, [fieldName]: result.imageUrl }));
+        toast.success(`${type === 'satyamev' ? 'Satyamev Jayate' : 'Digital India'} लोगो अपलोड झाले`);
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'अपलोड अयशस्वी');
+      }
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(error.message || 'अपलोड अयशस्वी');
+    } finally {
+      setUploading(prev => ({ ...prev, [type]: false }));
+    }
   };
 
   if (isLoading) {
@@ -292,6 +348,165 @@ export default function FooterContentPage() {
               <Plus className="h-4 w-4 mr-2" />
               Add Social Media Link
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>सरकारी ब्रँडिंग (फुटर)</CardTitle>
+          <CardDescription>
+            फुटरमधील सरकारी लोगो आणि मजकूर व्यवस्थापन
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Satyamev Jayate Logo */}
+            <div className="space-y-3">
+              <Label>Satyamev Jayate लोगो</Label>
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <Input 
+                    value={footerContent.footerSatyamevJayateLogoUrl || ''}
+                    onChange={(e) => setFooterContent(prev => ({ ...prev, footerSatyamevJayateLogoUrl: e.target.value }))}
+                    placeholder="/images/gov-logos/satyamev_jayate_logo.png" 
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:bg-gray-50 transition-colors">
+                    <Upload className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-medium">
+                      {uploading.satyamev ? 'अपलोड करत आहे...' : 'फाइल निवडा'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file, 'satyamev');
+                      }}
+                      disabled={uploading.satyamev}
+                    />
+                  </label>
+                  {footerContent.footerSatyamevJayateLogoUrl && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFooterContent(prev => ({ ...prev, footerSatyamevJayateLogoUrl: '/images/gov-logos/satyamev_jayate_logo.png' }))}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {footerContent.footerSatyamevJayateLogoUrl && (
+                <div className="mt-2">
+                  <div className="inline-block p-2 border rounded-lg bg-gray-50">
+                    <Image
+                      src={footerContent.footerSatyamevJayateLogoUrl}
+                      alt="Satyamev Jayate Preview"
+                      width={40}
+                      height={40}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Digital India Logo */}
+            <div className="space-y-3">
+              <Label>Digital India लोगो</Label>
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <Input 
+                    value={footerContent.footerDigitalIndiaLogoUrl || ''}
+                    onChange={(e) => setFooterContent(prev => ({ ...prev, footerDigitalIndiaLogoUrl: e.target.value }))}
+                    placeholder="/images/gov-logos/digital-india.png" 
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:bg-gray-50 transition-colors">
+                    <Upload className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-medium">
+                      {uploading.digitalIndia ? 'अपलोड करत आहे...' : 'फाइल निवडा'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file, 'digitalIndia');
+                      }}
+                      disabled={uploading.digitalIndia}
+                    />
+                  </label>
+                  {footerContent.footerDigitalIndiaLogoUrl && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFooterContent(prev => ({ ...prev, footerDigitalIndiaLogoUrl: '/images/gov-logos/digital-india.png' }))}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {footerContent.footerDigitalIndiaLogoUrl && (
+                <div className="mt-2">
+                  <div className="inline-block p-2 border rounded-lg bg-gray-50">
+                    <Image
+                      src={footerContent.footerDigitalIndiaLogoUrl}
+                      alt="Digital India Preview"
+                      width={80}
+                      height={32}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Government Department Text */}
+            <div className="space-y-2">
+              <Label htmlFor="footerGovDeptText">विभाग मजकूर</Label>
+              <Input
+                id="footerGovDeptText"
+                value={footerContent.footerGovDeptText || ''}
+                onChange={(e) => setFooterContent(prev => ({ ...prev, footerGovDeptText: e.target.value }))}
+                placeholder="शासन महाराष्ट्र • ग्रामीण विकास विभाग"
+              />
+              <p className="text-xs text-gray-500">हे मजकूर फुटरमधील सरकारी ब्रँडिंग विभागात दिसेल</p>
+            </div>
+
+            {/* Ownership Text */}
+            <div className="space-y-2">
+              <Label htmlFor="footerOwnershipText">मालकी मजकूर</Label>
+              <Input
+                id="footerOwnershipText"
+                value={footerContent.footerOwnershipText || ''}
+                onChange={(e) => setFooterContent(prev => ({ ...prev, footerOwnershipText: e.target.value }))}
+                placeholder="या संकेतस्थळाचे मालक: ग्रामपंचायत कार्यालय"
+              />
+              <p className="text-xs text-gray-500">हे मजकूर फुटरमधील मालकी विभागात दिसेल</p>
+            </div>
+
+            {/* File Upload Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <ImageIcon className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-medium text-blue-900">फाइल अपलोड माहिती</h4>
+                  <p className="text-xs text-blue-700 mt-1">
+                    • JPG, PNG, WebP स्वरूपातील प्रतिमा स्वीकारल्या जातात<br/>
+                    • कमाल फाइल आकार: 5MB<br/>
+                    • लोगो साठी शिफारस केलेले आकार: Satyamev Jayate (40x40px), Digital India (80x32px)
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

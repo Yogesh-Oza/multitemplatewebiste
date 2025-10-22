@@ -23,7 +23,8 @@ import {
   MessageSquare,
   BarChart3,
   Search,
-  Map
+  Map,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +34,12 @@ const adminNavItems = [
     label: 'मुख्य प्रतिमा',
     icon: Image,
     description: 'होमपेज मुख्य प्रतिमा व्यवस्थापन'
+  },
+  {
+    href: '/admin/branding',
+    label: 'सरकारी ब्रँडिंग',
+    icon: Shield,
+    description: 'सरकारी लोगो आणि मजकूर व्यवस्थापन'
   },
   {
     href: '/admin/village-info',

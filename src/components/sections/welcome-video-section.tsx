@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Play, ExternalLink } from 'lucide-react';
 
 interface WelcomeVideoData {
@@ -10,55 +9,30 @@ interface WelcomeVideoData {
   isActive: boolean;
 }
 
-export function WelcomeVideoSection() {
-  const [videoData, setVideoData] = useState<WelcomeVideoData>({
-    isActive: false
-  });
+interface HomepageSettings {
+  welcomeVideo?: {
+    url: string;
+    title: string;
+    description: string;
+  };
+}
 
-  useEffect(() => {
-    fetchWelcomeVideo();
-  }, []);
+interface WelcomeVideoSectionProps {
+  homepageSettings: HomepageSettings | null;
+}
 
-  const fetchWelcomeVideo = async () => {
-    try {
-      const response = await fetch('/api/homepage-settings');
-      if (response.ok) {
-        const data = await response.json();
-        if (data?.welcomeVideo) {
-          setVideoData({
-            videoUrl: data.welcomeVideo.url,
-            title: data.welcomeVideo.title || 'गावाचे स्वागत व्हिडिओ',
-            description: data.welcomeVideo.description || 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
-            isActive: true
-          });
-        } else {
-          // Use demo video as fallback
-          setVideoData({
-            videoUrl: 'https://www.youtube.com/watch?v=9W5Vw34xayM',
-            title: 'गावाचे स्वागत व्हिडिओ',
-            description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
-            isActive: true
-          });
-        }
-      } else {
-        // Use demo video as fallback
-        setVideoData({
-          videoUrl: 'https://www.youtube.com/watch?v=9W5Vw34xayM',
-          title: 'गावाचे स्वागत व्हिडिओ',
-          description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
-          isActive: true
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching welcome video:', error);
-      // Use demo video as fallback
-      setVideoData({
-        videoUrl: 'https://www.youtube.com/watch?v=9W5Vw34xayM',
-        title: 'गावाचे स्वागत व्हिडिओ',
-        description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
-        isActive: true
-      });
-    }
+export function WelcomeVideoSection({ homepageSettings }: WelcomeVideoSectionProps) {
+  // Extract video data from settings or use fallback
+  const videoData: WelcomeVideoData = homepageSettings?.welcomeVideo ? {
+    videoUrl: homepageSettings.welcomeVideo.url,
+    title: homepageSettings.welcomeVideo.title || 'गावाचे स्वागत व्हिडिओ',
+    description: homepageSettings.welcomeVideo.description || 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
+    isActive: true
+  } : {
+    videoUrl: 'https://www.youtube.com/watch?v=9W5Vw34xayM',
+    title: 'गावाचे स्वागत व्हिडिओ',
+    description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
+    isActive: true
   };
 
   if (!videoData.isActive || !videoData.videoUrl) {

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { History, BookOpen, Users, ChevronRight, TrendingUp, Palette } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 interface HistoryCard {
   id: string;
@@ -26,52 +25,12 @@ interface TimelineItem {
   side: string;
 }
 
-export function HistorySection() {
-  const [historyCards, setHistoryCards] = useState<HistoryCard[]>([]);
-  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
-  const [loading, setLoading] = useState(true);
+interface HistorySectionProps {
+  historyCards: HistoryCard[];
+  timelineItems: TimelineItem[];
+}
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [historyResponse, timelineResponse] = await Promise.all([
-          fetch('/api/history-cards'),
-          fetch('/api/timeline-items')
-        ]);
-
-        if (historyResponse.ok) {
-          const historyData = await historyResponse.json();
-          setHistoryCards(historyData);
-        }
-
-        if (timelineResponse.ok) {
-          const timelineData = await timelineResponse.json();
-          setTimelineItems(timelineData);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className="py-16 bg-white">
-        <div className="container">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+export function HistorySection({ historyCards, timelineItems }: HistorySectionProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { TrendingUp, Users, Home, Droplets, Zap, TreePine, CheckCircle } from 'lucide-react';
 
 interface PragatiMetric {
@@ -14,23 +13,13 @@ interface PragatiMetric {
   color: string;
 }
 
-export function PragatiMeterSection() {
-  const [metrics, setMetrics] = useState<PragatiMetric[]>([]);
-  const [loading, setLoading] = useState(true);
+interface PragatiMeterSectionProps {
+  dashboardMetrics: PragatiMetric[];
+}
 
-  useEffect(() => {
-    fetchPragatiMetrics();
-  }, []);
-
-  const fetchPragatiMetrics = async () => {
-    try {
-      const response = await fetch('/api/dashboard-metrics');
-      if (response.ok) {
-        const data = await response.json();
-        setMetrics(data);
-      } else {
-        // Fallback metrics
-        setMetrics([
+export function PragatiMeterSection({ dashboardMetrics }: PragatiMeterSectionProps) {
+  // Use provided metrics or fallback to default
+  const metrics = dashboardMetrics && dashboardMetrics.length > 0 ? dashboardMetrics : [
           {
             key: 'sanitation',
             label: 'स्वच्छता कव्हरेज',
@@ -71,14 +60,7 @@ export function PragatiMeterSection() {
             icon: 'TreePine',
             color: 'green'
           }
-        ]);
-      }
-    } catch (error) {
-      console.error('Error fetching pragati metrics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        ];
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -108,27 +90,6 @@ export function PragatiMeterSection() {
     }
   };
 
-  if (loading) {
-    return (
-      <section className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="container">
-          <div className="text-center mb-12">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4 animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto animate-pulse"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
-                <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-                <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-full"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
