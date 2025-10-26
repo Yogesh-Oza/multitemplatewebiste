@@ -36,15 +36,15 @@ export function AdminContextProvider({ children }: { children: React.ReactNode }
         
         try {
           // Fetch subdomain data
-          const response = await fetch(`/api/validate-subdomain?subdomain=${subdomain}`);
+          const response = await fetch(`/api/subdomain/validate?subdomain=${subdomain}`);
           const data = await response.json();
           
-          if (data.valid && data.subdomainData) {
+          if (data.valid && data.subdomain) {
             setContext({
               isSubdomain: true,
               subdomain,
-              subdomainId: data.subdomainData.id,
-              villageName: data.subdomainData.villageName,
+              subdomainId: data.subdomain.id,
+              villageName: data.subdomain.villageName,
             });
           }
         } catch (error) {

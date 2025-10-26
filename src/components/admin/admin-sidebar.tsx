@@ -145,6 +145,19 @@ const adminNavItems = [
     description: 'शोध आणि साइटमॅप व्यवस्थापन'
   },
   {
+    href: '/admin/campaign-form',
+    label: 'अभियान फॉर्म',
+    icon: BarChart3,
+    description: 'अभियान फॉर्म व्यवस्थापन',
+    subItems: [
+      { href: '/admin/campaign-form', label: 'डॅशबोर्ड', description: 'अभियान फॉर्म डॅशबोर्ड' },
+      { href: '/admin/campaign-form/basic-info', label: 'मूलभूत माहिती', description: 'गावाची मूलभूत माहिती' },
+      { href: '/admin/campaign-form/form', label: 'अभियान फॉर्म', description: 'अभियान फॉर्म भरणे' },
+      { href: '/admin/campaign-form/results', label: 'निकाल', description: 'प्रदर्शन निकाल आणि रिपोर्ट' },
+      { href: '/admin/campaign-form/history', label: 'इतिहास', description: 'मागील सबमिशन' }
+    ]
+  },
+  {
     href: '/admin/settings',
     label: 'सेटिंग्स',
     icon: Settings,

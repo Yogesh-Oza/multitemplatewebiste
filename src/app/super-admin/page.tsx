@@ -20,7 +20,8 @@ import {
   Plus,
   Search,
   Filter,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import UserManagementModal from '@/components/admin/user-management-modal';
@@ -63,7 +64,7 @@ export default function SuperAdminPage() {
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [subdomains, setSubdomains] = useState<Subdomain[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'subdomains'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'subdomains' | 'village-marking' | 'campaign-forms'>('overview');
   
   // Modal states
   const [userModal, setUserModal] = useState<{
@@ -383,6 +384,22 @@ export default function SuperAdminPage() {
             >
               <Globe className="h-4 w-4 mr-2" />
               Subdomains ({subdomains.length})
+            </Button>
+            <Button
+              variant={activeTab === 'village-marking' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('village-marking')}
+              className="px-6"
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Village Marking
+            </Button>
+            <Button
+              variant={activeTab === 'campaign-forms' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('campaign-forms')}
+              className="px-6"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Campaign Forms
             </Button>
           </div>
         </div>
@@ -881,6 +898,61 @@ export default function SuperAdminPage() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Village Marking Tab */}
+        {activeTab === 'village-marking' && (
+          <div className="space-y-6">
+            <div className="text-center py-12">
+              <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Village Marking System</h3>
+              <p className="text-gray-500 mb-4">Manage village performance marking and evaluation</p>
+              <div className="flex justify-center space-x-4">
+                <Link href="/super-admin/village-marking">
+                  <Button>
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href="/super-admin/village-marking/form-builder">
+                  <Button variant="outline">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Form Builder
+                  </Button>
+                </Link>
+                <Link href="/super-admin/village-marking/reports">
+                  <Button variant="outline">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Reports
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Campaign Forms Tab */}
+        {activeTab === 'campaign-forms' && (
+          <div className="space-y-6">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Campaign Forms</h3>
+              <p className="text-gray-500 mb-4">Create and manage flexible campaign forms for village evaluation</p>
+              <div className="flex justify-center space-x-4">
+                <Link href="/super-admin/campaign-forms">
+                  <Button>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Manage Forms
+                  </Button>
+                </Link>
+                <Link href="/super-admin/campaign-forms/builder/new">
+                  <Button variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Form
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
