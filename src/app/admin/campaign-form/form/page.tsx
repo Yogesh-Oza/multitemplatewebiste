@@ -74,6 +74,7 @@ interface ItemValue {
   achieved: number;
   percentage: number;
   marks: number;
+  isCompleted?: boolean;
   innovations?: string[];
 }
 
