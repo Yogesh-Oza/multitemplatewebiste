@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate section totals
-    const sectionTotals = {};
+    const sectionTotals: { [key: string]: { total: number; maxTotal: number } } = {};
     let grandTotal = 0;
     let maxPossibleTotal = 0;
 
@@ -73,8 +73,7 @@ export async function POST(request: NextRequest) {
         select: {
           sectionId: true,
           maxMarks: true,
-          itemType: true,
-          parentItemId: true
+          itemType: true
         }
       });
 

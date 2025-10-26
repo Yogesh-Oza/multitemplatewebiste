@@ -44,33 +44,33 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): F
     expression = expression.replace(/ROUND\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, value, decimals) => {
       const numValue = parseFloat(evaluateExpression(value, variables));
       const numDecimals = parseInt(evaluateExpression(decimals, variables));
-      return Math.round(numValue * Math.pow(10, numDecimals)) / Math.pow(10, numDecimals);
+      return (Math.round(numValue * Math.pow(10, numDecimals)) / Math.pow(10, numDecimals)).toString();
     });
 
     // Handle MIN function
     expression = expression.replace(/MIN\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, a, b) => {
       const valA = parseFloat(evaluateExpression(a, variables));
       const valB = parseFloat(evaluateExpression(b, variables));
-      return Math.min(valA, valB);
+      return Math.min(valA, valB).toString();
     });
 
     // Handle MAX function
     expression = expression.replace(/MAX\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, a, b) => {
       const valA = parseFloat(evaluateExpression(a, variables));
       const valB = parseFloat(evaluateExpression(b, variables));
-      return Math.max(valA, valB);
+      return Math.max(valA, valB).toString();
     });
 
     // Handle SUM function
     expression = expression.replace(/SUM\s*\(\s*([^)]+)\s*\)/g, (match, args) => {
-      const values = args.split(',').map(arg => parseFloat(evaluateExpression(arg.trim(), variables)));
-      return values.reduce((sum, val) => sum + val, 0);
+      const values = args.split(',').map((arg: string) => parseFloat(evaluateExpression(arg.trim(), variables)));
+      return values.reduce((sum: number, val: number) => sum + val, 0).toString();
     });
 
     // Handle AVG function
     expression = expression.replace(/AVG\s*\(\s*([^)]+)\s*\)/g, (match, args) => {
-      const values = args.split(',').map(arg => parseFloat(evaluateExpression(arg.trim(), variables)));
-      return values.reduce((sum, val) => sum + val, 0) / values.length;
+      const values = args.split(',').map((arg: string) => parseFloat(evaluateExpression(arg.trim(), variables)));
+      return (values.reduce((sum: number, val: number) => sum + val, 0) / values.length).toString();
     });
 
     const result = parseFloat(evaluateExpression(expression, variables));
@@ -218,8 +218,8 @@ function evaluateCondition(condition: string, variables: FormulaVariables): bool
         case '<': return leftVal < rightVal;
         case '==': return Math.abs(leftVal - rightVal) < 0.0001; // Float comparison
         case '!=': return Math.abs(leftVal - rightVal) >= 0.0001;
-        case '&&': return leftVal && rightVal;
-        case '||': return leftVal || rightVal;
+        case '&&': return Boolean(leftVal && rightVal);
+        case '||': return Boolean(leftVal || rightVal);
         default: return false;
       }
     }

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'super_admin') {
+    if (!session || (session.user as any)?.role !== 'super_admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -152,6 +152,7 @@ async function getSectionAnalysis(where: any) {
   // Group by section
   const sectionData = submissions.reduce((acc: any, submission) => {
     const sectionKey = submission.sectionId;
+    if (!sectionKey) return acc;
     if (!acc[sectionKey]) {
       acc[sectionKey] = {
         section: submission.section,

@@ -206,7 +206,7 @@ export default function MarkingFormPage() {
         newFieldValues[fieldId].marks = marks;
       }
     } else {
-      newFieldValues[fieldId][fieldType] = value;
+      (newFieldValues[fieldId] as any)[fieldType] = value;
     }
 
     setFieldValues(newFieldValues);

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -71,36 +71,36 @@ export async function GET(request: NextRequest) {
     // Set up styles
     const headerStyle = {
       font: { bold: true, size: 14, color: { argb: 'FFFFFFFF' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F4E79' } },
-      alignment: { horizontal: 'center', vertical: 'middle' },
+      fill: { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FF1F4E79' } },
+      alignment: { horizontal: 'center' as const, vertical: 'middle' as const },
       border: {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
+        top: { style: 'thin' as const },
+        left: { style: 'thin' as const },
+        bottom: { style: 'thin' as const },
+        right: { style: 'thin' as const }
       }
     };
 
     const sectionHeaderStyle = {
       font: { bold: true, size: 12, color: { argb: 'FF000000' } },
-      fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7E6E6' } },
-      alignment: { horizontal: 'center', vertical: 'middle' },
+      fill: { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FFE7E6E6' } },
+      alignment: { horizontal: 'center' as const, vertical: 'middle' as const },
       border: {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
+        top: { style: 'thin' as const },
+        left: { style: 'thin' as const },
+        bottom: { style: 'thin' as const },
+        right: { style: 'thin' as const }
       }
     };
 
     const cellStyle = {
       border: {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
+        top: { style: 'thin' as const },
+        left: { style: 'thin' as const },
+        bottom: { style: 'thin' as const },
+        right: { style: 'thin' as const }
       },
-      alignment: { vertical: 'middle' }
+      alignment: { vertical: 'middle' as const }
     };
 
     // Add header information

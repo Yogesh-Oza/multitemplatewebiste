@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
                 itemId: true,
                 fieldName: true,
                 fieldNameEn: true,
-                itemType: true,
-                parentItemId: true
+                itemType: true
               }
             },
             section: {
@@ -66,12 +65,12 @@ export async function POST(request: NextRequest) {
 
     // Prepare data for Excel generation
     const excelData = {
-      basicInfo: submission.basicInfo || {},
+      basicInfo: (submission.basicInfo as any) || {},
       campaignInfo: {
         name: submission.campaignForm.name,
         nameEn: submission.campaignForm.nameEn,
-        year: submission.campaignForm.formMetadata?.year || '2025-2026',
-        campaignName: submission.campaignForm.formMetadata?.campaignName || 'Campaign'
+        year: (submission.campaignForm.formMetadata as any)?.year || '2025-2026',
+        campaignName: (submission.campaignForm.formMetadata as any)?.campaignName || 'Campaign'
       },
       summary: {
         grandTotal: submission.totalMarks || 0,
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
     const excelBuffer = await generateCampaignFormExcel(excelData);
 
     // Return Excel file as response
-    return new NextResponse(excelBuffer, {
+    return new NextResponse(new Uint8Array(excelBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
