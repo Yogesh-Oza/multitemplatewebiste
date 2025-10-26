@@ -44,6 +44,24 @@ interface Submission {
   submittedAt?: string;
   basicInfo: any;
   summary: any;
+  itemValues?: Array<{
+    id: string;
+    marks?: number;
+    section: {
+      id: string;
+      sectionId: number;
+      title: string;
+      titleEn: string;
+    };
+    item: {
+      id: string;
+      itemId: string;
+      fieldName: string;
+      fieldNameEn: string;
+      maxMarks: number;
+      itemType: string;
+    };
+  }>;
 }
 
 export default function CampaignFormDashboard() {
