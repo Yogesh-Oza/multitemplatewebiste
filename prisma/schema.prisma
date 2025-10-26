@@ -419,8 +419,6 @@ model Subdomain {
   environmentInitiatives EnvironmentInitiative[]
   dashboardMetrics DashboardMetric[]
   socialFeeds      SocialFeed[]
-  villageMarkingSections VillageMarkingSection[]
-  villageMarkingSubmissions VillageMarkingSubmission[]
   formSubmissions FormSubmission[]
 
   @@map("subdomains")
@@ -662,120 +660,6 @@ model Village {
   @@map("villages")
 }
 
-// Village Marking System Models
-model VillageMarkingSection {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  titleEn     String
-  description String?
-  descriptionEn String?
-  order       Int    @default(0)
-  isActive    Boolean @default(true)
-  isRequired  Boolean @default(true)
-  maxMarks    Float   @default(0)
-  subdomainId String? @db.ObjectId
-  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
-  createdBy   String? @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  fields      VillageMarkingField[]
-  submissions VillageMarkingSubmission[]
-  fieldValues VillageMarkingFieldValue[]
-  
-  @@map("village_marking_sections")
-}
-
-model VillageMarkingField {
-  id              String @id @default(auto()) @map("_id") @db.ObjectId
-  sectionId       String @db.ObjectId
-  section         VillageMarkingSection @relation(fields: [sectionId], references: [id])
-  fieldName       String
-  fieldNameEn     String
-  fieldType       String // udisht, sadhya, percentage, marks, text, number, dropdown, date, file, checkbox, calculated
-  formula         String? // for calculated fields like "percentage = (sadhya/udisht)*100"
-  validationRules Json?   // JSON: {min, max, required, pattern, etc.}
-  order           Int    @default(0)
-  isActive        Boolean @default(true)
-  isEditable      Boolean @default(true) // false for auto-calculated fields
-  options         Json?   // JSON array for dropdown options
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  // Relations
-  fieldValues     VillageMarkingFieldValue[]
-  
-  @@map("village_marking_fields")
-}
-
-model VillageMarkingTemplate {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  nameEn      String
-  description String?
-  descriptionEn String?
-  isActive    Boolean @default(true)
-  isDefault   Boolean @default(false)
-  createdBy   String? @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  submissions VillageMarkingSubmission[]
-  
-  @@map("village_marking_templates")
-}
-
-model VillageMarkingSubmission {
-  id              String @id @default(auto()) @map("_id") @db.ObjectId
-  subdomainId     String @db.ObjectId
-  subdomain       Subdomain @relation(fields: [subdomainId], references: [id])
-  templateId      String? @db.ObjectId
-  template        VillageMarkingTemplate? @relation(fields: [templateId], references: [id])
-  sectionId       String? @db.ObjectId
-  section         VillageMarkingSection? @relation(fields: [sectionId], references: [id])
-  submittedBy     String @db.ObjectId
-  status          String @default("draft") // draft, submitted, approved, rejected
-  totalMarks      Float  @default(0)
-  totalMaxMarks   Float  @default(0)
-  submittedAt     DateTime?
-  approvedAt      DateTime?
-  approvedBy      String? @db.ObjectId
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  // Relations
-  fieldValues     VillageMarkingFieldValue[]
-  
-  @@map("village_marking_submissions")
-}
-
-model VillageMarkingFieldValue {
-  id              String @id @default(auto()) @map("_id") @db.ObjectId
-  submissionId    String @db.ObjectId
-  submission      VillageMarkingSubmission @relation(fields: [submissionId], references: [id])
-  fieldId         String @db.ObjectId
-  field           VillageMarkingField @relation(fields: [fieldId], references: [id])
-  sectionId       String @db.ObjectId
-  section         VillageMarkingSection @relation(fields: [sectionId], references: [id])
-  // Government fields
-  udisht          Float?  // Target value
-  sadhya          Float?  // Achievement value
-  percentage      Float?  // Calculated percentage
-  marks           Float?  // Calculated marks
-  // Other field types
-  textValue       String?
-  numberValue     Float?
-  dateValue       DateTime?
-  fileUrl         String?
-  checkboxValue   Boolean?
-  calculatedValue Float?  // for custom calculated fields
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  @@map("village_marking_field_values")
-}
 
 // ===== CAMPAIGN FORM SYSTEM MODELS =====
 

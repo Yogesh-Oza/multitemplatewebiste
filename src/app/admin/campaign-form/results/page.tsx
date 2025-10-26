@@ -138,14 +138,7 @@ export default function ResultsPage() {
                 Math.round((submission.totalMarks / submission.totalMaxMarks) * 100) : 0
             },
             sectionResults,
-            innovations: submission.itemValues?.filter((item: any) => 
-              item.item.itemType === 'innovation' && item.innovations
-            ).flatMap((item: any) => 
-              item.innovations.map((innovation: string) => ({
-                description: innovation,
-                marks: 1
-              }))
-            ) || []
+            innovations: []
           };
 
           setResultsData(results);

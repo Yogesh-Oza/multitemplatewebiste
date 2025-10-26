@@ -38,18 +38,10 @@ export async function POST(request: NextRequest) {
       let calculatedPercentage = 0;
       let calculatedMarks = 0;
 
-      // Handle different item types
-      if (item.itemType === 'innovation') {
-        // Innovation items: each innovation = 1 mark, max 5
-        const innovationCount = Array.isArray(innovations) ? innovations.length : 0;
-        calculatedMarks = Math.min(innovationCount, 5);
-        calculatedPercentage = (calculatedMarks / item.maxMarks) * 100;
-      } else {
-        // Simple items: calculate based on target/achieved
-        if (target && target > 0) {
-          calculatedPercentage = Math.min((achieved / target) * 100, 100);
-          calculatedMarks = (calculatedPercentage / 100) * item.maxMarks;
-        }
+      // Calculate based on target/achieved
+      if (target && target > 0) {
+        calculatedPercentage = Math.min((achieved / target) * 100, 100);
+        calculatedMarks = (calculatedPercentage / 100) * item.maxMarks;
       }
 
       calculatedValues.push({

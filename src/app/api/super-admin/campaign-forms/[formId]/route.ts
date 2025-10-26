@@ -100,14 +100,6 @@ export async function PUT(
         ...(maxPossibleTotal !== undefined && { maxPossibleTotal }),
         ...(isActive !== undefined && { isActive }),
         ...(isDefault !== undefined && { isDefault })
-      },
-      include: {
-        sections: {
-          include: {
-            items: true
-          },
-          orderBy: { order: 'asc' }
-        }
       }
     });
 

@@ -448,9 +448,12 @@ export default function FormBuilderPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // If we have a form with sections, update their order
+        // If we have a form with sections, update their order in the background
         if (form && form.sections.length > 0) {
-          await updateSectionOrders();
+          // Run order updates in background without blocking UI
+          updateSectionOrders().catch(error => {
+            console.error('Background order update failed:', error);
+          });
         }
         
         toast.success(isNew ? 'Form created successfully' : 'Form updated successfully');
@@ -472,26 +475,34 @@ export default function FormBuilderPage() {
     if (!form?.id) return;
 
     try {
-      // Update section orders only if there are sections
+      const updatePromises = [];
+
+      // Update section orders only if there are sections and orders need updating
       if (form.sections.length > 0) {
         const sectionOrders = form.sections.map((section, index) => ({
           id: section.id,
           order: index + 1
         }));
 
-        const sectionResponse = await fetch(`/api/super-admin/campaign-forms/${form.id}/sections`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orders: sectionOrders })
-        });
+        // Check if section orders actually need updating
+        const needsSectionUpdate = sectionOrders.some((order, index) => 
+          form.sections[index]?.order !== order.order
+        );
 
-        if (!sectionResponse.ok) {
-          const errorData = await sectionResponse.json();
-          console.error('Error updating section orders:', errorData);
+        if (needsSectionUpdate) {
+          updatePromises.push(
+            fetch(`/api/super-admin/campaign-forms/${form.id}/sections`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orders: sectionOrders })
+            }).catch(error => {
+              console.error('Error updating section orders:', error);
+            })
+          );
         }
       }
 
-      // Update item orders for each section
+      // Update item orders for each section in parallel
       for (const section of form.sections) {
         if (section.items.length > 0) {
           const itemOrders = section.items.map((item, index) => ({
@@ -499,17 +510,28 @@ export default function FormBuilderPage() {
             order: index + 1
           }));
 
-          const itemResponse = await fetch(`/api/super-admin/campaign-forms/${form.id}/items`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orders: itemOrders })
-          });
+          // Check if item orders actually need updating
+          const needsItemUpdate = itemOrders.some((order, index) => 
+            section.items[index]?.order !== order.order
+          );
 
-          if (!itemResponse.ok) {
-            const errorData = await itemResponse.json();
-            console.error('Error updating item orders for section:', section.id, errorData);
+          if (needsItemUpdate) {
+            updatePromises.push(
+              fetch(`/api/super-admin/campaign-forms/${form.id}/items`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orders: itemOrders })
+              }).catch(error => {
+                console.error('Error updating item orders for section:', section.id, error);
+              })
+            );
           }
         }
+      }
+
+      // Wait for all updates to complete in parallel
+      if (updatePromises.length > 0) {
+        await Promise.all(updatePromises);
       }
     } catch (error) {
       console.error('Error updating orders:', error);

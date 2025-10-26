@@ -306,22 +306,12 @@ export default function CampaignFormPage() {
     let maxMarks = 0;
 
     section.items.forEach(item => {
-      if (item.itemType === 'innovation') {
-        // For innovation items, count innovations
-        const itemValue = itemValues.get(item.id);
-        if (itemValue && itemValue.innovations) {
-          const innovationCount = itemValue.innovations.length;
-          achievedMarks += Math.min(innovationCount, 5); // Max 5 marks
-        }
-        maxMarks += item.maxMarks;
-      } else {
-        // Regular items
-        const itemValue = itemValues.get(item.id);
-        if (itemValue) {
-          achievedMarks += itemValue.marks;
-        }
-        maxMarks += item.maxMarks;
+      // Regular items
+      const itemValue = itemValues.get(item.id);
+      if (itemValue) {
+        achievedMarks += itemValue.marks;
       }
+      maxMarks += item.maxMarks;
     });
 
     const percentage = maxMarks > 0 ? Math.round((achievedMarks / maxMarks) * 100) : 0;
@@ -471,30 +461,6 @@ export default function CampaignFormPage() {
     setExpandedSections(newExpanded);
   };
 
-  const addInnovation = (itemId: string) => {
-    const itemValue = itemValues.get(itemId);
-    if (itemValue) {
-      const newInnovations = [...(itemValue.innovations || []), ''];
-      updateItemValue(itemId, 'innovations', newInnovations);
-    }
-  };
-
-  const updateInnovation = (itemId: string, index: number, value: string) => {
-    const itemValue = itemValues.get(itemId);
-    if (itemValue) {
-      const newInnovations = [...(itemValue.innovations || [])];
-      newInnovations[index] = value;
-      updateItemValue(itemId, 'innovations', newInnovations);
-    }
-  };
-
-  const removeInnovation = (itemId: string, index: number) => {
-    const itemValue = itemValues.get(itemId);
-    if (itemValue) {
-      const newInnovations = (itemValue.innovations || []).filter((_, i) => i !== index);
-      updateItemValue(itemId, 'innovations', newInnovations);
-    }
-  };
 
   if (loading) {
     return (
@@ -639,87 +605,51 @@ export default function CampaignFormPage() {
                         )}
                       </div>
 
-                      {item.itemType === 'innovation' ? (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <Label>Innovation Items (Max 5, 1 mark each)</Label>
-                            <Button
-                              size="sm"
-                              onClick={() => addInnovation(item.id)}
-                              disabled={(itemValues.get(item.id)?.innovations?.length || 0) >= 5}
-                            >
-                              <Plus className="h-3 w-3 mr-1" />
-                              Add Innovation
-                            </Button>
-                          </div>
-                          {(itemValues.get(item.id)?.innovations || []).map((innovation, index) => (
-                            <div key={index} className="flex gap-2">
-                              <Input
-                                value={innovation}
-                                onChange={(e) => updateInnovation(item.id, index, e.target.value)}
-                                placeholder="Describe the innovation"
-                                className="flex-1"
-                              />
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => removeInnovation(item.id, index)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          ))}
-                          <div className="text-sm text-muted-foreground">
-                            Innovations: {(itemValues.get(item.id)?.innovations?.length || 0)}/5
-                          </div>
+                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div>
+                          <Label>Target (उदिष्ट) </Label>
+                          <Input
+                            type="number"
+                            value={itemValues.get(item.id)?.targetValue || 0}
+                            onChange={(e) => updateItemValue(item.id, 'targetValue', parseFloat(e.target.value) || 0)}
+                            placeholder="Enter target value"
+                          />
                         </div>
-                      ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                          <div>
-                            <Label>Target (उदिष्ट) </Label>
-                            <Input
-                              type="number"
-                              value={itemValues.get(item.id)?.targetValue || 0}
-                              onChange={(e) => updateItemValue(item.id, 'targetValue', parseFloat(e.target.value) || 0)}
-                              placeholder="Enter target value"
-                            />
-                          </div>
-                          <div>
-                            <Label>Achieved (साध्य)</Label>
-                            <Input
-                              type="number"
-                              value={itemValues.get(item.id)?.achieved || 0}
-                              onChange={(e) => updateItemValue(item.id, 'achieved', parseFloat(e.target.value) || 0)}
-                              placeholder="Achieved"
-                            />
-                          </div>
-                          <div>
-                            <Label>Population-based Targets</Label>
-                            <Input
-                              value={`${getTargetForPopulation(item)}%`}
-                              disabled
-                              className="bg-muted"
-                              placeholder="Auto-set from population"
-                            />
-                          </div>
-                          <div>
-                            <Label>Achieved Percentage</Label>
-                            <Input
-                              value={`${itemValues.get(item.id)?.percentage || 0}%`}
-                              disabled
-                              className="bg-muted"
-                            />
-                          </div>
-                          <div>
-                            <Label>Marks (गुण)</Label>
-                            <Input
-                              value={itemValues.get(item.id)?.marks || 0}
-                              disabled
-                              className="bg-muted"
-                            />
-                          </div>
+                        <div>
+                          <Label>Achieved (साध्य)</Label>
+                          <Input
+                            type="number"
+                            value={itemValues.get(item.id)?.achieved || 0}
+                            onChange={(e) => updateItemValue(item.id, 'achieved', parseFloat(e.target.value) || 0)}
+                            placeholder="Achieved"
+                          />
                         </div>
-                      )}
+                        <div>
+                          <Label>Population-based Targets</Label>
+                          <Input
+                            value={`${getTargetForPopulation(item)}%`}
+                            disabled
+                            className="bg-muted"
+                            placeholder="Auto-set from population"
+                          />
+                        </div>
+                        <div>
+                          <Label>Achieved Percentage</Label>
+                          <Input
+                            value={`${itemValues.get(item.id)?.percentage || 0}%`}
+                            disabled
+                            className="bg-muted"
+                          />
+                        </div>
+                        <div>
+                          <Label>Marks (गुण)</Label>
+                          <Input
+                            value={itemValues.get(item.id)?.marks || 0}
+                            disabled
+                            className="bg-muted"
+                          />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

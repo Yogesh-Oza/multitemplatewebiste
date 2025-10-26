@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         status: submission.status
       },
       sectionResults: await getSectionResults(submission),
-      innovations: getInnovationItems(submission)
+      innovations: []
     };
 
     // Generate Excel file
@@ -121,39 +121,20 @@ async function getSectionResults(submission: any) {
     const items: any[] = [];
 
     section.items.forEach(item => {
-      if (item.itemType === 'innovation') {
-        // For innovation items, count innovations
-        const itemValue = submission.itemValues.find((iv: any) => iv.itemId === item.id);
-        if (itemValue && itemValue.innovations) {
-          const innovationCount = itemValue.innovations.length;
-          achievedMarks += Math.min(innovationCount, 5); // Max 5 marks
-          items.push({
-            itemId: item.itemId,
-            fieldName: item.fieldName,
-            fieldNameEn: item.fieldNameEn,
-            target: 0,
-            achieved: innovationCount,
-            percentage: 100,
-            marks: Math.min(innovationCount, 5),
-            isSubItem: false
-          });
-        }
-      } else {
-        // Regular items
-        const itemValue = submission.itemValues.find((iv: any) => iv.itemId === item.id);
-        if (itemValue) {
-          achievedMarks += itemValue.marks;
-          items.push({
-            itemId: item.itemId,
-            fieldName: item.fieldName,
-            fieldNameEn: item.fieldNameEn,
-            target: itemValue.target || 0,
-            achieved: itemValue.achieved || 0,
-            percentage: itemValue.percentage || 0,
-            marks: itemValue.marks || 0,
-            isSubItem: false
-          });
-        }
+      // Regular items
+      const itemValue = submission.itemValues.find((iv: any) => iv.itemId === item.id);
+      if (itemValue) {
+        achievedMarks += itemValue.marks;
+        items.push({
+          itemId: item.itemId,
+          fieldName: item.fieldName,
+          fieldNameEn: item.fieldNameEn,
+          target: itemValue.target || 0,
+          achieved: itemValue.achieved || 0,
+          percentage: itemValue.percentage || 0,
+          marks: itemValue.marks || 0,
+          isSubItem: false
+        });
       }
     });
 
@@ -171,19 +152,3 @@ async function getSectionResults(submission: any) {
   });
 }
 
-function getInnovationItems(submission: any) {
-  const innovationItems: any[] = [];
-  
-  submission.itemValues.forEach((itemValue: any) => {
-    if (itemValue.item.itemType === 'innovation' && itemValue.innovations) {
-      itemValue.innovations.forEach((innovation: string) => {
-        innovationItems.push({
-          description: innovation,
-          marks: 1
-        });
-      });
-    }
-  });
-
-  return innovationItems;
-}
