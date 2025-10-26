@@ -115,15 +115,26 @@ export default function CampaignFormDashboard() {
     if (!campaignForm || !submission) return [];
     
     return campaignForm.sections.map((section: any) => {
-      const sectionMarks = Number(submission.summary?.sectionTotals?.[section.id]) || 0;
-      const percentage = section.maxMarks > 0 ? Math.round((sectionMarks / section.maxMarks) * 100) : 0;
+      // Calculate section marks from actual item values (same logic as results page)
+      const sectionItems = submission.itemValues?.filter((item: any) => item.section.id === section.id) || [];
+      const achievedMarks = sectionItems.reduce((total: number, item: any) => {
+        return total + (item.marks || 0);
+      }, 0);
+      
+      // Calculate max marks from items in the section
+      const calculatedMaxMarks = sectionItems.reduce((total: number, item: any) => {
+        return total + (item.item.maxMarks || 0);
+      }, 0);
+      
+      const maxMarks = calculatedMaxMarks > 0 ? calculatedMaxMarks : section.maxMarks;
+      const percentage = maxMarks > 0 ? Math.round((achievedMarks / maxMarks) * 100) : 0;
       
       return {
         id: section.id,
         title: section.title,
         titleEn: section.titleEn,
-        maxMarks: section.maxMarks,
-        achievedMarks: sectionMarks,
+        maxMarks: maxMarks,
+        achievedMarks: achievedMarks,
         percentage
       };
     });
