@@ -231,6 +231,18 @@ function SortableItem({
                 />
               </div>
               <div>
+                <Label htmlFor={`itemType-${item.id}`}>Item Type</Label>
+                <select
+                  id={`itemType-${item.id}`}
+                  value={itemEditData.itemType || item.itemType || 'simple'}
+                  onChange={(e) => setItemEditData((prev: any) => ({ ...prev, itemType: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="simple">Simple (Target/Achieved)</option>
+                  <option value="yesno">Yes/No (Checkbox)</option>
+                </select>
+              </div>
+              <div>
                 <Label htmlFor={`maxMarks-${item.id}`}>Max Marks</Label>
                 <Input
                   id={`maxMarks-${item.id}`}
@@ -260,15 +272,17 @@ function SortableItem({
               </Button>
             </div>
             
-            {/* Population Target Configuration */}
-            <div className="mt-4">
-              <PopulationTargetConfig
-                itemId={item.id}
-                fieldName={itemEditData.fieldName || item.fieldName}
-                currentTargets={itemEditData.targets || item.targets}
-                onSave={onUpdateTargets}
-              />
-            </div>
+            {/* Population Target Configuration - Only for simple items */}
+            {(itemEditData.itemType || item.itemType || 'simple') === 'simple' && (
+              <div className="mt-4">
+                <PopulationTargetConfig
+                  itemId={item.id}
+                  fieldName={itemEditData.fieldName || item.fieldName}
+                  currentTargets={itemEditData.targets || item.targets}
+                  onSave={onUpdateTargets}
+                />
+              </div>
+            )}
           </div>
         </Card>
       ) : (
@@ -650,6 +664,7 @@ export default function FormBuilderPage() {
     setEditingItem(item.id);
     setItemEditData({
       fieldName: item.fieldName,
+      itemType: item.itemType || 'simple',
       description: item.description || '',
       maxMarks: item.maxMarks,
       targets: item.targets || {

@@ -121,20 +121,35 @@ async function getSectionResults(submission: any) {
     const items: any[] = [];
 
     section.items.forEach(item => {
-      // Regular items
       const itemValue = submission.itemValues.find((iv: any) => iv.itemId === item.id);
       if (itemValue) {
         achievedMarks += itemValue.marks;
-        items.push({
-          itemId: item.itemId,
-          fieldName: item.fieldName,
-          fieldNameEn: item.fieldNameEn,
-          target: itemValue.target || 0,
-          achieved: itemValue.achieved || 0,
-          percentage: itemValue.percentage || 0,
-          marks: itemValue.marks || 0,
-          isSubItem: false
-        });
+        
+        if (item.itemType === 'yesno') {
+          // Yes/No items
+          items.push({
+            itemId: item.itemId,
+            fieldName: item.fieldName,
+            fieldNameEn: item.fieldNameEn,
+            target: 'होय/नाही (Yes/No)',
+            achieved: itemValue.isCompleted ? 'होय (Yes)' : 'नाही (No)',
+            percentage: itemValue.isCompleted ? 100 : 0,
+            marks: itemValue.marks || 0,
+            isSubItem: false
+          });
+        } else {
+          // Simple items
+          items.push({
+            itemId: item.itemId,
+            fieldName: item.fieldName,
+            fieldNameEn: item.fieldNameEn,
+            target: itemValue.target || 0,
+            achieved: itemValue.achieved || 0,
+            percentage: itemValue.percentage || 0,
+            marks: itemValue.marks || 0,
+            isSubItem: false
+          });
+        }
       }
     });
 

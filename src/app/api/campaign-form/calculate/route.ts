@@ -38,10 +38,18 @@ export async function POST(request: NextRequest) {
       let calculatedPercentage = 0;
       let calculatedMarks = 0;
 
-      // Calculate based on target/achieved
-      if (target && target > 0) {
-        calculatedPercentage = Math.min((achieved / target) * 100, 100);
-        calculatedMarks = (calculatedPercentage / 100) * item.maxMarks;
+      // Handle different item types
+      if (item.itemType === 'yesno') {
+        // Yes/No items: full marks if completed, 0 if not
+        const isCompleted = itemValue.isCompleted || false;
+        calculatedMarks = isCompleted ? item.maxMarks : 0;
+        calculatedPercentage = isCompleted ? 100 : 0;
+      } else {
+        // Simple items: calculate based on target/achieved
+        if (target && target > 0) {
+          calculatedPercentage = Math.min((achieved / target) * 100, 100);
+          calculatedMarks = (calculatedPercentage / 100) * item.maxMarks;
+        }
       }
 
       calculatedValues.push({
@@ -50,7 +58,8 @@ export async function POST(request: NextRequest) {
         achieved,
         percentage: Math.round(calculatedPercentage * 100) / 100,
         marks: Math.round(calculatedMarks * 100) / 100,
-        innovations
+        innovations,
+        isCompleted: item.itemType === 'yesno' ? (itemValue.isCompleted || false) : undefined
       });
     }
 

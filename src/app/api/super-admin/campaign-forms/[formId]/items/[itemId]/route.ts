@@ -19,7 +19,8 @@ export async function PUT(
       maxMarks,
       isActive,
       isEditable,
-      order
+      order,
+      itemType
     } = body;
 
     const item = await prisma.formItem.update({
@@ -34,7 +35,8 @@ export async function PUT(
         ...(maxMarks !== undefined && { maxMarks }),
         ...(isActive !== undefined && { isActive }),
         ...(isEditable !== undefined && { isEditable }),
-        ...(order !== undefined && { order })
+        ...(order !== undefined && { order }),
+        ...(itemType !== undefined && { itemType })
       },
       include: {
         section: {

@@ -605,51 +605,90 @@ export default function CampaignFormPage() {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div>
-                          <Label>Target (उदिष्ट) </Label>
-                          <Input
-                            type="number"
-                            value={itemValues.get(item.id)?.targetValue || 0}
-                            onChange={(e) => updateItemValue(item.id, 'targetValue', parseFloat(e.target.value) || 0)}
-                            placeholder="Enter target value"
-                          />
+                      {item.itemType === 'yesno' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id={`checkbox-${item.id}`}
+                              checked={itemValues.get(item.id)?.isCompleted || false}
+                              onChange={(e) => {
+                                const isCompleted = e.target.checked;
+                                updateItemValue(item.id, 'isCompleted', isCompleted);
+                                // Auto-calculate marks: full marks if checked, 0 if unchecked
+                                updateItemValue(item.id, 'marks', isCompleted ? item.maxMarks : 0);
+                                updateItemValue(item.id, 'percentage', isCompleted ? 100 : 0);
+                              }}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <Label htmlFor={`checkbox-${item.id}`} className="text-sm font-medium">
+                              {itemValues.get(item.id)?.isCompleted ? 'होय (Yes)' : 'नाही (No)'}
+                            </Label>
+                          </div>
+                          <div>
+                            <Label>Status</Label>
+                            <Input
+                              value={itemValues.get(item.id)?.isCompleted ? 'होय (Yes)' : 'नाही (No)'}
+                              disabled
+                              className="bg-muted"
+                            />
+                          </div>
+                          <div>
+                            <Label>Marks (गुण)</Label>
+                            <Input
+                              value={itemValues.get(item.id)?.marks || 0}
+                              disabled
+                              className="bg-muted"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <Label>Achieved (साध्य)</Label>
-                          <Input
-                            type="number"
-                            value={itemValues.get(item.id)?.achieved || 0}
-                            onChange={(e) => updateItemValue(item.id, 'achieved', parseFloat(e.target.value) || 0)}
-                            placeholder="Achieved"
-                          />
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                          <div>
+                            <Label>Target (उदिष्ट) </Label>
+                            <Input
+                              type="number"
+                              value={itemValues.get(item.id)?.targetValue || 0}
+                              onChange={(e) => updateItemValue(item.id, 'targetValue', parseFloat(e.target.value) || 0)}
+                              placeholder="Enter target value"
+                            />
+                          </div>
+                          <div>
+                            <Label>Achieved (साध्य)</Label>
+                            <Input
+                              type="number"
+                              value={itemValues.get(item.id)?.achieved || 0}
+                              onChange={(e) => updateItemValue(item.id, 'achieved', parseFloat(e.target.value) || 0)}
+                              placeholder="Achieved"
+                            />
+                          </div>
+                          <div>
+                            <Label>Population-based Targets</Label>
+                            <Input
+                              value={`${getTargetForPopulation(item)}%`}
+                              disabled
+                              className="bg-muted"
+                              placeholder="Auto-set from population"
+                            />
+                          </div>
+                          <div>
+                            <Label>Achieved Percentage</Label>
+                            <Input
+                              value={`${itemValues.get(item.id)?.percentage || 0}%`}
+                              disabled
+                              className="bg-muted"
+                            />
+                          </div>
+                          <div>
+                            <Label>Marks (गुण)</Label>
+                            <Input
+                              value={itemValues.get(item.id)?.marks || 0}
+                              disabled
+                              className="bg-muted"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <Label>Population-based Targets</Label>
-                          <Input
-                            value={`${getTargetForPopulation(item)}%`}
-                            disabled
-                            className="bg-muted"
-                            placeholder="Auto-set from population"
-                          />
-                        </div>
-                        <div>
-                          <Label>Achieved Percentage</Label>
-                          <Input
-                            value={`${itemValues.get(item.id)?.percentage || 0}%`}
-                            disabled
-                            className="bg-muted"
-                          />
-                        </div>
-                        <div>
-                          <Label>Marks (गुण)</Label>
-                          <Input
-                            value={itemValues.get(item.id)?.marks || 0}
-                            disabled
-                            className="bg-muted"
-                          />
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
