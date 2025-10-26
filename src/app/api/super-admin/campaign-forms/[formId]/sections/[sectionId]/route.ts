@@ -51,18 +51,31 @@ export async function DELETE(
   try {
     const { sectionId } = await params;
 
-    // Check if section has items
-    const itemCount = await prisma.formItem.count({
+    // Get all items in this section
+    const items = await prisma.formItem.findMany({
+      where: { sectionId },
+      select: { id: true }
+    });
+
+    // Delete all FormItemValue records for items in this section
+    if (items.length > 0) {
+      const itemIds = items.map(item => item.id);
+      await prisma.formItemValue.deleteMany({
+        where: { itemId: { in: itemIds } }
+      });
+    }
+
+    // Delete all FormItem records in this section
+    await prisma.formItem.deleteMany({
       where: { sectionId }
     });
 
-    if (itemCount > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete section with existing items' },
-        { status: 400 }
-      );
-    }
+    // Delete all FormItemValue records directly related to this section
+    await prisma.formItemValue.deleteMany({
+      where: { sectionId }
+    });
 
+    // Finally, delete the FormSection
     await prisma.formSection.delete({
       where: { id: sectionId }
     });

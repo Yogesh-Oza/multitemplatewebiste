@@ -68,7 +68,12 @@ export async function DELETE(
   try {
     const { itemId } = await params;
 
+    // First, delete all related FormItemValue records
+    await prisma.formItemValue.deleteMany({
+      where: { itemId }
+    });
 
+    // Then delete the FormItem
     await prisma.formItem.delete({
       where: { id: itemId }
     });
