@@ -22,7 +22,22 @@ import {
   Target,
   TrendingUp,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Sparkles,
+  Zap,
+  Shield,
+  Heart,
+  Leaf,
+  Lightbulb,
+  Rocket,
+  Crown,
+  Gem,
+  Star,
+  Award,
+  Trophy,
+  Users,
+  Clock,
+  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -98,6 +113,7 @@ export default function CampaignFormPage() {
   const [sectionProgress, setSectionProgress] = useState<Map<string, SectionProgress>>(new Map());
   const [basicInfo, setBasicInfo] = useState<any>(null);
   const [populationCategory, setPopulationCategory] = useState('below2000');
+  const [animateCards, setAnimateCards] = useState(false);
 
   // Auto-save timer
   const [lastSaved, setLastSaved] = useState<Date | null>(null);

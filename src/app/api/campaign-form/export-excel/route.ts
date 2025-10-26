@@ -5,56 +5,113 @@ import { generateCampaignFormExcel } from '@/lib/campaign-form-excel-export';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { submissionId } = body;
+    const { submissionId, subdomainId, campaignFormId } = body;
 
-    if (!submissionId) {
+    if (!submissionId && !subdomainId) {
       return NextResponse.json(
-        { error: 'SubmissionId is required' },
+        { error: 'SubmissionId or SubdomainId is required' },
         { status: 400 }
       );
     }
 
-    // Get submission with all related data
-    const submission = await prisma.formSubmission.findUnique({
-      where: { id: submissionId },
-      include: {
-        campaignForm: {
-          select: {
-            id: true,
-            name: true,
-            nameEn: true,
-            formMetadata: true
-          }
+    let submission;
+
+    if (submissionId === 'current' || !submissionId) {
+      // Handle "current" case - find the submission for the current subdomain
+      if (!subdomainId || !campaignFormId) {
+        return NextResponse.json(
+          { error: 'SubdomainId and CampaignFormId are required when using "current"' },
+          { status: 400 }
+        );
+      }
+
+      submission = await prisma.formSubmission.findFirst({
+        where: {
+          subdomainId,
+          campaignFormId,
+          status: { not: 'deleted' }
         },
-        subdomain: {
-          select: {
-            villageName: true,
-            villageNameEn: true
-          }
-        },
-        itemValues: {
-          include: {
-            item: {
-              select: {
-                id: true,
-                itemId: true,
-                fieldName: true,
-                fieldNameEn: true,
-                itemType: true
-              }
-            },
-            section: {
-              select: {
-                id: true,
-                sectionId: true,
-                title: true,
-                titleEn: true
+        include: {
+          campaignForm: {
+            select: {
+              id: true,
+              name: true,
+              nameEn: true,
+              formMetadata: true
+            }
+          },
+          subdomain: {
+            select: {
+              villageName: true,
+              villageNameEn: true
+            }
+          },
+          itemValues: {
+            include: {
+              item: {
+                select: {
+                  id: true,
+                  itemId: true,
+                  fieldName: true,
+                  fieldNameEn: true,
+                  itemType: true
+                }
+              },
+              section: {
+                select: {
+                  id: true,
+                  sectionId: true,
+                  title: true,
+                  titleEn: true
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+    } else {
+      // Handle specific submissionId case
+      submission = await prisma.formSubmission.findUnique({
+        where: { id: submissionId },
+        include: {
+          campaignForm: {
+            select: {
+              id: true,
+              name: true,
+              nameEn: true,
+              formMetadata: true
+            }
+          },
+          subdomain: {
+            select: {
+              villageName: true,
+              villageNameEn: true
+            }
+          },
+          itemValues: {
+            include: {
+              item: {
+                select: {
+                  id: true,
+                  itemId: true,
+                  fieldName: true,
+                  fieldNameEn: true,
+                  itemType: true
+                }
+              },
+              section: {
+                select: {
+                  id: true,
+                  sectionId: true,
+                  title: true,
+                  titleEn: true
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     if (!submission) {
       return NextResponse.json(

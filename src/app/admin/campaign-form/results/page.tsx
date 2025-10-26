@@ -168,11 +168,23 @@ export default function ResultsPage() {
     try {
       setDownloading(true);
       
+      // Get the default campaign form ID
+      const formResponse = await fetch('/api/super-admin/campaign-forms');
+      const formData = await formResponse.json();
+      
+      if (!formResponse.ok || !formData.forms.length) {
+        throw new Error('Failed to get campaign form data');
+      }
+      
+      const defaultForm = formData.forms[0];
+      
       const response = await fetch('/api/campaign-form/export-excel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          submissionId: 'current' // This should be the actual submission ID
+          submissionId: 'current',
+          subdomainId: subdomainId,
+          campaignFormId: defaultForm.id
         })
       });
 
