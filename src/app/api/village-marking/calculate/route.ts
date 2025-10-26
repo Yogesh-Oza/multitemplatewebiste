@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -102,21 +102,21 @@ function evaluateFormula(formula: string, variables: any): number {
     expression = expression.replace(/ROUND\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, value, decimals) => {
       const numValue = parseFloat(evaluateExpression(value, variables));
       const numDecimals = parseInt(evaluateExpression(decimals, variables));
-      return Math.round(numValue * Math.pow(10, numDecimals)) / Math.pow(10, numDecimals);
+      return (Math.round(numValue * Math.pow(10, numDecimals)) / Math.pow(10, numDecimals)).toString();
     });
 
     // Handle MIN function
     expression = expression.replace(/MIN\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, a, b) => {
       const valA = parseFloat(evaluateExpression(a, variables));
       const valB = parseFloat(evaluateExpression(b, variables));
-      return Math.min(valA, valB);
+      return Math.min(valA, valB).toString();
     });
 
     // Handle MAX function
     expression = expression.replace(/MAX\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, a, b) => {
       const valA = parseFloat(evaluateExpression(a, variables));
       const valB = parseFloat(evaluateExpression(b, variables));
-      return Math.max(valA, valB);
+      return Math.max(valA, valB).toString();
     });
 
     return parseFloat(evaluateExpression(expression, variables));
@@ -142,8 +142,8 @@ function evaluateCondition(condition: string, variables: any): boolean {
         case '<': return leftVal < rightVal;
         case '==': return leftVal === rightVal;
         case '!=': return leftVal !== rightVal;
-        case '&&': return leftVal && rightVal;
-        case '||': return leftVal || rightVal;
+        case '&&': return Boolean(leftVal && rightVal);
+        case '||': return Boolean(leftVal || rightVal);
         default: return false;
       }
     }

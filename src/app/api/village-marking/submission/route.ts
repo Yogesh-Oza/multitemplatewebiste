@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     const submission = await prisma.villageMarkingSubmission.findFirst({
       where: {
-        subdomainId: session.user?.subdomainId,
+        subdomainId: (session.user as any)?.subdomainId,
         status
       },
       include: {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     // Check if draft already exists
     const existingDraft = await prisma.villageMarkingSubmission.findFirst({
       where: {
-        subdomainId: session.user?.subdomainId,
+        subdomainId: (session.user as any)?.subdomainId,
         status: 'draft'
       }
     });
@@ -89,10 +89,10 @@ export async function POST(request: NextRequest) {
 
     const submission = await prisma.villageMarkingSubmission.create({
       data: {
-        subdomainId: session.user?.subdomainId!,
+        subdomainId: (session.user as any)?.subdomainId!,
         templateId: templateId || null,
         sectionId: sectionId || null,
-        submittedBy: session.user?.id!,
+        submittedBy: (session.user as any)?.id!,
         status: 'draft',
         totalMarks: 0,
         totalMaxMarks: 0
@@ -114,7 +114,7 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -134,41 +134,51 @@ export async function PUT(request: NextRequest) {
     for (const fieldValue of fieldValues) {
       const { fieldId, sectionId, udisht, sadhya, percentage, marks, textValue, numberValue, dateValue, fileUrl, checkboxValue, calculatedValue } = fieldValue;
 
-      await prisma.villageMarkingFieldValue.upsert({
+      // First, try to find existing record
+      const existingValue = await prisma.villageMarkingFieldValue.findFirst({
         where: {
-          submissionId_fieldId: {
-            submissionId,
-            fieldId
-          }
-        },
-        update: {
-          udisht: udisht ? parseFloat(udisht) : null,
-          sadhya: sadhya ? parseFloat(sadhya) : null,
-          percentage: percentage ? parseFloat(percentage) : null,
-          marks: marks ? parseFloat(marks) : null,
-          textValue,
-          numberValue: numberValue ? parseFloat(numberValue) : null,
-          dateValue: dateValue ? new Date(dateValue) : null,
-          fileUrl,
-          checkboxValue,
-          calculatedValue: calculatedValue ? parseFloat(calculatedValue) : null
-        },
-        create: {
           submissionId,
-          fieldId,
-          sectionId,
-          udisht: udisht ? parseFloat(udisht) : null,
-          sadhya: sadhya ? parseFloat(sadhya) : null,
-          percentage: percentage ? parseFloat(percentage) : null,
-          marks: marks ? parseFloat(marks) : null,
-          textValue,
-          numberValue: numberValue ? parseFloat(numberValue) : null,
-          dateValue: dateValue ? new Date(dateValue) : null,
-          fileUrl,
-          checkboxValue,
-          calculatedValue: calculatedValue ? parseFloat(calculatedValue) : null
+          fieldId
         }
       });
+
+      if (existingValue) {
+        // Update existing record
+        await prisma.villageMarkingFieldValue.update({
+          where: { id: existingValue.id },
+          data: {
+            udisht: udisht ? parseFloat(udisht) : null,
+            sadhya: sadhya ? parseFloat(sadhya) : null,
+            percentage: percentage ? parseFloat(percentage) : null,
+            marks: marks ? parseFloat(marks) : null,
+            textValue,
+            numberValue: numberValue ? parseFloat(numberValue) : null,
+            dateValue: dateValue ? new Date(dateValue) : null,
+            fileUrl,
+            checkboxValue,
+            calculatedValue: calculatedValue ? parseFloat(calculatedValue) : null
+          }
+        });
+      } else {
+        // Create new record
+        await prisma.villageMarkingFieldValue.create({
+          data: {
+            submissionId,
+            fieldId,
+            sectionId,
+            udisht: udisht ? parseFloat(udisht) : null,
+            sadhya: sadhya ? parseFloat(sadhya) : null,
+            percentage: percentage ? parseFloat(percentage) : null,
+            marks: marks ? parseFloat(marks) : null,
+            textValue,
+            numberValue: numberValue ? parseFloat(numberValue) : null,
+            dateValue: dateValue ? new Date(dateValue) : null,
+            fileUrl,
+            checkboxValue,
+            calculatedValue: calculatedValue ? parseFloat(calculatedValue) : null
+          }
+        });
+      }
     }
 
     return NextResponse.json({ submission });
@@ -186,7 +196,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'admin') {
+    if (!session || (session.user as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

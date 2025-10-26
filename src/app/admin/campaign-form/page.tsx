@@ -362,7 +362,7 @@ export default function CampaignFormDashboard() {
                 <div className="flex-1">
                   <p className="text-sm font-medium">Form created</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(submission.createdAt).toLocaleString()}
+                    {new Date(submission.submittedAt || '').toLocaleString()}
                   </p>
                 </div>
               </div>

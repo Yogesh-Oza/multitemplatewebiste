@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     if (existingSubmission?.basicInfo) {
       basicInfo = {
         ...basicInfo,
-        ...existingSubmission.basicInfo
+        ...(existingSubmission.basicInfo as Record<string, any> || {})
       };
     }
 

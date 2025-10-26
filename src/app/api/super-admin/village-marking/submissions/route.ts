@@ -3,16 +3,76 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-// GET: List all village submissions with filters
+// GET: List all village submissions with filters or get specific submission by ID
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'super_admin') {
+    if (!session || (session.user as any)?.role !== 'super_admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    // If ID is provided, return specific submission
+    if (id) {
+      const submission = await prisma.villageMarkingSubmission.findUnique({
+        where: { id },
+        include: {
+          subdomain: {
+            select: {
+              subdomain: true,
+              villageName: true,
+              villageNameEn: true,
+              districtName: true,
+              subDistrictName: true
+            }
+          },
+          template: {
+            select: {
+              name: true,
+              nameEn: true
+            }
+          },
+          section: {
+            select: {
+              title: true,
+              titleEn: true,
+              maxMarks: true
+            }
+          },
+          fieldValues: {
+            include: {
+              field: {
+                select: {
+                  fieldName: true,
+                  fieldNameEn: true,
+                  fieldType: true,
+                  formula: true
+                }
+              }
+            },
+            orderBy: {
+              field: {
+                order: 'asc'
+              }
+            }
+          }
+        }
+      });
+
+      if (!submission) {
+        return NextResponse.json(
+          { error: 'Submission not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({ submission });
+    }
+
+    // Otherwise, return list of submissions with filters
     const subdomainId = searchParams.get('subdomainId');
     const status = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1');
@@ -100,83 +160,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// GET by ID: Detailed submission view
-export async function GET_BY_ID(request: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session || session.user?.role !== 'super_admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const submission = await prisma.villageMarkingSubmission.findUnique({
-      where: { id: params.id },
-      include: {
-        subdomain: {
-          select: {
-            subdomain: true,
-            villageName: true,
-            villageNameEn: true,
-            districtName: true,
-            subDistrictName: true
-          }
-        },
-        template: {
-          select: {
-            name: true,
-            nameEn: true
-          }
-        },
-        section: {
-          select: {
-            title: true,
-            titleEn: true,
-            maxMarks: true
-          }
-        },
-        fieldValues: {
-          include: {
-            field: {
-              select: {
-                fieldName: true,
-                fieldNameEn: true,
-                fieldType: true,
-                formula: true
-              }
-            }
-          },
-          orderBy: {
-            field: {
-              order: 'asc'
-            }
-          }
-        }
-      }
-    });
-
-    if (!submission) {
-      return NextResponse.json(
-        { error: 'Submission not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ submission });
-  } catch (error) {
-    console.error('Error fetching submission:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch submission' },
-      { status: 500 }
-    );
-  }
-}
-
 // PUT: Approve/reject submission
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'super_admin') {
+    if (!session || (session.user as any)?.role !== 'super_admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -192,7 +181,7 @@ export async function PUT(request: NextRequest) {
 
     const updateData: any = {
       status,
-      approvedBy: session.user?.id
+      approvedBy: (session.user as any)?.id
     };
 
     if (status === 'approved') {

@@ -388,7 +388,7 @@ export default function FormBuilderPage() {
       {showSectionModal && (
         <SectionModal
           section={editingSection}
-          onSave={editingSection ? handleUpdateSection : handleCreateSection}
+          onSave={editingSection ? (data: Partial<Section>) => handleUpdateSection(editingSection.id, data) : handleCreateSection}
           onClose={() => {
             setShowSectionModal(false);
             setEditingSection(null);
@@ -401,7 +401,7 @@ export default function FormBuilderPage() {
         <FieldModal
           field={editingField}
           sectionId={selectedSection.id}
-          onSave={editingField ? handleUpdateField : handleCreateField}
+          onSave={editingField ? (data: Partial<Field>) => handleUpdateField(editingField.id, data) : handleCreateField}
           onClose={() => {
             setShowFieldModal(false);
             setEditingField(null);

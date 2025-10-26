@@ -46,6 +46,7 @@ interface FormSection {
   title: string;
   description?: string;
   maxMarks: number;
+  order: number;
   items: FormItem[];
 }
 
@@ -59,6 +60,7 @@ interface FormItem {
   targets?: any;
   unit?: string;
   maxMarks: number;
+  order: number;
   subItems: FormItem[];
   parentItemId?: string;
 }
