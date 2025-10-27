@@ -22,7 +22,11 @@ import {
   MapPin,
   ExternalLink,
   Download,
-  Play
+  Play,
+  Building,
+  GraduationCap,
+  Wrench,
+  ShoppingCart
 } from 'lucide-react';
 import Image from 'next/image';
 

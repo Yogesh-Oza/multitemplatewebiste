@@ -22,7 +22,7 @@ import {
   UserPlus,
   Trophy,
   Target,
-  HandHeart
+  Heart as HandHeart
 } from 'lucide-react';
 import Image from 'next/image';
 

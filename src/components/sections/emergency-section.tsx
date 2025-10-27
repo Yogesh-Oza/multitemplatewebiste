@@ -7,27 +7,27 @@ import { Button } from '@/components/ui/button';
 import { 
   Phone, 
   AlertTriangle, 
-  Shield,
-  MapPin,
-  Clock,
-  Users,
-  Ambulance,
-  Fire,
-  Police,
-  Heart,
-  Zap,
-  Wind,
-  Droplets,
-  Building,
-  Car,
-  ExternalLink,
-  Download,
-  Call,
-  MessageSquare,
-  Eye,
-  CheckCircle,
-  XCircle,
-  Info
+  Shield, 
+  MapPin, 
+  Clock, 
+  Users, 
+  Truck, 
+  Flame, 
+  Shield as Police, 
+  Heart, 
+  Zap, 
+  Wind, 
+  Droplets, 
+  Building, 
+  Car, 
+  ExternalLink, 
+  Download, 
+  Phone as Call, 
+  MessageSquare, 
+  Eye, 
+  CheckCircle, 
+  XCircle, 
+  Info 
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -160,7 +160,7 @@ export function EmergencySection({
       case 'fire':
         return {
           label: language === 'en' ? 'Fire' : 'आग',
-          icon: Fire,
+          icon: Flame,
           color: 'text-orange-600 bg-orange-50 border-orange-200',
           badgeColor: 'bg-orange-100 text-orange-800'
         };
@@ -300,7 +300,7 @@ export function EmergencySection({
       case 'fire-station':
         return {
           label: language === 'en' ? 'Fire Stations' : 'आग विभाग स्टेशन',
-          icon: Fire,
+          icon: Flame,
           color: 'text-orange-600 bg-orange-50'
         };
       case 'evacuation-center':

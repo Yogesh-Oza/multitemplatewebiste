@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  Road, 
+  Car as Road, 
   Droplets, 
   Trash2, 
-  School, 
+  GraduationCap as School, 
   Heart,
   MapPin,
   CheckCircle,

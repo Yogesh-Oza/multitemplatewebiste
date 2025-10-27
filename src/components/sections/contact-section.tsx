@@ -42,7 +42,9 @@ import {
   Award,
   Shield,
   Target,
-  Zap
+  Zap,
+  Lightbulb,
+  XCircle
 } from 'lucide-react';
 import Image from 'next/image';
 
