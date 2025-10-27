@@ -32,31 +32,42 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 13%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 13%;
+    --primary: 210 100% 27%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 13%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 38%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 13%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 210 100% 27%;
     --radius: 0.5rem;
     
-    /* Theme variables */
-    --theme-primary: #7c3aed;
-    --theme-secondary: #3b82f6;
-    --theme-accent: #10b981;
-    --theme-background: #ffffff;
+    /* Maharashtra Government Theme Colors */
+    --gov-primary: #0A4A8A;        /* Government Blue */
+    --gov-secondary: #F47920;      /* Saffron Orange */
+    --gov-success: #138808;        /* Green */
+    --gov-background: #FFFFFF;     /* White */
+    --gov-surface: #F5F5F5;        /* Light Gray */
+    --gov-text-primary: #212121;   /* Dark Gray */
+    --gov-text-secondary: #616161; /* Medium Gray */
+    --gov-border: #E0E0E0;         /* Light Border */
+    --gov-header-strip: #1A1A1A;   /* Near Black */
+    
+    /* Theme variables for backward compatibility */
+    --theme-primary: #0A4A8A;
+    --theme-secondary: #F47920;
+    --theme-accent: #138808;
+    --theme-background: #FFFFFF;
     --font-primary: 'Inter';
     --font-secondary: 'Noto Sans Devanagari';
     --font-heading: 'Inter';
@@ -236,6 +247,120 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Maharashtra Government Design System Utilities */
+  .bg-gov-primary {
+    background-color: var(--gov-primary);
+  }
+  
+  .bg-gov-secondary {
+    background-color: var(--gov-secondary);
+  }
+  
+  .bg-gov-success {
+    background-color: var(--gov-success);
+  }
+  
+  .bg-gov-surface {
+    background-color: var(--gov-surface);
+  }
+  
+  .text-gov-primary {
+    color: var(--gov-primary);
+  }
+  
+  .text-gov-secondary {
+    color: var(--gov-secondary);
+  }
+  
+  .text-gov-success {
+    color: var(--gov-success);
+  }
+  
+  .text-gov-text-primary {
+    color: var(--gov-text-primary);
+  }
+  
+  .text-gov-text-secondary {
+    color: var(--gov-text-secondary);
+  }
+  
+  .border-gov-primary {
+    border-color: var(--gov-primary);
+  }
+  
+  .border-gov-border {
+    border-color: var(--gov-border);
+  }
+  
+  .ring-gov-primary {
+    --tw-ring-color: var(--gov-primary);
+  }
+  
+  .shadow-gov-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  }
+  
+  .shadow-gov-card-hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  }
+  
+  /* Government Button Styles */
+  .btn-gov-primary {
+    @apply bg-gov-primary text-white hover:bg-blue-800 focus:ring-2 focus:ring-gov-primary focus:ring-offset-2;
+  }
+  
+  .btn-gov-secondary {
+    @apply bg-white text-gov-primary border border-gov-primary hover:bg-gov-primary hover:text-white focus:ring-2 focus:ring-gov-primary focus:ring-offset-2;
+  }
+  
+  .btn-gov-cta {
+    @apply bg-gov-secondary text-white hover:bg-orange-600 focus:ring-2 focus:ring-gov-secondary focus:ring-offset-2;
+  }
+  
+  /* Government Card Styles */
+  .card-gov {
+    @apply bg-white border border-gov-border shadow-gov-card hover:shadow-gov-card-hover transition-shadow duration-300;
+  }
+  
+  /* Government Section Styles */
+  .section-gov {
+    @apply py-16;
+  }
+  
+  .section-gov-white {
+    @apply section-gov bg-white;
+  }
+  
+  .section-gov-gray {
+    @apply section-gov bg-gov-surface;
+  }
+  
+  /* Government Header Styles */
+  .header-gov-strip {
+    @apply bg-gov-header-strip text-white;
+  }
+  
+  .header-gov-main {
+    @apply bg-white border-b border-gov-border;
+  }
+  
+  /* Government Typography */
+  .heading-gov {
+    @apply text-gov-text-primary font-bold;
+  }
+  
+  .heading-gov-primary {
+    @apply heading-gov text-gov-primary;
+  }
+  
+  .text-gov-body {
+    @apply text-gov-text-primary;
+  }
+  
+  .text-gov-muted {
+    @apply text-gov-text-secondary;
   }
 
   /* Text gradient utilities */

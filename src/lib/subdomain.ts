@@ -71,3 +71,6 @@ export async function validateSubdomain(request: NextRequest): Promise<{ isValid
     return { isValid: false, subdomainId: null, subdomain };
   }
 }
+
+// Alias for API routes compatibility
+export const validateSubdomainAccess = validateSubdomain;

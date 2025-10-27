@@ -1,23 +1,25 @@
 export const NAVIGATION_ITEMS = [
-  { href: '/', label: 'मुख्यपृष्ठ', labelEn: 'Home' },
-  { href: '/about', label: 'आमच्याबद्दल', labelEn: 'About Us' },
-  { href: '/history', label: 'इतिहास', labelEn: 'History' },
-  { href: '/programs', label: 'कार्यक्रम', labelEn: 'Programs' },
-  { href: '/gallery', label: 'गॅलरी', labelEn: 'Gallery' },
-  { href: '/jama-kharch', label: 'जमा-खर्च', labelEn: 'Income-Expenditure' },
-  { href: '/announcements', label: 'सूचना', labelEn: 'Announcements' },
-  { href: '/gov-programs', label: 'शासकीय योजना', labelEn: 'Government Schemes' },
-  { href: '/departments', label: 'विभाग', labelEn: 'Departments' },
-  { href: '/amenities', label: 'सोई-सुविधा', labelEn: 'Amenities' },
-  { href: '/contact', label: 'संपर्क', labelEn: 'Contact' },
+  { href: '/', label: 'मुख्यपृष्ठ', labelEn: 'Home', scrollTo: 'hero' },
+  { href: '/about', label: 'आमच्याबद्दल', labelEn: 'About Us', scrollTo: 'about' },
+  { href: '/history', label: 'इतिहास', labelEn: 'History', scrollTo: 'history' },
+  { href: '/programs', label: 'कार्यक्रम', labelEn: 'Programs', scrollTo: 'programs' },
+  { href: '/gallery', label: 'गॅलरी', labelEn: 'Gallery', scrollTo: 'gallery' },
+  { href: '/jama-kharch', label: 'जमा-खर्च', labelEn: 'Income-Expense', scrollTo: 'finance' },
+  { href: '/announcements', label: 'सूचना', labelEn: 'Announcements', scrollTo: 'announcements' },
+  { href: '/gov-programs', label: 'शासकीय योजना', labelEn: 'Government Schemes', scrollTo: 'schemes' },
+  { href: '/departments', label: 'विभाग', labelEn: 'Departments', scrollTo: 'departments' },
+  { href: '/amenities', label: 'सोई-सुविधा', labelEn: 'Amenities', scrollTo: 'infrastructure' },
+  { href: '/contact', label: 'संपर्क', labelEn: 'Contact', scrollTo: 'contact' },
 ] as const;
 
 export const NEW_NAVIGATION_ITEMS = [
-  { href: '/projects', label: 'प्रकल्प', labelEn: 'Projects' },
-  { href: '/gr', label: 'शासकीय ठराव', labelEn: 'Government Resolutions' },
-  { href: '/feedback', label: 'फीडबॅक', labelEn: 'Feedback' },
-  { href: '/dashboard', label: 'डॅशबोर्ड', labelEn: 'Dashboard' },
-  { href: '/sitemap', label: 'साइटमॅप', labelEn: 'Sitemap' },
+  { href: '/projects', label: 'प्रकल्प', labelEn: 'Projects', scrollTo: 'projects' },
+  { href: '/employment', label: 'रोजगार', labelEn: 'Employment', scrollTo: 'employment' },
+  { href: '/education', label: 'शिक्षण', labelEn: 'Education', scrollTo: 'education' },
+  { href: '/environment', label: 'पर्यावरण', labelEn: 'Environment', scrollTo: 'environment' },
+  { href: '/grievance', label: 'तक्रार', labelEn: 'Grievance', scrollTo: 'grievance' },
+  { href: '/citizen-services', label: 'नागरिक सेवा', labelEn: 'Citizen Services', scrollTo: 'citizenServices' },
+  { href: '/leadership', label: 'नेतृत्व', labelEn: 'Leadership', scrollTo: 'leadership' },
 ] as const;
 
 export const VILLAGE_STATS = [

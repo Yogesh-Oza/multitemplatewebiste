@@ -8,7 +8,9 @@ import { Menu, X, Globe, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SearchModal } from '@/components/search/search-modal';
-import { NAVIGATION_ITEMS } from '@/lib/constants';
+import { LanguageToggle } from '@/components/ui/language-toggle';
+import { NAVIGATION_ITEMS, NEW_NAVIGATION_ITEMS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n/i18n-context';
 
 interface VillageData {
   villageLogo?: string;
@@ -30,6 +32,22 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
   const [isOpen, setIsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
+  const { t, language } = useTranslation();
+
+  // Handle scroll navigation for homepage
+  const handleNavClick = (href: string, scrollTo?: string) => {
+    if (pathname === '/' && scrollTo) {
+      // On homepage, scroll to section
+      const element = document.getElementById(scrollTo);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        setIsOpen(false);
+        return;
+      }
+    }
+    // Otherwise, navigate to page
+    window.location.href = href;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -97,31 +115,33 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden lg:flex items-center space-x-1">
           {NAVIGATION_ITEMS.map((item) => {
             const isActive = pathname === item.href;
+            const displayLabel = language === 'en' ? item.labelEn : item.label;
             return (
-              <Link
+              <button
                 key={item.href}
-                href={item.href}
+                onClick={() => handleNavClick(item.href, item.scrollTo)}
                 className={`relative px-4 py-3 text-base font-medium transition-all duration-300 rounded-md group ${
                   isActive 
-                    ? 'text-theme-primary bg-theme-primary/10 shadow-sm' 
-                    : 'text-gray-700 hover:text-theme-primary hover:bg-gray-50'
+                    ? 'text-blue-600 bg-blue-50 shadow-sm' 
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                 }`}
               >
-                {item.label}
+                {displayLabel}
                 {isActive && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 gradient-theme rounded-full animate-pulse" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full animate-pulse" />
                 )}
-                <div className="absolute inset-0 gradient-theme opacity-0 group-hover:opacity-10 rounded-md transition-opacity duration-300" />
-              </Link>
+                <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-10 rounded-md transition-opacity duration-300" />
+              </button>
             );
           })}
         </nav>
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageToggle />
           <Button
             variant="outline"
             size="sm"
@@ -129,7 +149,7 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
             className="flex items-center gap-2"
           >
             <Search className="h-4 w-4" />
-            <span className="hidden lg:inline">शोध</span>
+            <span className="hidden lg:inline">{t('common.search')}</span>
           </Button>
         </div>
 
@@ -163,36 +183,69 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
               <nav className="flex flex-col space-y-2">
                 {NAVIGATION_ITEMS.map((item) => {
                   const isActive = pathname === item.href;
+                  const displayLabel = language === 'en' ? item.labelEn : item.label;
                   return (
-                    <Link
+                    <button
                       key={item.href}
-                      href={item.href}
-                      className={`px-4 py-3 text-base font-medium rounded-md transition-all duration-300 ${
+                      onClick={() => {
+                        handleNavClick(item.href, item.scrollTo);
+                        setIsOpen(false);
+                      }}
+                      className={`px-4 py-3 text-base font-medium rounded-md transition-all duration-300 text-left ${
                         isActive 
                           ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500 shadow-sm' 
                           : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                       }`}
-                      onClick={() => setIsOpen(false)}
                     >
-                      {item.label}
-                    </Link>
+                      {displayLabel}
+                    </button>
                   );
                 })}
+                
+                {/* Additional navigation items */}
+                <div className="pt-4 border-t">
+                  <h3 className="px-4 py-2 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    {t('common.more')}
+                  </h3>
+                  {NEW_NAVIGATION_ITEMS.map((item) => {
+                    const isActive = pathname === item.href;
+                    const displayLabel = language === 'en' ? item.labelEn : item.label;
+                    return (
+                      <button
+                        key={item.href}
+                        onClick={() => {
+                          handleNavClick(item.href, item.scrollTo);
+                          setIsOpen(false);
+                        }}
+                        className={`px-4 py-3 text-base font-medium rounded-md transition-all duration-300 text-left ${
+                          isActive 
+                            ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500 shadow-sm' 
+                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        {displayLabel}
+                      </button>
+                    );
+                  })}
+                </div>
               </nav>
 
-              {/* Mobile Search */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setIsOpen(false);
-                  setIsSearchOpen(true);
-                }}
-                className="flex items-center gap-2 w-full justify-center"
-              >
-                <Search className="h-4 w-4" />
-                <span>शोध</span>
-              </Button>
+              {/* Mobile Actions */}
+              <div className="pt-4 border-t space-y-2">
+                <LanguageToggle />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsSearchOpen(true);
+                  }}
+                  className="flex items-center gap-2 w-full justify-center"
+                >
+                  <Search className="h-4 w-4" />
+                  <span>{t('common.search')}</span>
+                </Button>
+              </div>
             </div>
           </SheetContent>
         </Sheet>

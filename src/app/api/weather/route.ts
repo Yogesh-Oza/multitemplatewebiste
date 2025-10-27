@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateSubdomainAccess } from '@/lib/subdomain';
 
 export async function GET(request: NextRequest) {
   try {
+    const { isValid, subdomainId } = await validateSubdomainAccess(request);
+    if (!isValid || !subdomainId) {
+      return NextResponse.json({ error: 'Invalid subdomain' }, { status: 401 });
+    }
     // For now, return static weather data
     // In production, integrate with weather API like OpenWeatherMap
     const weatherData = {
