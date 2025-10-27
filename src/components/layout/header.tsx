@@ -8,7 +8,9 @@ import { Menu, X, Globe, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SearchModal } from '@/components/search/search-modal';
-import { NAVIGATION_ITEMS } from '@/lib/constants';
+import { LanguageToggle } from '@/components/ui/language-toggle';
+import { useTranslation } from '@/lib/i18n/i18n-context';
+import { NAVIGATION_ITEMS, NEW_NAVIGATION_ITEMS } from '@/lib/constants';
 
 interface VillageData {
   villageLogo?: string;
@@ -30,6 +32,34 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
   const [isOpen, setIsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
+  const { t, language } = useTranslation();
+
+  // Scroll to section function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Handle navigation click
+  const handleNavClick = (item: any) => {
+    if (pathname === '/' && item.scrollTo) {
+      // On homepage, scroll to section
+      scrollToSection(item.scrollTo);
+    } else if (item.href !== '/') {
+      // Navigate to page
+      window.location.href = item.href;
+    } else {
+      // Go to homepage
+      window.location.href = '/';
+    }
+  };
+
+  // Get navigation label based on current language
+  const getNavLabel = (item: any) => {
+    return language === 'en' ? item.labelEn : item.label;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -101,27 +131,28 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
           {NAVIGATION_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link
+              <button
                 key={item.href}
-                href={item.href}
+                onClick={() => handleNavClick(item)}
                 className={`relative px-4 py-3 text-base font-medium transition-all duration-300 rounded-md group ${
                   isActive 
                     ? 'text-theme-primary bg-theme-primary/10 shadow-sm' 
                     : 'text-gray-700 hover:text-theme-primary hover:bg-gray-50'
                 }`}
               >
-                {item.label}
+                {getNavLabel(item)}
                 {isActive && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 gradient-theme rounded-full animate-pulse" />
                 )}
                 <div className="absolute inset-0 gradient-theme opacity-0 group-hover:opacity-10 rounded-md transition-opacity duration-300" />
-              </Link>
+              </button>
             );
           })}
         </nav>
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageToggle />
           <Button
             variant="outline"
             size="sm"
@@ -129,7 +160,7 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
             className="flex items-center gap-2"
           >
             <Search className="h-4 w-4" />
-            <span className="hidden lg:inline">शोध</span>
+            <span className="hidden lg:inline">{t('common.search')}</span>
           </Button>
         </div>
 
@@ -164,21 +195,28 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
                 {NAVIGATION_ITEMS.map((item) => {
                   const isActive = pathname === item.href;
                   return (
-                    <Link
+                    <button
                       key={item.href}
-                      href={item.href}
-                      className={`px-4 py-3 text-base font-medium rounded-md transition-all duration-300 ${
+                      onClick={() => {
+                        handleNavClick(item);
+                        setIsOpen(false);
+                      }}
+                      className={`px-4 py-3 text-base font-medium rounded-md transition-all duration-300 text-left ${
                         isActive 
                           ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500 shadow-sm' 
                           : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                       }`}
-                      onClick={() => setIsOpen(false)}
                     >
-                      {item.label}
-                    </Link>
+                      {getNavLabel(item)}
+                    </button>
                   );
                 })}
               </nav>
+
+              {/* Language Toggle for Mobile */}
+              <div className="pt-4 border-t">
+                <LanguageToggle />
+              </div>
 
               {/* Mobile Search */}
               <Button
@@ -191,7 +229,7 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
                 className="flex items-center gap-2 w-full justify-center"
               >
                 <Search className="h-4 w-4" />
-                <span>शोध</span>
+                <span>{t('common.search')}</span>
               </Button>
             </div>
           </SheetContent>
