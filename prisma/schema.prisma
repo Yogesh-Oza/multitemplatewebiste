@@ -420,6 +420,20 @@ model Subdomain {
   dashboardMetrics DashboardMetric[]
   socialFeeds      SocialFeed[]
   formSubmissions FormSubmission[]
+  // New Government Compliance Relations
+  leadership       Leadership[]
+  schemes          Scheme[]
+  infrastructure   Infrastructure[]
+  grievances       Grievance[]
+  environment      Environment[]
+  citizenServices  CitizenService[]
+  quickInfo        QuickInfo[]
+  weatherData      WeatherData[]
+  dailyQuotes      DailyQuote[]
+  progressMeters   ProgressMeter[]
+  emergencyContacts EmergencyContact[]
+  feedback         Feedback[]
+  volunteers       Volunteer[]
 
   @@map("subdomains")
 }
@@ -778,4 +792,241 @@ model FormItemValue {
   updatedAt       DateTime @updatedAt
   
   @@map("form_item_values")
+}
+
+// ===== NEW GOVERNMENT COMPLIANCE MODELS =====
+
+model Leadership {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  nameEn      String
+  designation String
+  designationEn String
+  photo       String?
+  level       String   // CM, Minister, Local
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("leadership")
+}
+
+model Scheme {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  nameEn      String
+  type        String   // central, state, district
+  eligibility String
+  eligibilityEn String
+  documents   Json     // array of document requirements
+  beneficiaries Int?
+  coverage    Json?    // map data
+  description String?
+  descriptionEn String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("schemes")
+}
+
+model Infrastructure {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  type        String   // road, water, school, health
+  name        String
+  nameEn      String
+  location    Json     // lat, lng
+  status      String   // completed, ongoing, planned
+  details     Json     // additional details
+  description String?
+  descriptionEn String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("infrastructure")
+}
+
+model Grievance {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  ticketId    String   @unique
+  name        String
+  contact     String
+  category    String
+  description String
+  status      String   @default("pending") // pending, in-progress, resolved
+  priority    String   @default("medium") // low, medium, high, urgent
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+
+  @@map("grievances")
+}
+
+model Environment {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  type        String   // tree, waste, solar
+  title       String
+  titleEn     String
+  target      Int
+  achieved    Int
+  metrics     Json     // additional metrics
+  description String?
+  descriptionEn String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("environment")
+}
+
+model CitizenService {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  description String?
+  descriptionEn String?
+  link        String?
+  qrCode      String?  // QR code image URL
+  category    String   // certificate, payment, form
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("citizen_services")
+}
+
+model QuickInfo {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  value       String
+  unit        String?
+  unitEn      String?
+  icon        String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("quick_info")
+}
+
+model WeatherData {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  temperature Float
+  humidity    Float
+  condition   String
+  conditionEn String
+  lastUpdated DateTime
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("weather_data")
+}
+
+model DailyQuote {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  quote       String
+  quoteEn     String
+  author      String?
+  authorEn    String?
+  isActive    Boolean  @default(true)
+  date        DateTime @default(now())
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("daily_quotes")
+}
+
+model ProgressMeter {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  titleEn     String
+  current     Float
+  target      Float
+  unit        String?
+  unitEn      String?
+  color       String?  // hex color
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("progress_meters")
+}
+
+model EmergencyContact {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  nameEn      String
+  phone       String
+  type        String   // health, police, fire, fpo
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("emergency_contacts")
+}
+
+model Feedback {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String?
+  phone       String?
+  subject     String
+  message     String
+  rating      Int?     // 1-5 stars
+  status      String   @default("pending") // pending, reviewed, responded
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feedback")
+}
+
+model Volunteer {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String
+  phone       String
+  skills      String[] // array of skills
+  availability String?
+  interests   String[] // array of interests
+  experience  String?
+  status      String   @default("pending") // pending, approved, rejected
+  subdomainId String?  @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("volunteers")
 }
