@@ -146,7 +146,6 @@ export function NewsUpdatesSection() {
               key={item.id}
               variants={itemVariants}
               whileHover="hover"
-              variants={cardHoverVariants}
               className="group"
             >
               <Card className="h-full overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">

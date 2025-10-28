@@ -37,7 +37,7 @@ export function DailyMessageSection() {
       author: 'श्रीमती. प्रिया शिंदे',
       authorTitle: 'उपसरपंच',
       date: new Date().toLocaleDateString('mr-IN'),
-      category: 'education',
+      category: 'development',
       icon: 'Lightbulb',
       color: 'from-green-500 to-emerald-600'
     },
