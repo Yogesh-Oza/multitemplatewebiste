@@ -89,12 +89,13 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
         color: 'blue' // Default color
       }))} />
       
-      <WelcomeVideoSection homepageSettings={homepageSettings ? {
+      <WelcomeVideoSection homepageSettings={homepageSettings && homepageSettings.mainHeading ? {
         welcomeVideo: {
-          url: '',
+          // If you later add a real URL in HomepageSettings, pass it here.
+          // Leaving url undefined triggers the component's fallback video.
           title: homepageSettings.mainHeading,
           description: homepageSettings.subtitle
-        }
+        } as any
       } : null} />
       
       <AnnouncementsSection announcements={subdomainData.announcements} />

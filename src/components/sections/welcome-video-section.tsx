@@ -23,7 +23,7 @@ interface WelcomeVideoSectionProps {
 
 export function WelcomeVideoSection({ homepageSettings }: WelcomeVideoSectionProps) {
   // Extract video data from settings or use fallback
-  const videoData: WelcomeVideoData = homepageSettings?.welcomeVideo ? {
+  const videoData: WelcomeVideoData = homepageSettings?.welcomeVideo && homepageSettings.welcomeVideo.url ? {
     videoUrl: homepageSettings.welcomeVideo.url,
     title: homepageSettings.welcomeVideo.title || 'गावाचे स्वागत व्हिडिओ',
     description: homepageSettings.welcomeVideo.description || 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
