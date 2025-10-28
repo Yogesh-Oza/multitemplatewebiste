@@ -2,6 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Translate UI cleanup */
+/* Hide the top banner iframe and tooltip balloon */
+.goog-te-banner-frame { display: none !important; visibility: hidden !important; }
+.goog-te-banner-frame.skiptranslate { display: none !important; visibility: hidden !important; }
+#goog-gt-tt { display: none !important; visibility: hidden !important; }
+.goog-te-balloon-frame { display: none !important; visibility: hidden !important; }
+
+/* Aggressive hide for injected translate containers */
+.skiptranslate,
+.skiptranslate iframe,
+iframe.skiptranslate,
+iframe[class*="VIpgJd-"],
+div[class*="VIpgJd-"],
+.goog-te-banner-frame + .skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Allowlist: keep the header widget visible */
+#google_translate_element .skiptranslate,
+#google_translate_element .goog-te-gadget,
+#google_translate_element .goog-te-gadget span,
+#google_translate_element .goog-te-gadget-simple,
+#google_translate_element .goog-te-combo {
+  display: inline-block !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Allowlist: keep the menu iframe visible (Google appends it to body) */
+.goog-te-menu-frame.skiptranslate,
+iframe.goog-te-menu-frame,
+.goog-te-menu2 {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  z-index: 2147483647 !important; /* above header */
+}
+
+/* Reset body/html top shift Google injects */
+html { top: 0 !important; }
+body { top: 0 !important; position: static !important; margin-top: 0 !important; padding-top: 0 !important; transform: none !important; }
+.goog-te-gadget img { display: none !important; }
+.goog-logo-link { display: none !important; }
+.goog-te-gadget { font-size: 14px !important; }
+
+/* Ensure the select remains visible and styled */
+#google_translate_element .goog-te-combo {
+  font-size: 14px !important;
+}
+.goog-tooltip, .goog-tooltip:hover { display: none !important; }
+.goog-text-highlight { background: inherit !important; box-shadow: none !important; }
+#google_translate_element .goog-te-gadget .goog-te-combo {
+  font-size: 12px !important;
+  color: #111827 !important; /* gray-900 */
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important; /* gray-200 */
+  border-radius: 6px !important;
+  padding: 6px 8px !important;
+}
+/* Hide the big balloon tooltip */
+.goog-te-balloon-frame { display: none !important; }
+.goog-te-banner .goog-te-combo { margin: 0 !important; }
+
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);

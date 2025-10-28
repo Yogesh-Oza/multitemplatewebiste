@@ -47,57 +47,32 @@ export default async function FeedbackPage({ params }: { params: Promise<{ subdo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/complaints', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+    // Static submission: simulate success and show message (no API call)
+    setTimeout(() => {
+      setSubmitSuccess(true);
+      setFormData({
+        type: 'complaint',
+        subject: '',
+        description: '',
+        citizenName: '',
+        phone: '',
+        email: '',
+        priority: 'medium'
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        setSubmitSuccess(true);
-        setFormData({
-          type: 'complaint',
-          subject: '',
-          description: '',
-          citizenName: '',
-          phone: '',
-          email: '',
-          priority: 'medium'
-        });
-      } else {
-        throw new Error('Failed to submit feedback');
-      }
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-    } finally {
       setIsSubmitting(false);
-    }
+    }, 800);
   };
 
   const handleTracking = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsTracking(true);
     setTrackingError('');
-
-    try {
-      const response = await fetch(`/api/complaints/track?code=${trackingCode}`);
-
-      if (response.ok) {
-        const result = await response.json();
-        setTrackingResult(result);
-      } else {
-        setTrackingError('तक्रार सापडली नाही. कृपया योग्य ट्रॅकिंग कोड प्रविष्ट करा.');
-      }
-    } catch (error) {
-      setTrackingError('ट्रॅकिंग करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
-    } finally {
+    // Static tracking: show info message (tracking backend not enabled)
+    setTimeout(() => {
+      setTrackingResult(null);
+      setTrackingError('ऑनलाइन ट्रॅकिंग लवकरच उपलब्ध होईल. कृपया फोन/ईमेल/व्हॉट्सऍपवर संपर्क करा.');
       setIsTracking(false);
-    }
+    }, 600);
   };
 
   const getStatusColor = (status: string) => {
@@ -199,8 +174,16 @@ export default async function FeedbackPage({ params }: { params: Promise<{ subdo
                     तक्रार यशस्वीरित्या सबमिट झाली!
                   </h3>
                   <p className="text-green-600">
-                    आपली तक्रार प्राप्त झाली आहे. आम्ही त्वरित कारवाई करू.
+                    आपली माहिती नोंदवली आहे. कृपया तातडीच्या प्रकरणांसाठी खालील संपर्कांवर थेट संपर्क साधा.
                   </p>
+                  <div className="mt-4 text-left max-w-lg mx-auto bg-white rounded-lg border border-green-200 p-4">
+                    <h4 className="font-semibold text-green-800 mb-2">पर्यायी संपर्क</h4>
+                    <ul className="text-sm text-green-700 space-y-1">
+                      <li>• ग्रामपंचायत कार्यालय: +91 12345 67890</li>
+                      <li>• ईमेल: grievance@grampanchayat.com</li>
+                      <li>• WhatsApp: +91 98765 43210</li>
+                    </ul>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-white rounded-lg shadow-md p-6">

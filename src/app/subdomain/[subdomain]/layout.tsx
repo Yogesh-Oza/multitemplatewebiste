@@ -1,8 +1,6 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 interface SubdomainLayoutProps {
   children: React.ReactNode;
@@ -18,19 +16,24 @@ export default async function SubdomainLayout({
   const { subdomain } = await params;
 
   // Fetch subdomain data for Header and Footer
-  const subdomainData = await prisma.subdomain.findUnique({
-    where: { subdomain },
-    include: {
-      villageInfo: true,
-      footerContent: true
-    }
-  });
+  let subdomainData: any = null;
+  try {
+    subdomainData = await prisma.subdomain.findUnique({
+      where: { subdomain },
+      include: {
+        villageInfo: true,
+        footerContent: true
+      }
+    });
+  } catch (e) {
+    console.error('Failed to read subdomain from DB:', e);
+  }
 
   if (!subdomainData || !subdomainData.isActive) {
     // This should not happen as the page already validates, but just in case
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Invalid subdomain</p>
+        <p>Service temporarily unavailable. Please try again.</p>
       </div>
     );
   }

@@ -19,6 +19,9 @@ import {
   AlertCircle,
   Info
 } from 'lucide-react';
+import ApplicationProcessSection from '@/components/sections/application-process-section';
+import BeneficiaryStoriesSection from '@/components/sections/beneficiary-stories-section';
+import EnhancedCoverageMapSection from '@/components/sections/enhanced-coverage-map-section';
 
 interface GovernmentScheme {
   id: string;
@@ -63,6 +66,7 @@ export default function GovProgramsPage() {
   const [filteredSchemes, setFilteredSchemes] = useState<GovernmentScheme[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('सर्व');
   const [isLoading, setIsLoading] = useState(true);
+  const [wardCoverage, setWardCoverage] = useState<{ ward: string; beneficiaries: number }[]>([]);
 
   useEffect(() => {
     const fetchSchemes = async () => {
@@ -73,6 +77,14 @@ export default function GovProgramsPage() {
           setSchemes(data);
           setFilteredSchemes(data);
         }
+        // Try to fetch ward coverage; ignore errors and fallback to empty
+        try {
+          const cov = await fetch('/api/government-schemes/coverage');
+          if (cov.ok) {
+            const coverageData = await cov.json();
+            if (Array.isArray(coverageData)) setWardCoverage(coverageData);
+          }
+        } catch {}
       } catch (error) {
         console.error('Error fetching schemes:', error);
       } finally {
@@ -137,32 +149,48 @@ export default function GovProgramsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20">
-        <div className="container mx-auto px-4">
+      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20 relative overflow-hidden">
+        {/* Government Logo Background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full flex items-center justify-center">
+            <Building className="h-10 w-10 text-blue-600" />
+          </div>
+          <div className="absolute top-20 right-20 w-16 h-16 bg-white rounded-full flex items-center justify-center">
+            <Users className="h-8 w-8 text-blue-600" />
+          </div>
+          <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-white rounded-full flex items-center justify-center">
+            <CheckCircle className="h-6 w-6 text-blue-600" />
+          </div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative">
           <div className="text-center max-w-4xl mx-auto">
             <div className="flex items-center justify-center mb-6">
-              <div className="p-4 rounded-2xl bg-white/20 text-white mr-4">
+              <div className="p-4 rounded-2xl bg-white/20 text-white mr-4 backdrop-blur-sm">
                 <Building className="h-8 w-8" />
               </div>
               <h1 className="text-4xl md:text-5xl font-bold">
-                शासकीय योजना
+                योजना आणि लाभार्थी माहिती
               </h1>
             </div>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
-              ग्रामपंचायत स्तरावरील विविध शासकीय योजना आणि कार्यक्रम
+            <p className="text-xl md:text-2xl mb-4 opacity-90">
+              Schemes & Beneficiary Information
+            </p>
+            <p className="text-lg mb-8 opacity-80">
+              केंद्र / राज्य / जिल्हा स्तरावरील लागू योजना, अर्ज प्रक्रिया, पात्रता आणि आवश्यक कागदपत्रे
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <div className="flex items-center bg-white/10 px-4 py-2 rounded-full">
+              <div className="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
                 <CheckCircle className="h-5 w-5 mr-2" />
                 <span>सर्व योजना</span>
               </div>
-              <div className="flex items-center bg-white/10 px-4 py-2 rounded-full">
+              <div className="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
                 <Users className="h-5 w-5 mr-2" />
-                <span>सामाजिक कल्याण</span>
+                <span>लाभार्थी कथा</span>
               </div>
-              <div className="flex items-center bg-white/10 px-4 py-2 rounded-full">
-                <Building className="h-5 w-5 mr-2" />
-                <span>विकास कार्यक्रम</span>
+              <div className="flex items-center bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
+                <MapPin className="h-5 w-5 mr-2" />
+                <span>कव्हरेज नकाशा</span>
               </div>
             </div>
           </div>
@@ -368,6 +396,52 @@ export default function GovProgramsPage() {
               </div>
               <div className="text-gray-600">वापरलेल्या श्रेण्या</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Application Process Section */}
+      {filteredSchemes.length > 0 && (
+        <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50">
+          <div className="container mx-auto px-4">
+            <ApplicationProcessSection scheme={filteredSchemes[0]} />
+          </div>
+        </section>
+      )}
+
+      {/* Star Beneficiary Stories Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <BeneficiaryStoriesSection />
+        </div>
+      </section>
+
+      {/* Enhanced Coverage Map Section */}
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="container mx-auto px-4">
+          <EnhancedCoverageMapSection wardData={wardCoverage} />
+        </div>
+      </section>
+
+      {/* Government Compliance Footer */}
+      <section className="py-12 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="p-3 rounded-full bg-white/20">
+                <Building className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold">महाराष्ट्र शासन</h3>
+                <p className="text-lg opacity-90">Maharashtra Government</p>
+              </div>
+            </div>
+            <p className="text-lg opacity-80 mb-4">
+              सर्व योजना भारत सरकार आणि महाराष्ट्र शासनाच्या मार्गदर्शनाखाली कार्यरत आहेत
+            </p>
+            <p className="text-sm opacity-70">
+              All schemes are operational under the guidance of Government of India and Maharashtra Government
+            </p>
           </div>
         </div>
       </section>

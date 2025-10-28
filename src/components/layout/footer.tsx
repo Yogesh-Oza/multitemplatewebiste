@@ -108,6 +108,31 @@ export function Footer({ footerContent }: FooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href="/projects" className="text-gray-300 hover:text-white transition-colors">
+                  प्रकल्प
+                </Link>
+              </li>
+              <li>
+                <Link href="/gr" className="text-gray-300 hover:text-white transition-colors">
+                  शासकीय ठराव
+                </Link>
+              </li>
+              <li>
+                <Link href="/jobs" className="text-gray-300 hover:text-white transition-colors">
+                  रोजगार
+                </Link>
+              </li>
+              <li>
+                <Link href="/education" className="text-gray-300 hover:text-white transition-colors">
+                  शिक्षण
+                </Link>
+              </li>
+              <li>
+                <Link href="/environment" className="text-gray-300 hover:text-white transition-colors">
+                  पर्यावरण
+                </Link>
+              </li>
+              <li>
                 <Link href="/programs" className="text-gray-300 hover:text-white transition-colors">
                   कार्यक्रम
                 </Link>
@@ -115,6 +140,21 @@ export function Footer({ footerContent }: FooterProps) {
               <li>
                 <Link href="/gallery" className="text-gray-300 hover:text-white transition-colors">
                   गॅलरी
+                </Link>
+              </li>
+              <li>
+                <Link href="/feedback" className="text-gray-300 hover:text-white transition-colors">
+                  फीडबॅक
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors">
+                  डॅशबोर्ड
+                </Link>
+              </li>
+              <li>
+                <Link href="/sitemap" className="text-gray-300 hover:text-white transition-colors">
+                  साइटमॅप
                 </Link>
               </li>
               <li>

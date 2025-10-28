@@ -8,6 +8,8 @@ import { CulturalHeritageSection } from '@/components/sections/cultural-heritage
 import { WelcomeVideoSection } from '@/components/sections/welcome-video-section';
 import { WeatherSection } from '@/components/sections/weather-section';
 import { PragatiMeterSection } from '@/components/sections/pragati-meter-section';
+import { NewsUpdatesSection } from '@/components/sections/news-updates-section';
+import { DailyMessageSection } from '@/components/sections/daily-message-section';
 
 const prisma = new PrismaClient();
 
@@ -97,6 +99,10 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
           description: homepageSettings.subtitle
         } as any
       } : null} />
+      
+      <NewsUpdatesSection />
+      
+      <DailyMessageSection />
       
       <AnnouncementsSection announcements={subdomainData.announcements} />
       

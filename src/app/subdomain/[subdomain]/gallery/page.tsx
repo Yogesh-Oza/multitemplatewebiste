@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 interface GalleryItem {
   id: string;
@@ -20,527 +21,303 @@ export default function GalleryPage() {
   const [activeTab, setActiveTab] = useState<'photo' | 'video'>('photo');
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<GalleryItem | null>(null);
 
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
-        const response = await fetch('/api/gallery');
-        if (response.ok) {
-          const data = await response.json();
-          setGalleryItems(data.filter((item: GalleryItem) => item.isActive));
+        const res = await fetch('/api/gallery', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setGalleryItems(
+            (data as GalleryItem[]).filter((i) => i.isActive).sort((a, b) => a.order - b.order)
+          );
         }
-      } catch (error) {
-        console.error('Error fetching gallery items:', error);
+      } catch (e) {
+        console.error('Error fetching gallery items:', e);
       } finally {
         setLoading(false);
       }
     };
-
     fetchGalleryItems();
   }, []);
 
-  const photoItems = galleryItems.filter(item => item.type === 'photo');
-  const videoItems = galleryItems.filter(item => item.type === 'video');
-
-  const openImagePopup = (imageUrl: string) => {
-    setSelectedImage(imageUrl);
-  };
-
-  const openVideoPopup = (videoUrl: string) => {
-    setSelectedVideo(videoUrl);
-  };
-
-  const closePopups = () => {
-    setSelectedImage(null);
-    setSelectedVideo(null);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
+  const photoItems = useMemo(() => galleryItems.filter((i) => i.type === 'photo'), [galleryItems]);
+  const videoItems = useMemo(() => galleryItems.filter((i) => i.type === 'video'), [galleryItems]);
+  const counts = useMemo(() => ({ photos: photoItems.length, videos: videoItems.length, total: galleryItems.length }), [photoItems.length, videoItems.length, galleryItems.length]);
 
   return (
-    <>
-      <style jsx>{`
-        :root {
-          --brand-purple: #8660D0;
-          --brand-light-purple: #C1C8E4;
-          --brand-sky-blue: #5AB9EA;
-          --brand-light-blue: #84CEEB;
-          --brand-blue: #5680E9;
-        }
-
-        .gallery-tabs {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 20px;
-          background-color: #f8f9fa;
-          border-radius: 8px;
-          padding: 5px;
-        }
-
-        .tab-button {
-          padding: 12px 20px;
-          cursor: pointer;
-          border: none;
-          background-color: transparent;
-          font-size: 1.1rem;
-          font-weight: 500;
-          color: #495057;
-          transition: color 0.3s, border-bottom 0.3s;
-          border-bottom: 3px solid transparent;
-        }
-
-        .tab-button.active {
-          color: var(--brand-purple);
-          font-weight: 700;
-          border-bottom: 3px solid var(--brand-purple);
-        }
-
-        .tab-content {
-          display: none;
-        }
-
-        .tab-content.active {
-          display: block;
-          animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        .hero-section {
-          background: linear-gradient(135deg, var(--brand-purple) 0%, var(--brand-blue) 50%, var(--brand-sky-blue) 100%);
-          color: white;
-          min-height: 30vh;
-          display: flex;
-          align-items: center;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .hero-content {
-          position: relative;
-          z-index: 2;
-          width: 100%;
-        }
-
-        .hero-title {
-          font-size: 3.5rem;
-          font-weight: 800;
-          margin-bottom: 1.5rem;
-          animation: slideUp 1s ease-out;
-          color: white;
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .hero-subtitle {
-          font-size: 1.5rem;
-          opacity: 0.95;
-          animation: slideUp 1s ease-out 0.2s both;
-          color: white;
-          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .gallery-section {
-          background: linear-gradient(to bottom, #f9fafb 0%, white 100%);
-        }
-
-        .gallery-card {
-          background: white;
-          border-radius: 1rem;
-          overflow: hidden;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          transition: all 0.5s ease;
-          position: relative;
-          margin-bottom: 2rem;
-        }
-
-        .gallery-card:hover {
-          transform: translateY(-10px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .gallery-image {
-          width: 100%;
-          height: 250px;
-          object-fit: cover;
-          transition: transform 0.5s ease;
-        }
-
-        .gallery-card:hover .gallery-image {
-          transform: scale(1.1);
-        }
-
-        .gallery-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
-          opacity: 0;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: flex-end;
-          padding: 1.5rem;
-        }
-
-        .gallery-card:hover .gallery-overlay {
-          opacity: 1;
-        }
-
-        .overlay-content {
-          color: white;
-          transform: translateY(20px);
-          transition: transform 0.3s ease;
-        }
-
-        .gallery-card:hover .overlay-content {
-          transform: translateY(0);
-        }
-
-        .overlay-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-        }
-
-        .overlay-description {
-          font-size: 0.9rem;
-          opacity: 0.9;
-          line-height: 1.4;
-        }
-
-        .image-popup-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.85);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-          padding: 15px;
-          animation: fadeIn 0.3s ease-out;
-        }
-
-        .image-popup-content {
-          position: relative;
-          background-color: #fff;
-          padding: 15px;
-          border-radius: 8px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-          max-width: 95vw;
-          max-height: 95vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          animation: scaleUp 0.3s ease-out;
-        }
-
-        .popup-image {
-          max-width: 100%;
-          max-height: calc(95vh - 70px);
-          width: auto;
-          height: auto;
-          object-fit: contain;
-          display: block;
-        }
-
-        .popup-caption {
-          text-align: center;
-          margin-top: 10px;
-          font-size: 1.1em;
-          color: #333;
-          font-weight: 500;
-        }
-
-        .popup-close-btn {
-          position: absolute;
-          top: -15px;
-          right: -15px;
-          background-color: #fff;
-          color: #333;
-          border: none;
-          border-radius: 50%;
-          width: 36px;
-          height: 36px;
-          font-size: 24px;
-          line-height: 36px;
-          text-align: center;
-          cursor: pointer;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-          transition: background-color 0.2s, color 0.2s;
-        }
-
-        .popup-close-btn:hover {
-          background-color: var(--brand-purple);
-          color: white;
-        }
-
-        .thumbnail-card {
-          position: relative;
-          aspect-ratio: 16 / 10;
-          overflow: hidden;
-          cursor: pointer;
-          border-radius: 12px;
-          box-shadow: 0 8px 25px rgba(44, 62, 80, 0.08);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .thumbnail-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 16px 40px rgba(44, 62, 80, 0.15);
-        }
-
-        .thumbnail-card video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .thumbnail-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.3);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .thumbnail-card:hover .thumbnail-overlay {
-          opacity: 1;
-        }
-
-        .video-popup-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.85);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1050;
-          animation: fadeIn 0.3s ease-out;
-        }
-
-        .video-popup-content {
-          position: relative;
-          background-color: #000;
-          border-radius: 8px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-          width: 90%;
-          max-width: 900px;
-          aspect-ratio: 16 / 9;
-          display: flex;
-          flex-direction: column;
-          animation: scaleUp 0.3s ease-out;
-        }
-
-        .popup-video {
-          width: 100%;
-          height: 100%;
-          border-radius: 8px;
-        }
-
-        .video-popup-close-btn {
-          position: absolute;
-          top: -15px;
-          right: -15px;
-          background-color: #fff;
-          color: #333;
-          border: none;
-          border-radius: 50%;
-          width: 36px;
-          height: 36px;
-          font-size: 24px;
-          line-height: 36px;
-          text-align: center;
-          cursor: pointer;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-          transition: background-color 0.2s, color 0.2s;
-          z-index: 1051;
-        }
-
-        .video-popup-close-btn:hover {
-          background-color: var(--brand-purple);
-          color: white;
-        }
-
-        @keyframes scaleUp {
-          from {
-            transform: scale(0.8);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-      `}</style>
-
-      <main>
-        {/* Hero Section */}
-        <section className="hero-section" style={{ marginTop: '50px' }}>
-          <div className="container">
-            <div className="hero-content text-center">
-              <h1 className="hero-title">
-                गावाची गॅलरी
-              </h1>
-              <p className="hero-subtitle">
-                प्रगती,संस्कृती आणि एकतेचे क्षण टिपणारी गॅलरी
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <div className="container mt-4">
-          {/* Gallery Tabs */}
-          <div className="gallery-tabs">
-            <button 
-              className={`tab-button ${activeTab === 'photo' ? 'active' : ''}`}
-              onClick={() => setActiveTab('photo')}
-            >
-              फोटो गॅलरी
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'video' ? 'active' : ''}`}
-              onClick={() => setActiveTab('video')}
-            >
-              व्हिडिओ गॅलरी
-            </button>
-          </div>
-
-          {/* Photo Gallery Content */}
-          <div id="photo-gallery-content" className={`tab-content ${activeTab === 'photo' ? 'active' : ''}`}>
-            <section className="gallery-section">
-              <div className="container">
-                <div className="row justify-content-center" id="galleryGrid">
-                  {photoItems.length === 0 ? (
-                    <div className="no-results text-center">
-                      <div className="no-results-icon">📸</div>
-                      <p className="fs-5">
-                        कोणत्याही प्रकारच्या प्रतिमा आढळल्या नाहीत.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="row">
-                      {photoItems.map((item) => (
-                        <div key={item.id} className="col-md-4 col-lg-3 mb-4">
-                          <div 
-                            className="gallery-card"
-                            onClick={() => openImagePopup(item.mediaUrl)}
-                          >
-                            <img
-                              src={item.mediaUrl}
-                              alt={item.title}
-                              className="gallery-image"
-                            />
-                            <div className="gallery-overlay">
-                              <div className="overlay-content">
-                                <h3 className="overlay-title">{item.title}</h3>
-                                <p className="overlay-description">{item.description}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {/* Video Gallery Content */}
-          <div id="video-gallery-content" className={`tab-content ${activeTab === 'video' ? 'active' : ''}`}>
-            <section className="video-gallery-section" id="videoGallery">
-              <div className="container">
-                {videoItems.length === 0 ? (
-                  <div className="no-results text-center">
-                    <div className="no-results-icon">📹</div>
-                    <p className="fs-5">
-                      कोणतेही व्हिडिओ आढळले नाहीत.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="row">
-                    {videoItems.map((item) => (
-                      <div key={item.id} className="col-md-4 col-lg-3 mb-4">
-                        <div 
-                          className="thumbnail-card"
-                          onClick={() => openVideoPopup(item.mediaUrl)}
-                        >
-                          <video>
-                            <source src={item.mediaUrl} type="video/mp4" />
-                          </video>
-                          <div className="thumbnail-overlay">
-                            <div className="text-center text-white">
-                              <h5>{item.title}</h5>
-                              <p className="mb-0">{item.description}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
+    <main className="min-h-screen bg-white">
+      {/* Page header */}
+      <header className="border-b border-gray-200 bg-gray-50">
+        <div className="container mx-auto px-4 py-8 sm:py-10">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">गॅलरी</h1>
+          <p className="mt-2 max-w-3xl text-slate-700">ग्रामपंचायतीचे कार्यक्रम, विकासकामे आणि संस्कृतीचे निवडक क्षण</p>
+          {/* Tricolor accent */}
+          <div className="mt-4 flex h-1 w-40 overflow-hidden rounded">
+            <span className="h-full w-1/3" style={{ backgroundColor: '#FF9933' }} aria-hidden="true" />
+            <span className="h-full w-1/3 bg-white" aria-hidden="true" />
+            <span className="h-full w-1/3" style={{ backgroundColor: '#138808' }} aria-hidden="true" />
           </div>
         </div>
+      </header>
 
-        {/* Image Popup */}
-        {selectedImage && (
-          <div className="image-popup-overlay" onClick={closePopups}>
-            <div className="image-popup-content" onClick={(e) => e.stopPropagation()}>
-              <button className="popup-close-btn" onClick={closePopups}>×</button>
-              <img src={selectedImage} alt="Gallery Image" className="popup-image" />
-            </div>
+      {/* Controls */}
+      <section aria-label="Gallery controls" className="border-b border-gray-100">
+        <div className="container mx-auto px-4">
+          {/* Stat chips */}
+          <div className="flex flex-wrap items-center gap-2 py-3 text-xs sm:text-sm text-slate-700">
+            <span className="rounded border border-blue-200 bg-blue-50 px-2 py-1 font-medium text-blue-700">एकूण: {counts.total}</span>
+            <span className="rounded border border-[\#FF9933] bg-orange-50 px-2 py-1 font-medium text-[\#B45309]">फोटो: {counts.photos}</span>
+            <span className="rounded border border-[\#138808] bg-green-50 px-2 py-1 font-medium text-green-700">व्हिडिओ: {counts.videos}</span>
           </div>
-        )}
+          <div role="tablist" aria-label="Gallery type" className="flex gap-2 pb-4 -mt-1 overflow-x-auto">
+            {(
+              [
+                { key: 'photo', label: 'फोटो' },
+                { key: 'video', label: 'व्हिडिओ' },
+              ] as const
+            ).map((t) => (
+            <button 
+                key={t.key}
+                role="tab"
+                aria-selected={activeTab === t.key}
+                aria-controls={`${t.key}-panel`}
+                className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${
+                  activeTab === t.key
+                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                    : 'bg-white text-slate-700 hover:bg-gray-50 border-gray-200'
+                }`}
+                onClick={() => setActiveTab(t.key as 'photo' | 'video')}
+              >
+                {t.label}
+            </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        {/* Video Popup */}
-        {selectedVideo && (
-          <div className="video-popup-overlay" onClick={closePopups}>
-            <div className="video-popup-content" onClick={(e) => e.stopPropagation()}>
-              <button className="video-popup-close-btn" onClick={closePopups}>×</button>
-              <video className="popup-video" controls autoPlay>
-                <source src={selectedVideo} type="video/mp4" />
-              </video>
-            </div>
-          </div>
+      {/* Photo grid */}
+      <section
+        id="photo-panel"
+        role="tabpanel"
+        aria-labelledby="photo"
+        hidden={activeTab !== 'photo'}
+        className="container mx-auto px-4 py-6 sm:py-8"
+      >
+        {loading ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <li key={i} className="list-none">
+                <div className="animate-pulse rounded-lg border border-gray-200 bg-white shadow-sm">
+                  <div className="h-48 w-full rounded-t-lg bg-gray-100" />
+                  <div className="space-y-2 p-3">
+                    <div className="h-3 w-2/3 rounded bg-gray-200" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : photoItems.length === 0 ? (
+          <p className="text-center text-slate-600">फोटो उपलब्ध नाहीत.</p>
+        ) : (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {photoItems.map((item, idx) => (
+              <li key={item.id} className="list-none">
+                <motion.figure
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.35, delay: idx * 0.02 }}
+                  className="group relative cursor-pointer rounded-lg border border-gray-200 bg-white shadow-sm ring-0 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-blue-700"
+                  tabIndex={0}
+                  onClick={() => setSelectedImage(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedImage(item);
+                  }}
+                >
+                  <Image
+                              src={item.mediaUrl}
+                    alt={item.title || 'गॅलरी फोटो'}
+                    width={800}
+                    height={600}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="h-48 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                  <figcaption className="border-t border-gray-100 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900 line-clamp-1">
+                      {item.title}
+                    </h3>
+                    <div className="mt-1 flex items-center justify-between">
+                      {item.description ? (
+                        <p className="text-xs text-slate-600 line-clamp-1 mr-2">{item.description}</p>
+                      ) : <span aria-hidden className="text-xs text-slate-400">&nbsp;</span>}
+                      {item.category ? (
+                        <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{item.category}</span>
+                      ) : null}
+                    </div>
+                  </figcaption>
+                  {/* saffron focus bar */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-0 top-0 h-0.5 scale-x-0 bg-[\#FF9933] transition-transform duration-200 group-hover:scale-x-100"
+                  />
+                </motion.figure>
+              </li>
+            ))}
+          </ul>
         )}
+            </section>
+
+      {/* Video grid */}
+      <section
+        id="video-panel"
+        role="tabpanel"
+        aria-labelledby="video"
+        hidden={activeTab !== 'video'}
+        className="container mx-auto px-4 py-6 sm:py-8"
+      >
+        {loading ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <li key={i} className="list-none">
+                <div className="animate-pulse rounded-lg border border-gray-200 bg-white shadow-sm">
+                  <div className="h-48 w-full rounded-t-lg bg-gray-100" />
+                  <div className="space-y-2 p-3">
+                    <div className="h-3 w-2/3 rounded bg-gray-200" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : videoItems.length === 0 ? (
+          <p className="text-center text-slate-600">व्हिडिओ उपलब्ध नाहीत.</p>
+        ) : (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {videoItems.map((item, idx) => (
+              <li key={item.id} className="list-none">
+                <motion.figure
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.35, delay: idx * 0.02 }}
+                  className="group relative cursor-pointer rounded-lg border border-gray-200 bg-white shadow-sm ring-0 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md focus-within:ring-2 focus-within:ring-blue-700"
+                  tabIndex={0}
+                  onClick={() => setSelectedVideo(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedVideo(item);
+                  }}
+                >
+                  <video
+                    className="h-48 w-full rounded-t-lg object-cover"
+                    src={item.mediaUrl}
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                  <figcaption className="border-t border-gray-100 p-3">
+                    <h3 className="text-sm font-semibold text-slate-900 line-clamp-1">{item.title}</h3>
+                    <div className="mt-1 flex items-center justify-between">
+                      {item.description ? (
+                        <p className="text-xs text-slate-600 line-clamp-1 mr-2">{item.description}</p>
+                      ) : <span aria-hidden className="text-xs text-slate-400">&nbsp;</span>}
+                      {item.category ? (
+                        <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{item.category}</span>
+                      ) : null}
+                    </div>
+                  </figcaption>
+                  {/* green focus bar */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-0 top-0 h-0.5 scale-x-0 bg-[\#138808] transition-transform duration-200 group-hover:scale-x-100"
+                  />
+                </motion.figure>
+              </li>
+            ))}
+          </ul>
+        )}
+            </section>
+
+      {/* Image Dialog */}
+      {selectedImage && (
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label={selectedImage.title || 'Image preview'}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-4 overflow-x-hidden overflow-y-auto overscroll-contain"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSelectedImage(null)}
+        >
+          <motion.div
+            initial={{ y: 12, scale: 0.98, opacity: 0.9 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: 8, scale: 0.98, opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="relative w-full max-w-5xl max-h-[90vh] overflow-auto rounded-md bg-white p-2 sm:p-3 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              aria-label="Close image preview"
+              onClick={() => setSelectedImage(null)}
+              className="absolute right-2 top-2 z-10 h-8 w-8 rounded-full bg-black/80 text-white shadow hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              ×
+            </button>
+            <Image
+              src={selectedImage.mediaUrl}
+              alt={selectedImage.title || 'गॅलरी फोटो'}
+              width={1600}
+              height={900}
+              sizes="(max-width: 1024px) 100vw, 80vw"
+              className="mx-auto h-auto w-full max-h-[80vh] rounded object-contain"
+            />
+            {selectedImage.description ? (
+              <p className="mt-2 text-center text-sm text-slate-700">{selectedImage.description}</p>
+            ) : null}
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Video Dialog */}
+      {selectedVideo && (
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label={selectedVideo.title || 'Video preview'}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-4 overflow-x-hidden overflow-y-auto overscroll-contain"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSelectedVideo(null)}
+        >
+          <motion.div
+            initial={{ y: 12, scale: 0.98, opacity: 0.9 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: 8, scale: 0.98, opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="relative w-full max-w-5xl rounded-md bg-black p-2 sm:p-3 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              aria-label="Close video preview"
+              onClick={() => setSelectedVideo(null)}
+              className="absolute right-2 top-2 z-10 h-8 w-8 rounded-full bg-white/90 text-slate-800 shadow hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            >
+              ×
+            </button>
+            <video className="aspect-video w-full rounded bg-black" src={selectedVideo.mediaUrl} controls autoPlay />
+            {selectedVideo.description ? (
+              <p className="mt-2 text-center text-sm text-white/90">{selectedVideo.description}</p>
+            ) : null}
+          </motion.div>
+        </motion.div>
+      )}
       </main>
-    </>
   );
 }

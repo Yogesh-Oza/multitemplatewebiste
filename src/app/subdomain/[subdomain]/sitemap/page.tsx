@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { SubdomainValidator } from '@/components/subdomain-validator';
-import { FileText, Building, Users, Calendar, MapPin, Home, Info, History, Image, DollarSign, Megaphone, Award, Wrench, Phone } from 'lucide-react';
+import { FileText, Building, Users, Calendar, MapPin, Home, Info, History, Image, DollarSign, Megaphone, Award, Wrench, Phone, Briefcase, GraduationCap, Leaf } from 'lucide-react';
 
 interface SitemapPageProps {
   params: Promise<{ subdomain: string }>;
@@ -55,20 +55,20 @@ export default async function SitemapPage({ params }: SitemapPageProps) {
       descriptionEn: 'Gram Panchayat Homepage'
     },
     {
-      title: 'आमच्याबद्दल',
-      titleEn: 'About Us',
+      title: 'ग्रामपंचायतीबद्दल',
+      titleEn: 'About Gram Panchayat',
       url: '/about',
       icon: Info,
       description: 'ग्रामपंचायत माहिती',
       descriptionEn: 'About Gram Panchayat'
     },
     {
-      title: 'इतिहास',
-      titleEn: 'History',
+      title: 'आमचे गाव',
+      titleEn: 'Our Village',
       url: '/history',
       icon: History,
-      description: 'गावाचा इतिहास',
-      descriptionEn: 'Village History'
+      description: 'गावाचा इतिहास आणि संस्कृती',
+      descriptionEn: 'Village History and Culture'
     },
     {
       title: 'कार्यक्रम',
@@ -80,38 +80,38 @@ export default async function SitemapPage({ params }: SitemapPageProps) {
       count: programsCount
     },
     {
-      title: 'गॅलरी',
-      titleEn: 'Gallery',
+      title: 'गॅलरी आणि मीडिया',
+      titleEn: 'Gallery & Media',
       url: '/gallery',
       icon: Image,
-      description: 'फोटो गॅलरी',
-      descriptionEn: 'Photo Gallery',
+      description: 'गॅलरी आणि मीडिया',
+      descriptionEn: 'Gallery and Media',
       count: galleryCount
     },
     {
-      title: 'जमा-खर्च',
-      titleEn: 'Income-Expenditure',
+      title: 'अर्थसंकल्प',
+      titleEn: 'Budget',
       url: '/jama-kharch',
       icon: DollarSign,
-      description: 'आर्थिक माहिती',
-      descriptionEn: 'Financial Information'
+      description: 'अर्थसंकल्प आणि पारदर्शकता',
+      descriptionEn: 'Budget and Transparency'
     },
     {
-      title: 'सूचना',
+      title: 'घोषणा',
       titleEn: 'Announcements',
       url: '/announcements',
       icon: Megaphone,
-      description: 'घोषणा आणि सूचना',
-      descriptionEn: 'Announcements and Notices',
+      description: 'घोषणा आणि परिपत्रके',
+      descriptionEn: 'Announcements and Circulars',
       count: announcementsCount
     },
     {
-      title: 'शासकीय योजना',
-      titleEn: 'Government Schemes',
+      title: 'योजना आणि लाभार्थी',
+      titleEn: 'Schemes & Beneficiaries',
       url: '/gov-programs',
       icon: Award,
-      description: 'सरकारी योजना',
-      descriptionEn: 'Government Schemes',
+      description: 'सरकारी योजना आणि लाभार्थी माहिती',
+      descriptionEn: 'Government Schemes and Beneficiary Information',
       count: governmentSchemesCount
     },
     {
@@ -124,32 +124,32 @@ export default async function SitemapPage({ params }: SitemapPageProps) {
       count: departmentsCount
     },
     {
-      title: 'सोई-सुविधा',
-      titleEn: 'Amenities',
+      title: 'पायाभूत सुविधा',
+      titleEn: 'Infrastructure',
       url: '/amenities',
       icon: Wrench,
-      description: 'ग्राम सुविधा',
-      descriptionEn: 'Village Amenities',
+      description: 'ग्राम पायाभूत सुविधा आणि सुविधा',
+      descriptionEn: 'Village Infrastructure and Facilities',
       count: facilitiesCount
     },
     {
-      title: 'संपर्क',
-      titleEn: 'Contact',
+      title: 'नागरिक सेवा',
+      titleEn: 'Citizen Services',
       url: '/contact',
       icon: Phone,
-      description: 'संपर्क माहिती',
-      descriptionEn: 'Contact Information'
+      description: 'नागरिक सेवा आणि फॉर्म्स',
+      descriptionEn: 'Citizen Services and Forms'
     }
   ];
 
   const newPages = [
     {
-      title: 'प्रकल्प',
-      titleEn: 'Projects',
+      title: 'प्रकल्प आणि उपक्रम',
+      titleEn: 'Projects & Initiatives',
       url: '/projects',
       icon: Building,
-      description: 'विकास प्रकल्प',
-      descriptionEn: 'Development Projects',
+      description: 'प्रमुख प्रकल्प आणि उपक्रम',
+      descriptionEn: 'Key Projects and Initiatives',
       count: projectsCount
     },
     {
@@ -171,12 +171,36 @@ export default async function SitemapPage({ params }: SitemapPageProps) {
       count: culturalHeritageCount
     },
     {
-      title: 'फीडबॅक',
-      titleEn: 'Feedback',
+      title: 'तक्रार निवारण',
+      titleEn: 'Grievance Redressal',
       url: '/feedback',
       icon: Users,
-      description: 'नागरिक फीडबॅक',
-      descriptionEn: 'Citizen Feedback'
+      description: 'तक्रार निवारण आणि फीडबॅक',
+      descriptionEn: 'Grievance Redressal and Feedback'
+    },
+    {
+      title: 'रोजगार आणि कौशल्य',
+      titleEn: 'Employment & Skills',
+      url: '/jobs',
+      icon: Briefcase,
+      description: 'रोजगार आणि कौशल्य विकास',
+      descriptionEn: 'Employment and Skill Development'
+    },
+    {
+      title: 'शिक्षण आणि युवक',
+      titleEn: 'Education & Youth',
+      url: '/education',
+      icon: GraduationCap,
+      description: 'शिक्षण आणि युवक कोपरा',
+      descriptionEn: 'Education and Youth Corner'
+    },
+    {
+      title: 'पर्यावरण आणि शाश्वत',
+      titleEn: 'Environment & Sustainability',
+      url: '/environment',
+      icon: Leaf,
+      description: 'पर्यावरण आणि शाश्वत विकास',
+      descriptionEn: 'Environment and Sustainable Development'
     }
   ];
 

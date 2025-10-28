@@ -1,4 +1,7 @@
 import { AboutSection } from '@/components/sections/about-section';
+import { OfficeInformationSection } from '@/components/sections/office-information-section';
+import { RolesResponsibilitiesSection } from '@/components/sections/roles-responsibilities-section';
+import { CompleteEmergencyContactsSection } from '@/components/sections/complete-emergency-contacts-section';
 import { PrismaClient } from '@prisma/client';
 import { redirect } from 'next/navigation';
 
@@ -38,6 +41,12 @@ export default async function SubdomainAboutPage({ params }: AboutPageProps) {
   return (
     <div className="min-h-screen">
       <AboutSection villageInfo={villageInfo} />
+      
+      <OfficeInformationSection />
+      
+      <RolesResponsibilitiesSection />
+      
+      <CompleteEmergencyContactsSection />
     </div>
   );
 }
