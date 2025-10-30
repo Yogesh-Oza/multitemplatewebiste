@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { validateSubdomain } from '@/lib/subdomain';
 
 export async function GET(request: NextRequest) {
   try {

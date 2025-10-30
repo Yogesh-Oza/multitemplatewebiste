@@ -17,43 +17,43 @@ const MENU_GROUPS = [
     items: [
       { href: '/', label: 'मुख्यपृष्ठ' },
       { href: '/about', label: 'ग्रामपंचायतीबद्दल' },
-      { href: '/history', label: 'आमचे गाव' }
+      { href: '/history', label: 'आमचे गाव – ओळख आणि संस्कृती' }
     ]
   },
   {
     label: 'विकास व प्रशासन',
     items: [
-      { href: '/projects', label: 'प्रकल्प आणि उपक्रम' },
+      { href: '/projects', label: 'प्रमुख प्रकल्प आणि उपक्रम' },
       { href: '/gr', label: 'शासकीय ठराव' },
       { href: '/programs', label: 'कार्यक्रम' },
       { href: '/departments', label: 'विभाग' },
-      { href: '/amenities', label: 'पायाभूत सुविधा' },
-      { href: '/gov-programs', label: 'योजना आणि लाभार्थी' },
-      { href: '/jama-kharch', label: 'अर्थसंकल्प' }
+      { href: '/amenities', label: 'ग्राम पायाभूत सुविधा आणि सुविधा' },
+      { href: '/gov-programs', label: 'योजना आणि लाभार्थी माहिती' },
+      { href: '/jama-kharch', label: 'अर्थसंकल्प आणि पारदर्शकता' }
     ]
   },
   {
     label: 'नागरिक सेवा',
     items: [
       { href: '/citizen-services', label: 'नागरिक सेवा आणि फॉर्म्स' },
-      { href: '/jobs', label: 'रोजगार आणि कौशल्य' },
-      { href: '/education', label: 'शिक्षण आणि युवक' },
-      { href: '/environment', label: 'पर्यावरण आणि शाश्वत' },
-      { href: '/feedback', label: 'तक्रार निवारण' },
+      { href: '/jobs', label: 'रोजगार आणि कौशल्य विकास' },
+      { href: '/education', label: 'शिक्षण आणि युवक कोपरा' },
+      { href: '/environment', label: 'पर्यावरण आणि शाश्वत विकास' },
+      { href: '/feedback', label: 'तक्रार निवारण आणि फीडबॅक' },
       { href: '/contact', label: 'संपर्क आणि सहकार्य' }
     ]
   },
   {
     label: 'माध्यम व अद्यतने',
     items: [
-      { href: '/announcements', label: 'घोषणा' },
+      { href: '/announcements', label: 'घोषणा आणि परिपत्रके' },
       { href: '/gallery', label: 'गॅलरी आणि मीडिया' }
     ]
   },
   {
     label: 'डाटा व नकाशा',
     items: [
-      { href: '/dashboard', label: 'डॅशबोर्ड' },
+      { href: '/dashboard', label: 'डॅशबोर्ड – माझे गाव, माझी प्रगती' },
       { href: '/sitemap', label: 'साइटमॅप' }
     ]
   }
@@ -81,21 +81,47 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
   const pathname = usePathname();
   const [selectedLang, setSelectedLang] = useState('mr');
 
+
   // Fallback language switcher using googtrans cookie
   const applyGoogleTranslate = (targetLang: string) => {
     try {
       const sourceLang = 'mr';
-      const cookieValue = `/` + sourceLang + `/` + targetLang;
-      const expires = new Date();
-      expires.setTime(expires.getTime() + 365 * 24 * 60 * 60 * 1000);
-      const cookieBase = `; expires=${expires.toUTCString()}; path=/`;
-      // Set for current domain and dot-domain to cover subdomains
-      document.cookie = `googtrans=${cookieValue}${cookieBase}`;
-      document.cookie = `googtrans=${cookieValue}${cookieBase}; domain=.${window.location.hostname}`;
-      // eslint-disable-next-line no-console
-      console.log('[GT] fallback cookie set', cookieValue);
+      const cookieValue = `/${sourceLang}/${targetLang}`;
+      const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+
+      // Compute apex domain (eTLD+1) naive: last two labels
+      const host = window.location.hostname; // e.g., pune.mahagp.in
+      const parts = host.split('.');
+      const apexDomain = parts.length >= 2 ? `.${parts.slice(-2).join('.')}` : `.${host}`; // .mahagp.in
+
+      // Helper to set cookie with common attributes
+      const setCookie = (domain?: string) => {
+        const domainAttr = domain ? `; domain=${domain}` : '';
+        document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/${domainAttr}; Secure; SameSite=Lax`;
+      };
+
+      // Clear potential duplicates across domains (current, dotted, apex)
+      const clearCookie = (domain?: string) => {
+        const domainAttr = domain ? `; domain=${domain}` : '';
+        // Delete with common variations
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainAttr}`;
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax${domainAttr}`;
+      };
+
+      // Remove existing variants that can conflict
+      const domainsToClear = [
+        undefined,
+        `.${host}`,
+        apexDomain,
+      ];
+      domainsToClear.forEach((d) => clearCookie(d));
+
+      // Set a single cookie on apex domain
+      setCookie(apexDomain);
+
+      // Reflect UI state immediately
       try { setSelectedLang(targetLang); } catch {}
-      // Trigger translation (element is already loaded)
+      // Force reload so GT widget re-reads cookie
       window.location.reload();
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -238,7 +264,7 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
           <div className="flex items-center gap-3">
             {/* Satyamev Jayate logo */}
             <Image
-              src={villageData?.satyamevJayateLogoUrl || '/images/gov-logos/satyamev_jayate_logo.png'}
+              src={villageData?.satyamevJayateLogoUrl ?? '/images/gov-logos/satyamev_jayate_logo.png'}
               alt="Satyamev Jayate"
               width={32}
               height={32}
@@ -252,15 +278,15 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
 
             <div className="h-6 w-px bg-white/30 hidden sm:block"></div>
             <span className="font-medium text-white">
-              {villageData?.govDeptText || 'शासन महाराष्ट्र • ग्रामीण विकास विभाग'}
+              {villageData?.govDeptText ?? 'शासन महाराष्ट्र • ग्रामीण विकास विभाग'}
             </span>
           </div>
           <div className="hidden md:flex items-center gap-3">
             <span className="text-white/90 font-medium">
-              {villageData?.officialSiteText || 'अधिकृत ग्रामपंचायत संकेतस्थळ'}
+              {villageData?.officialSiteText ?? 'अधिकृत ग्रामपंचायत संकेतस्थळ'}
             </span>
             <Image
-              src={villageData?.digitalIndiaLogoUrl || '/images/gov-logos/digital-india.png'}
+              src={villageData?.digitalIndiaLogoUrl ?? '/images/gov-logos/digital-india.png'}
               alt="Digital India"
               width={80}
               height={32}

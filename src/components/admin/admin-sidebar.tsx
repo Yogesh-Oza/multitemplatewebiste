@@ -36,12 +36,6 @@ const adminNavItems = [
     description: 'होमपेज मुख्य प्रतिमा व्यवस्थापन'
   },
   {
-    href: '/admin/branding',
-    label: 'सरकारी ब्रँडिंग',
-    icon: Shield,
-    description: 'सरकारी लोगो आणि मजकूर व्यवस्थापन'
-  },
-  {
     href: '/admin/village-info',
     label: 'गाव माहिती',
     icon: Users,

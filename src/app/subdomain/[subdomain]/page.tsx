@@ -10,6 +10,8 @@ import { WeatherSection } from '@/components/sections/weather-section';
 import { PragatiMeterSection } from '@/components/sections/pragati-meter-section';
 import { NewsUpdatesSection } from '@/components/sections/news-updates-section';
 import { DailyMessageSection } from '@/components/sections/daily-message-section';
+import { LeadersHierarchySection } from '@/components/sections/leaders-hierarchy-section';
+import { QRTaxPaymentSection } from '@/components/sections/qr-tax-payment-section';
 
 const prisma = new PrismaClient();
 
@@ -84,6 +86,9 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
           : []
       } : null} />
       
+      {/* Leaders and hierarchy section (CM, DCMs, Ministers, Officials) */}
+      <LeadersHierarchySection />
+      
       <PragatiMeterSection dashboardMetrics={dashboardMetrics.map(metric => ({
         ...metric,
         target: 100, // Default target value
@@ -99,6 +104,9 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
           description: homepageSettings.subtitle
         } as any
       } : null} />
+
+      {/* Demo QR Tax Payment Section */}
+      <QRTaxPaymentSection />
       
       <NewsUpdatesSection />
       

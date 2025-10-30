@@ -25,6 +25,10 @@ interface VillageInfo {
   villageLogo?: string;
   villageName?: string;
   villageNameEn?: string;
+  satyamevJayateLogoUrl?: string;
+  digitalIndiaLogoUrl?: string;
+  govDeptText?: string;
+  officialSiteText?: string;
   sectionOneTitle?: string;
   sectionOneBody?: string;
   sectionTwoTitle?: string;
@@ -113,6 +117,10 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
     villageLogo: villageData?.villageLogo || '',
     villageName: villageData?.villageName || '',
     villageNameEn: villageData?.villageNameEn || '',
+    satyamevJayateLogoUrl: villageData?.satyamevJayateLogoUrl || '/images/gov-logos/satyamev_jayate_logo.png',
+    digitalIndiaLogoUrl: villageData?.digitalIndiaLogoUrl || '/images/gov-logos/digital-india.png',
+    govDeptText: villageData?.govDeptText || 'शासन महाराष्ट्र • ग्रामीण विकास विभाग',
+    officialSiteText: villageData?.officialSiteText || 'अधिकृत ग्रामपंचायत संकेतस्थळ',
     sectionOneTitle: villageData?.sectionOneTitle || 'आमचे गाव',
     sectionOneBody: villageData?.sectionOneBody || 'आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.',
     sectionTwoTitle: villageData?.sectionTwoTitle || 'स्थान',
@@ -139,6 +147,10 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         villageLogo: villageData.villageLogo || '',
         villageName: villageData.villageName || '',
         villageNameEn: villageData.villageNameEn || '',
+        satyamevJayateLogoUrl: villageData.satyamevJayateLogoUrl || '/images/gov-logos/satyamev_jayate_logo.png',
+        digitalIndiaLogoUrl: villageData.digitalIndiaLogoUrl || '/images/gov-logos/digital-india.png',
+        govDeptText: villageData.govDeptText || 'शासन महाराष्ट्र • ग्रामीण विकास विभाग',
+        officialSiteText: villageData.officialSiteText || 'अधिकृत ग्रामपंचायत संकेतस्थळ',
         sectionOneTitle: villageData.sectionOneTitle || 'आमचे गाव',
         sectionOneBody: villageData.sectionOneBody || 'आमचे गाव एक प्रगतीशील, सुसंस्कृत आणि सामाजिक न्यायावर आधारित गाव आहे. येथे सर्व जाती-धर्माचे लोक एकत्रित राहतात आणि सामूहिक विकासासाठी काम करतात.',
         sectionTwoTitle: villageData.sectionTwoTitle || 'स्थान',
@@ -227,16 +239,40 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
 
       if (response.ok) {
         const data = await response.json();
-        setFormData(prev => ({
-          ...prev,
-          villageLogo: data.url
-        }));
+        const uploadedUrl = (data.url || data.imageUrl) as string | undefined;
+        if (uploadedUrl) {
+          setFormData(prev => ({
+            ...prev,
+            villageLogo: uploadedUrl
+          }));
+        } else {
+        }
         toast.success('लोगो अपलोड केले!');
       } else {
         toast.error('लोगो अपलोड करताना त्रुटी आली');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      toast.error('लोगो अपलोड करताना त्रुटी आली');
+    }
+  };
+
+  const handleGovLogoUpload = async (file: File, field: 'satyamevJayateLogoUrl' | 'digitalIndiaLogoUrl') => {
+    try {
+      const formDataFd = new FormData();
+      formDataFd.append('file', file);
+      const response = await fetch('/api/upload', { method: 'POST', body: formDataFd });
+      if (response.ok) {
+        const data = await response.json();
+        const uploadedUrl = (data.url || data.imageUrl) as string | undefined;
+        if (uploadedUrl) {
+          setFormData(prev => ({ ...prev, [field]: uploadedUrl }));
+        } else {
+        }
+        toast.success('लोगो अपलोड केले!');
+      } else {
+        toast.error('लोगो अपलोड करताना त्रुटी आली');
+      }
+    } catch (error) {
       toast.error('लोगो अपलोड करताना त्रुटी आली');
     }
   };
@@ -252,7 +288,6 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         stats: Array.isArray(formData.stats) ? formData.stats : []
       };
       
-      console.log('Submitting village info:', dataToSubmit);
       
       const response = await fetch('/api/admin/village-info', {
         method: 'PUT',
@@ -260,11 +295,9 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         body: JSON.stringify(dataToSubmit),
       });
 
-      console.log('Response status:', response.status);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('Update successful:', result);
         toast.success('गाव माहिती सफलतापूर्वक सेव्ह केली!');
         
         // Force refresh the page to show updated data
@@ -273,11 +306,9 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
         }, 500);
       } else {
         const errorData = await response.json();
-        console.error('Update failed:', errorData);
         toast.error(`त्रुटी आली: ${errorData.error || 'अज्ञात त्रुटी'}`);
       }
     } catch (error) {
-      console.error('Submit error:', error);
       toast.error('त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
     } finally {
       setIsLoading(false);
@@ -348,13 +379,113 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
               <p className="text-xs text-gray-500 mt-1">JPG, PNG, WebP, कमाल 5MB</p>
               
               {formData.villageLogo && (
-                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
-                  <div className="flex items-center space-x-2 text-sm text-green-700">
-                    <Home className="h-4 w-4" />
-                    <span>लोगो अपलोड केले: {formData.villageLogo.split('/').pop()}</span>
+						<div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+							<div className="flex items-center space-x-2 text-sm text-green-700">
+								<Home className="h-4 w-4" />
+								<span>लोगो अपलोड केले: {formData.villageLogo.split('/').pop()}</span>
+							</div>
+							<div className="mt-3 flex items-center gap-4">
+								<img
+									src={formData.villageLogo}
+									alt="Village logo preview"
+									className="h-16 w-16 rounded object-contain border border-green-200 bg-white"
+								/>
+								<a
+									href={formData.villageLogo}
+									target="_blank"
+									rel="noreferrer"
+									className="text-sm text-green-700 underline underline-offset-2 hover:text-green-800"
+								>
+									पूर्ण आकारात पहा
+								</a>
+							</div>
+						</div>
+              )}
+            </div>
+          </div>
+
+          {/* Government Branding moved into Village Info */}
+          <div className="pt-2">
+            <h4 className="text-sm font-semibold mb-2">सरकारी लोगो आणि मजकूर</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label>Satyamev Jayate लोगो</Label>
+                <div className="mt-2">
+                  <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <Upload className="h-5 w-5 mr-2" />
+                    <span className="text-sm font-medium">फाइल निवडा</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGovLogoUpload(file, 'satyamevJayateLogoUrl');
+                      }}
+                    />
+                  </label>
+                  <div className="mt-2 flex items-center gap-3">
+                    {formData.satyamevJayateLogoUrl ? (
+                      <img src={formData.satyamevJayateLogoUrl} alt="Satyamev Jayate Preview" className="h-8 w-8 object-contain bg-white border rounded" />
+                    ) : null}
+                    <span className="text-xs text-gray-600 break-all">{formData.satyamevJayateLogoUrl || ''}</span>
                   </div>
                 </div>
-              )}
+              </div>
+              <div>
+                <Label>Digital India लोगो</Label>
+                <div className="mt-2">
+                  <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <Upload className="h-5 w-5 mr-2" />
+                    <span className="text-sm font-medium">फाइल निवडा</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGovLogoUpload(file, 'digitalIndiaLogoUrl');
+                      }}
+                    />
+                  </label>
+                  <div className="mt-2 flex items-center gap-3">
+                    {formData.digitalIndiaLogoUrl ? (
+                      <img src={formData.digitalIndiaLogoUrl} alt="Digital India Preview" className="h-8 w-20 object-contain bg-white border rounded" />
+                    ) : null}
+                    <span className="text-xs text-gray-600 break-all">{formData.digitalIndiaLogoUrl || ''}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <Label htmlFor="govDeptText">सरकारी मजकूर (डावे)</Label>
+                <Input
+                  id="govDeptText"
+                  value={formData.govDeptText || ''}
+                  onChange={(e) => handleInputChange('govDeptText', e.target.value)}
+                  placeholder="शासन महाराष्ट्र • ग्रामीण विकास विभाग"
+                />
+                <p className="text-xs text-gray-500 mt-1">हे मजकूर हेडरमधील डाव्या बाजूला दिसेल</p>
+              </div>
+              <div>
+                <Label htmlFor="officialSiteText">सरकारी मजकूर (उजवे)</Label>
+                <Input
+                  id="officialSiteText"
+                  value={formData.officialSiteText || ''}
+                  onChange={(e) => handleInputChange('officialSiteText', e.target.value)}
+                  placeholder="अधिकृत ग्रामपंचायत संकेतस्थळ"
+                />
+                <p className="text-xs text-gray-500 mt-1">हे मजकूर हेडरमधील उजव्या बाजूला दिसेल</p>
+              </div>
+            </div>
+
+            <div className="mt-3 text-xs text-gray-600 space-y-1">
+              <div>फाइल अपलोड माहिती</div>
+              <div>• JPG, PNG, WebP स्वरूपातील प्रतिमा स्वीकारल्या जातात</div>
+              <div>• कमाल फाइल आकार: 5MB</div>
+              <div>• लोगो साठी शिफारस केलेले आकार: Satyamev Jayate (32x32px), Digital India (80x32px)</div>
             </div>
           </div>
         </CardContent>
