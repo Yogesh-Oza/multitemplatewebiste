@@ -5,8 +5,9 @@ import Image from 'next/image';
 import { QrCode, CreditCard, Smartphone, ShieldCheck, IndianRupee } from 'lucide-react';
 
 export function QRTaxPaymentSection() {
-  // Demo UPI QR (replace data param with real UPI handle later)
-  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property%20Tax';
+  // Demo UPI QR (replace with official handle). Ensure data is URL-encoded
+  const qrData = 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property Tax';
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}`;
 
   return (
     <section className="relative py-16 bg-gradient-to-br from-emerald-50 to-blue-50 overflow-hidden">
@@ -53,8 +54,7 @@ export function QRTaxPaymentSection() {
             </div>
             <div className="flex flex-col items-center">
               <div className="rounded-xl border bg-white p-4">
-                {/* Use Image for better optimization; external host is allowed */}
-                <Image src={qrUrl} alt="UPI QR" width={220} height={220} className="h-[220px] w-[220px] object-contain" />
+                <img src={qrUrl} alt="UPI QR" width={220} height={220} className="h-[220px] w-[220px] object-contain" />
               </div>
               <p className="mt-4 text-sm text-gray-600">डेमो UPI: gp-pay@upi (रक्कम टाका आणि पे करा)</p>
             </div>
