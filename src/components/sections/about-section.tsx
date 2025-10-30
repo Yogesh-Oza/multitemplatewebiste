@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Home, MapPin, TrendingUp, ChevronRight, Phone, Shield, Flame, Hospital, Zap } from 'lucide-react';
+import { Users, Home, MapPin, TrendingUp, ChevronRight } from 'lucide-react';
 
 interface Stat {
   value: string;

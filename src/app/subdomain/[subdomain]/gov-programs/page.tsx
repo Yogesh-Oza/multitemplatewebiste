@@ -66,7 +66,6 @@ export default function GovProgramsPage() {
   const [filteredSchemes, setFilteredSchemes] = useState<GovernmentScheme[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('सर्व');
   const [isLoading, setIsLoading] = useState(true);
-  const [wardCoverage, setWardCoverage] = useState<{ ward: string; beneficiaries: number }[]>([]);
 
   useEffect(() => {
     const fetchSchemes = async () => {
@@ -77,14 +76,6 @@ export default function GovProgramsPage() {
           setSchemes(data);
           setFilteredSchemes(data);
         }
-        // Try to fetch ward coverage; ignore errors and fallback to empty
-        try {
-          const cov = await fetch('/api/government-schemes/coverage');
-          if (cov.ok) {
-            const coverageData = await cov.json();
-            if (Array.isArray(coverageData)) setWardCoverage(coverageData);
-          }
-        } catch {}
       } catch (error) {
         console.error('Error fetching schemes:', error);
       } finally {
@@ -419,7 +410,7 @@ export default function GovProgramsPage() {
       {/* Enhanced Coverage Map Section */}
       <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="container mx-auto px-4">
-          <EnhancedCoverageMapSection wardData={wardCoverage} />
+          <EnhancedCoverageMapSection />
         </div>
       </section>
 
