@@ -13,6 +13,7 @@ interface PragatiMetric {
   target: number;
   icon: string;
   color: string;
+  order?: number;
   isActive?: boolean;
 }
 
