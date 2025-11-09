@@ -263,6 +263,22 @@ model TeamMember {
   @@map("team_members")
 }
 
+model Leader {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  role        String // मा. मुख्यमंत्री, मा. उपमुख्यमंत्री, etc.
+  roleEn      String // Hon'ble Chief Minister, etc.
+  imageUrl    String
+  order       Int @default(0)
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("leaders")
+}
+
 model MapSettings {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   embedUrl    String // Google Maps embed URL
@@ -420,6 +436,11 @@ model Subdomain {
   dashboardMetrics DashboardMetric[]
   socialFeeds      SocialFeed[]
   formSubmissions FormSubmission[]
+  leaders          Leader[]
+  progressMetrics  ProgressMetric[]
+  newsItems        NewsItem[]
+  dailyMessages    DailyMessage[]
+  qrCodeSettings   QRCodeSettings[]
 
   @@map("subdomains")
 }
@@ -617,6 +638,77 @@ model SocialFeed {
   updatedAt   DateTime @updatedAt
 
   @@map("social_feeds")
+}
+
+model ProgressMetric {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  key         String // sanitation, electricity, water, trees
+  label       String // स्वच्छता कव्हरेज
+  labelEn     String // Sanitation Coverage
+  value       Float  // 85
+  unit        String // %, झाडे
+  target      Float  // 100, 2000
+  icon        String // CheckCircle, Zap, Droplets, TreePine
+  color       String // green, blue, yellow
+  order       Int    @default(0)
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("progress_metrics")
+}
+
+model NewsItem {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String
+  date          String // २३ मार्च २०२४
+  imageUrl      String
+  category      String // पायाभूत सुविधा, शिक्षण, स्वच्छता
+  categoryColor String // bg-blue-500
+  isUrgent      Boolean @default(false)
+  order         Int    @default(0)
+  isActive      Boolean @default(true)
+  subdomainId   String? @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("news_items")
+}
+
+model DailyMessage {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  message     String
+  authorTitle String // सरपंच, उपसरपंच
+  date        String
+  category    String // governance, development, community
+  icon        String // User, Lightbulb, Heart
+  color       String // from-blue-500 to-indigo-600
+  isActive    Boolean @default(true)
+  subdomainId String? @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("daily_messages")
+}
+
+model QRCodeSettings {
+  id                    String @id @default(auto()) @map("_id") @db.ObjectId
+  propertyTaxQrData     String // UPI payment string for property tax
+  waterTaxQrData        String // UPI payment string for water tax
+  propertyTaxInstruction String // Instruction text for property tax
+  waterTaxInstruction   String // Instruction text for water tax
+  isActive              Boolean @default(true)
+  subdomainId           String? @db.ObjectId
+  subdomain             Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("qr_code_settings")
 }
 
 // Village Data Models

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { Building2, ExternalLink, Crown, Users, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -10,60 +11,35 @@ type Leader = {
   roleEn: string;
   name: string;
   imageUrl: string;
+  isActive?: boolean;
+  order?: number;
 };
 
-const leadersData: Leader[] = [
-  {
-    id: 'cm',
-    role: 'मा. मुख्यमंत्री',
-    roleEn: 'Hon’ble Chief Minister',
-    name: 'Shri. Devendra Fadnavis',
-    imageUrl:
-      'https://cdnbbsr.s3waas.gov.in/s3e6c2dc3dee4a51dcec3a876aa2339a78/uploads/2024/12/20241226554268834.png',
-  },
-  {
-    id: 'dcm-eknath',
-    role: 'मा. उपमुख्यमंत्री',
-    roleEn: 'Hon’ble Deputy Chief Minister',
-    name: 'Shri. Eknath Shinde',
-    imageUrl:
-      'https://cdnbbsr.s3waas.gov.in/s3e6c2dc3dee4a51dcec3a876aa2339a78/uploads/2024/12/20241210519881483.jpeg',
-  },
-  {
-    id: 'dcm-ajit',
-    role: 'मा. उपमुख्यमंत्री',
-    roleEn: 'Hon’ble Deputy Chief Minister',
-    name: 'Shri. Ajit Pawar',
-    imageUrl:
-      'https://cdnbbsr.s3waas.gov.in/s3e6c2dc3dee4a51dcec3a876aa2339a78/uploads/2024/09/202409281433179732.jpeg',
-  },
-  {
-    id: 'minister-rd',
-    role: 'मा. मंत्री, ग्रामविकास व पंचायतराज',
-    roleEn: 'Hon’ble Minister, Rural Development & PR',
-    name: 'Shri. Jayakumar Gore',
-    imageUrl:
-      'https://cdnbbsr.s3waas.gov.in/s3e6c2dc3dee4a51dcec3a876aa2339a78/uploads/2024/12/20241226862517803.png',
-  },
-  {
-    id: 'mos-rd',
-    role: 'मा. राज्यमंत्री, ग्रामविकास व पंचायतराज',
-    roleEn: 'Hon’ble MoS, Rural Development & PR',
-    name: 'Shri. Yogesh Kadam',
-    imageUrl:
-      'https://cdnbbsr.s3waas.gov.in/s3e6c2dc3dee4a51dcec3a876aa2339a78/uploads/2024/12/202412271839437941.png',
-  },
-  {
-    id: 'ps-rd',
-    role: 'प्रमुख सचिव, ग्रामविकास व पंचायतराज',
-    roleEn: 'Principal Secretary, Rural Development & PR',
-    name: 'Shri. Eknath Dawale',
-    imageUrl:
-      'https://cdnbbsr.s3waas.gov.in/s3e6c2dc3dee4a51dcec3a876aa2339a78/uploads/2024/12/202412261951170016.png',
-  },
-];
-
 export function LeadersHierarchySection() {
+  const [leadersData, setLeadersData] = useState<Leader[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeaders = async () => {
+      try {
+        const response = await fetch('/api/leaders');
+        if (response.ok) {
+          const data = await response.json();
+          // Filter only active leaders and sort by order
+          const activeLeaders = data
+            .filter((leader: Leader) => leader.isActive !== false)
+            .sort((a: Leader, b: Leader) => (a.order || 0) - (b.order || 0));
+          setLeadersData(activeLeaders);
+        }
+      } catch (error) {
+        console.error('Error fetching leaders:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLeaders();
+  }, []);
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
       {/* Thin pillars (decorative) */}
@@ -125,27 +101,39 @@ export function LeadersHierarchySection() {
         </motion.div>
 
         {/* All Leaders in Single Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {leadersData.map((leader, idx) => (
-            <motion.div
-              key={leader.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: idx * 0.05 }}
-              className="group w-full rounded-2xl bg-white p-6 shadow hover:shadow-lg transition-shadow"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="relative mb-4 h-28 w-28 overflow-hidden rounded-full ring-4 ring-blue-100">
-                  <Image src={leader.imageUrl} alt={leader.name} fill className="object-cover" />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">लोड होत आहे...</span>
+          </div>
+        ) : leadersData.length === 0 ? (
+          <div className="text-center py-12">
+            <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">अजून कोणतेही नेते जोडलेले नाहीत</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {leadersData.map((leader, idx) => (
+              <motion.div
+                key={leader.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: idx * 0.05 }}
+                className="group w-full rounded-2xl bg-white p-6 shadow hover:shadow-lg transition-shadow"
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div className="relative mb-4 h-28 w-28 overflow-hidden rounded-full ring-4 ring-blue-100">
+                    <Image src={leader.imageUrl} alt={leader.name} fill className="object-cover" />
+                  </div>
+                  <span className="text-sm text-blue-700 font-semibold">{leader.role}</span>
+                  <h3 className="mt-1 text-lg font-bold text-gray-900">{leader.name}</h3>
+                  <span className="text-xs text-gray-500">{leader.roleEn}</span>
                 </div>
-                <span className="text-sm text-blue-700 font-semibold">{leader.role}</span>
-                <h3 className="mt-1 text-lg font-bold text-gray-900">{leader.name}</h3>
-                <span className="text-xs text-gray-500">{leader.roleEn}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Footer note */}
         <div className="mt-6 text-center text-xs text-gray-500 flex items-center justify-center gap-2">

@@ -1,16 +1,71 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { QrCode, IndianRupee, CheckCircle, FileText, Send, Receipt } from 'lucide-react';
 
+interface QRCodeSettings {
+  propertyTaxQrData: string;
+  waterTaxQrData: string;
+  propertyTaxInstruction: string;
+  waterTaxInstruction: string;
+}
+
 export function QRTaxPaymentSection() {
+  const [settings, setSettings] = useState<QRCodeSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/qr-code-settings');
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+        } else {
+          // Fallback to default settings
+          setSettings({
+            propertyTaxQrData: 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property Tax',
+            waterTaxQrData: 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Water Tax',
+            propertyTaxInstruction: '(घरपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot व UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)',
+            waterTaxInstruction: '(पाणीपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot, UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching QR code settings:', error);
+        // Fallback to default settings
+        setSettings({
+          propertyTaxQrData: 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property Tax',
+          waterTaxQrData: 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Water Tax',
+          propertyTaxInstruction: '(घरपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot व UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)',
+          waterTaxInstruction: '(पाणीपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot, UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
+  if (isLoading || !settings) {
+    return (
+      <section className="relative py-16 bg-gradient-to-br from-emerald-50 to-blue-50 overflow-hidden">
+        <div className="container mx-auto px-4 relative">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+            <span className="ml-2 text-gray-600">लोड होत आहे...</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   // Property Tax QR Code (left side)
-  const propertyTaxQrData = 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property Tax';
-  const propertyTaxQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(propertyTaxQrData)}`;
+  const propertyTaxQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(settings.propertyTaxQrData)}`;
 
   // Water Tax QR Code (right side)
-  const waterTaxQrData = 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Water Tax';
-  const waterTaxQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(waterTaxQrData)}`;
+  const waterTaxQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(settings.waterTaxQrData)}`;
 
   return (
     <section className="relative py-16 bg-gradient-to-br from-emerald-50 to-blue-50 overflow-hidden">
@@ -65,7 +120,7 @@ export function QRTaxPaymentSection() {
                 />
               </div>
               <p className="mt-4 text-sm text-gray-600 text-center">
-                (घरपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot व UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)
+                {settings.propertyTaxInstruction}
               </p>
             </div>
           </motion.div>
@@ -173,7 +228,7 @@ export function QRTaxPaymentSection() {
                 />
               </div>
               <p className="mt-4 text-sm text-gray-600 text-center">
-                (पाणीपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot, UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)
+                {settings.waterTaxInstruction}
               </p>
             </div>
           </motion.div>

@@ -1,8 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { TrendingUp, Users, Home, Droplets, Zap, TreePine, CheckCircle } from 'lucide-react';
 
 interface PragatiMetric {
+  id?: string;
   key: string;
   label: string;
   labelEn: string;
@@ -11,15 +13,42 @@ interface PragatiMetric {
   target: number;
   icon: string;
   color: string;
+  isActive?: boolean;
 }
 
 interface PragatiMeterSectionProps {
-  dashboardMetrics: PragatiMetric[];
+  dashboardMetrics?: PragatiMetric[];
 }
 
-export function PragatiMeterSection({ dashboardMetrics }: PragatiMeterSectionProps) {
-  // Use provided metrics or fallback to default
-  const metrics = dashboardMetrics && dashboardMetrics.length > 0 ? dashboardMetrics : [
+export function PragatiMeterSection({ dashboardMetrics: propMetrics }: PragatiMeterSectionProps) {
+  const [metrics, setMetrics] = useState<PragatiMetric[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch('/api/progress-metrics');
+        if (response.ok) {
+          const data = await response.json();
+          // Filter only active metrics and sort by order
+          const activeMetrics = data
+            .filter((metric: PragatiMetric) => metric.isActive !== false)
+            .sort((a: PragatiMetric, b: PragatiMetric) => {
+              // Sort by order if available, otherwise by key
+              if (a.order !== undefined && b.order !== undefined) {
+                return a.order - b.order;
+              }
+              return 0;
+            });
+          setMetrics(activeMetrics);
+        }
+      } catch (error) {
+        console.error('Error fetching progress metrics:', error);
+        // Fallback to prop metrics or default
+        if (propMetrics && propMetrics.length > 0) {
+          setMetrics(propMetrics);
+        } else {
+          setMetrics([
           {
             key: 'sanitation',
             label: 'स्वच्छता कव्हरेज',
@@ -60,7 +89,15 @@ export function PragatiMeterSection({ dashboardMetrics }: PragatiMeterSectionPro
             icon: 'TreePine',
             color: 'green'
           }
-        ];
+        ]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMetrics();
+  }, [propMetrics]);
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -103,8 +140,19 @@ export function PragatiMeterSection({ dashboardMetrics }: PragatiMeterSectionPro
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {metrics.map((metric, index) => {
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <span className="ml-2 text-gray-600">लोड होत आहे...</span>
+          </div>
+        ) : metrics.length === 0 ? (
+          <div className="text-center py-12">
+            <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">अजून कोणतेही मेट्रिक्स जोडलेले नाहीत</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {metrics.map((metric, index) => {
             const percentage = metric.unit === '%' 
               ? metric.value 
               : Math.min((metric.value / metric.target) * 100, 100);
@@ -149,8 +197,9 @@ export function PragatiMeterSection({ dashboardMetrics }: PragatiMeterSectionPro
                 </div>
               </div>
             );
-          })}
-        </div>
+            })}
+          </div>
+        )}
 
         <div className="mt-12 text-center">
           <a

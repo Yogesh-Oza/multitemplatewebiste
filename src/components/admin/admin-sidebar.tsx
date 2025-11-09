@@ -5,8 +5,6 @@ import { usePathname } from 'next/navigation';
 import { 
   Home, 
   Users, 
-  History, 
-  Megaphone, 
   Settings,
   FileText,
   Globe,
@@ -17,7 +15,6 @@ import {
   Wrench,
   Phone,
   BookOpen,
-  Layout,
   FolderOpen,
   MessageSquare,
   BarChart3,
@@ -30,27 +27,9 @@ import { cn } from '@/lib/utils';
 const adminNavItems = [
   {
     href: '/admin/village-info',
-    label: 'गाव माहिती',
+    label: 'Homepage',
     icon: Users,
-    description: 'गावाची मुख्य माहिती, आकडेवारी आणि होमपेज व्यवस्थापन'
-  },
-  {
-    href: '/admin/announcements',
-    label: 'सूचना',
-    icon: Megaphone,
-    description: 'सूचना आणि जाहीराती व्यवस्थापन'
-  },
-  {
-    href: '/admin/history',
-    label: 'इतिहास',
-    icon: History,
-    description: 'गावाचा इतिहास आणि परंपरा'
-  },
-  {
-    href: '/admin/cultural-heritage',
-    label: 'सांस्कृतिक वारसा',
-    icon: Globe,
-    description: 'सांस्कृतिक उत्सव आणि परंपरागत कला'
+    description: 'गावाची मुख्य माहिती, आकडेवारी, होमपेज आणि नेते व्यवस्थापन'
   },
   {
     href: '/admin/programs',
@@ -93,12 +72,6 @@ const adminNavItems = [
     label: 'संपर्क',
     icon: Phone,
     description: 'संपर्क माहिती व्यवस्थापन'
-  },
-  {
-    href: '/admin/footer',
-    label: 'फुटर',
-    icon: Layout,
-    description: 'फुटर सामग्री व्यवस्थापन'
   },
   // New sections
   {

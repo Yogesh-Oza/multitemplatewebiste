@@ -6,19 +6,62 @@ import { Quote, Calendar, User, Star, Heart, Lightbulb } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface DailyMessage {
-  id: string;
+  id?: string;
   message: string;
   authorTitle: string;
   date: string;
-  category: 'inspirational' | 'development' | 'community' | 'governance';
+  category?: 'inspirational' | 'development' | 'community' | 'governance';
   icon: string;
   color: string;
+  isActive?: boolean;
 }
 
 export function DailyMessageSection() {
   const [currentMessage, setCurrentMessage] = useState<DailyMessage | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Static daily messages - in real app, this would come from API
+  useEffect(() => {
+    const fetchMessage = async () => {
+      try {
+        const response = await fetch('/api/daily-messages');
+        if (response.ok) {
+          const data = await response.json();
+          if (data) {
+            setCurrentMessage(data);
+          } else {
+            // Fallback to default message
+            setCurrentMessage({
+              id: '1',
+              message: 'एकत्रित विकास, सामाजिक न्याय आणि सुशासनाच्या मार्गावर प्रगतीशील गाव बनवण्यासाठी सर्व नागरिकांचा सहभाग आवश्यक आहे.',
+              authorTitle: 'सरपंच',
+              date: new Date().toLocaleDateString('mr-IN'),
+              category: 'governance',
+              icon: 'User',
+              color: 'from-blue-500 to-indigo-600'
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching daily message:', error);
+        // Fallback to default message
+        setCurrentMessage({
+          id: '1',
+          message: 'एकत्रित विकास, सामाजिक न्याय आणि सुशासनाच्या मार्गावर प्रगतीशील गाव बनवण्यासाठी सर्व नागरिकांचा सहभाग आवश्यक आहे.',
+          authorTitle: 'सरपंच',
+          date: new Date().toLocaleDateString('mr-IN'),
+          category: 'governance',
+          icon: 'User',
+          color: 'from-blue-500 to-indigo-600'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessage();
+  }, []);
+
+  // Legacy code - keeping for reference but not used
   const dailyMessages: DailyMessage[] = [
     {
       id: '1',
@@ -49,12 +92,18 @@ export function DailyMessageSection() {
     }
   ];
 
-  useEffect(() => {
-    // Rotate messages daily
-    const today = new Date().getDate();
-    const messageIndex = today % dailyMessages.length;
-    setCurrentMessage(dailyMessages[messageIndex]);
-  }, []);
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative overflow-hidden">
+        <div className="container relative z-10">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+            <span className="ml-2 text-gray-600">लोड होत आहे...</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!currentMessage) return null;
 

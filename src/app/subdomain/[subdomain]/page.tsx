@@ -89,12 +89,7 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
       {/* Leaders and hierarchy section (CM, DCMs, Ministers, Officials) */}
       <LeadersHierarchySection />
       
-      <PragatiMeterSection dashboardMetrics={dashboardMetrics.map(metric => ({
-        ...metric,
-        target: 100, // Default target value
-        icon: 'TrendingUp', // Default icon
-        color: 'blue' // Default color
-      }))} />
+      <PragatiMeterSection />
       
       <WelcomeVideoSection homepageSettings={homepageSettings && homepageSettings.mainHeading ? {
         welcomeVideo: {

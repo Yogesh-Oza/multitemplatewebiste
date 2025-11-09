@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 interface NewsItem {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   date: string;
@@ -17,40 +18,71 @@ interface NewsItem {
   category: string;
   categoryColor: string;
   isUrgent?: boolean;
+  isActive?: boolean;
+  order?: number;
 }
 
 export function NewsUpdatesSection() {
-  // Static news data - in real app, this would come from API
-  const newsItems: NewsItem[] = [
-    {
-      id: '1',
-      title: 'नवीन पाणी पुरवठा योजना यशस्वी',
-      description: 'गावातील सर्व भागांमध्ये २४ तास पाणी पुरवठा सुनिश्चित करण्यासाठी आधुनिक पंपिंग सिस्टम स्थापना पूर्ण झाली.',
-      date: '२३ मार्च २०२४',
-      imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center',
-      category: 'पायाभूत सुविधा',
-      categoryColor: 'bg-blue-500',
-      isUrgent: true
-    },
-    {
-      id: '2',
-      title: 'शिक्षण क्षेत्रात राज्यस्तरीय पुरस्कार',
-      description: 'आमच्या गावातील प्राथमिक शाळेला डिजिटल शिक्षणातील उत्कृष्ट कामगिरीसाठी राज्य सरकारकडून सन्मान मिळाला.',
-      date: '१५ फेब्रुवारी २०२४',
-      imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=300&fit=crop&crop=center',
-      category: 'शिक्षण',
-      categoryColor: 'bg-green-500'
-    },
-    {
-      id: '3',
-      title: 'स्वच्छता अभियान मोठे यश',
-      description: 'गावव्यापी स्वच्छता अभियानात ९८% कुटुंबांनी सहभाग घेतला आणि गावाला \'स्वच्छ गाव\' चा दर्जा मिळाला.',
-      date: '८ जानेवारी २०२४',
-      imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center',
-      category: 'स्वच्छता',
-      categoryColor: 'bg-cyan-500'
-    }
-  ];
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch('/api/news-items');
+        if (response.ok) {
+          const data = await response.json();
+          // Filter only active news items and sort by order
+          const activeNews = data
+            .filter((item: NewsItem) => item.isActive !== false)
+            .sort((a: NewsItem, b: NewsItem) => {
+              if (a.order !== undefined && b.order !== undefined) {
+                return a.order - b.order;
+              }
+              return 0;
+            });
+          setNewsItems(activeNews);
+        }
+      } catch (error) {
+        console.error('Error fetching news items:', error);
+        // Fallback to default news
+        setNewsItems([
+          {
+            id: '1',
+            title: 'नवीन पाणी पुरवठा योजना यशस्वी',
+            description: 'गावातील सर्व भागांमध्ये २४ तास पाणी पुरवठा सुनिश्चित करण्यासाठी आधुनिक पंपिंग सिस्टम स्थापना पूर्ण झाली.',
+            date: '२३ मार्च २०२४',
+            imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center',
+            category: 'पायाभूत सुविधा',
+            categoryColor: 'bg-blue-500',
+            isUrgent: true
+          },
+          {
+            id: '2',
+            title: 'शिक्षण क्षेत्रात राज्यस्तरीय पुरस्कार',
+            description: 'आमच्या गावातील प्राथमिक शाळेला डिजिटल शिक्षणातील उत्कृष्ट कामगिरीसाठी राज्य सरकारकडून सन्मान मिळाला.',
+            date: '१५ फेब्रुवारी २०२४',
+            imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=300&fit=crop&crop=center',
+            category: 'शिक्षण',
+            categoryColor: 'bg-green-500'
+          },
+          {
+            id: '3',
+            title: 'स्वच्छता अभियान मोठे यश',
+            description: 'गावव्यापी स्वच्छता अभियानात ९८% कुटुंबांनी सहभाग घेतला आणि गावाला \'स्वच्छ गाव\' चा दर्जा मिळाला.',
+            date: '८ जानेवारी २०२४',
+            imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center',
+            category: 'स्वच्छता',
+            categoryColor: 'bg-cyan-500'
+          }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -134,14 +166,25 @@ export function NewsUpdatesSection() {
         </motion.div>
 
         {/* News Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12"
-        >
-          {newsItems.map((item, index) => (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">लोड होत आहे...</span>
+          </div>
+        ) : newsItems.length === 0 ? (
+          <div className="text-center py-12">
+            <Newspaper className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">अजून कोणतीही बातमी नाही</p>
+          </div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12"
+          >
+            {newsItems.map((item, index) => (
             <motion.div
               key={item.id}
               variants={itemVariants}
@@ -209,8 +252,9 @@ export function NewsUpdatesSection() {
                 </div>
               </Card>
             </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         {/* View All Button */}
         <motion.div
