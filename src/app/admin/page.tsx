@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function AdminDashboard() {
-  redirect('/admin/hero-images');
+  redirect('/admin/village-info');
 }

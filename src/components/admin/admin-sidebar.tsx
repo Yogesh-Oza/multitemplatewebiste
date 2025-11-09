@@ -7,7 +7,6 @@ import {
   Users, 
   History, 
   Megaphone, 
-  Image, 
   Settings,
   FileText,
   Globe,
@@ -30,16 +29,10 @@ import { cn } from '@/lib/utils';
 
 const adminNavItems = [
   {
-    href: '/admin/hero-images',
-    label: 'मुख्य प्रतिमा',
-    icon: Image,
-    description: 'होमपेज मुख्य प्रतिमा व्यवस्थापन'
-  },
-  {
     href: '/admin/village-info',
     label: 'गाव माहिती',
     icon: Users,
-    description: 'गावाची मुख्य माहिती आणि आकडेवारी'
+    description: 'गावाची मुख्य माहिती, आकडेवारी आणि होमपेज व्यवस्थापन'
   },
   {
     href: '/admin/announcements',
