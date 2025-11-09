@@ -1,13 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
-import { QrCode, CreditCard, Smartphone, ShieldCheck, IndianRupee } from 'lucide-react';
+import { QrCode, IndianRupee, CheckCircle, FileText, Send, Receipt } from 'lucide-react';
 
 export function QRTaxPaymentSection() {
-  // Demo UPI QR (replace with official handle). Ensure data is URL-encoded
-  const qrData = 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property Tax';
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}`;
+  // Property Tax QR Code (left side)
+  const propertyTaxQrData = 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property Tax';
+  const propertyTaxQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(propertyTaxQrData)}`;
+
+  // Water Tax QR Code (right side)
+  const waterTaxQrData = 'upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Water Tax';
+  const waterTaxQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(waterTaxQrData)}`;
 
   return (
     <section className="relative py-16 bg-gradient-to-br from-emerald-50 to-blue-50 overflow-hidden">
@@ -34,8 +37,8 @@ export function QRTaxPaymentSection() {
           <p className="mt-3 text-gray-600">मालमत्ता कर / पाणी कर सहज, सुरक्षित आणि जलद पद्धतीने</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* QR Card */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Side - Property Tax QR Code */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -48,19 +51,102 @@ export function QRTaxPaymentSection() {
                 <IndianRupee className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">UPI QR (डेमो)</h3>
-                <p className="text-sm text-gray-600">UPI स्कॅन करून कर भरा</p>
+                <h3 className="text-lg font-semibold text-gray-900">मालमत्ता कर, देणगी इं. भरणेसाठी QR Code</h3>
               </div>
             </div>
             <div className="flex flex-col items-center">
               <div className="rounded-xl border bg-white p-4">
-                <img src={qrUrl} alt="UPI QR" width={220} height={220} className="h-[220px] w-[220px] object-contain" />
+                <img 
+                  src={propertyTaxQrUrl} 
+                  alt="Property Tax QR Code" 
+                  width={220} 
+                  height={220} 
+                  className="h-[220px] w-[220px] object-contain" 
+                />
               </div>
-              <p className="mt-4 text-sm text-gray-600">डेमो UPI: gp-pay@upi (रक्कम टाका आणि पे करा)</p>
+              <p className="mt-4 text-sm text-gray-600 text-center">
+                (घरपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot व UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)
+              </p>
             </div>
           </motion.div>
 
-          {/* Steps & Info */}
+          {/* Middle - Steps Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="rounded-2xl bg-white p-6 shadow-md hover:shadow-lg transition-shadow"
+          >
+            <div className="space-y-4">
+              {/* Step 1 */}
+              <div className="rounded-xl border p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-blue-100 text-blue-700 flex-shrink-0">
+                    <CheckCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">स्टेप १</h4>
+                    <p className="text-sm text-gray-600">तुम्हाला घरपट्टि भरणा करावयाची आहे का पाणीपट्टि हे ठरवा.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="rounded-xl border p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700 flex-shrink-0">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">स्टेप २</h4>
+                    <p className="text-sm text-gray-600">घरपट्टि किंवा पाणीपट्टि करीता भरावयाच्या रक्कमेचा तपशील Website किंवा ग्रामपंचायतीकडुन प्राप्त करा.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="rounded-xl border p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700 flex-shrink-0">
+                    <QrCode className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">स्टेप ३</h4>
+                    <p className="text-sm text-gray-600">घरपट्टि करीता डावी बाजुचा (Left side) QR Code आपल्या UPI अॅप मधून स्कॅन करा व रक्कम भरा. पाणीपट्टि करीता उजव्या बाजुचा (Right Side) QR Code आपल्या UPI अॅप मधून स्कॅन करा व रक्कम भरा.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="rounded-xl border p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-teal-100 text-teal-700 flex-shrink-0">
+                    <Send className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">स्टेप ४</h4>
+                    <p className="text-sm text-gray-600">घरपट्टि धारक नाव, भरणारेचे नाव, दिनांक, UTR क्रमांक, दिनांक या बाबी नमुद करुन ग्राम पंचायतीस कळवा.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 5 */}
+              <div className="rounded-xl border p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-purple-100 text-purple-700 flex-shrink-0">
+                    <Receipt className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">स्टेप ५</h4>
+                    <p className="text-sm text-gray-600">ग्राम पंचायतीकडुन घरपट्टि किंवा पाणीपट्टि पावती मिळवा.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Side - Water Tax QR Code */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -68,51 +154,27 @@ export function QRTaxPaymentSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="rounded-2xl bg-white p-6 shadow-md hover:shadow-lg transition-shadow"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Step 1 */}
-              <div className="rounded-xl border p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-blue-100 text-blue-700">
-                    <Smartphone className="h-5 w-5" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900">स्टेप १</h4>
-                </div>
-                <p className="text-sm text-gray-600">आपल्या UPI अॅप (PhonePe/Google Pay/Paytm) मधून स्कॅन करा</p>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-lg bg-blue-100 text-blue-700">
+                <QrCode className="h-5 w-5" />
               </div>
-              {/* Step 2 */}
-              <div className="rounded-xl border p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700">
-                    <CreditCard className="h-5 w-5" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900">स्टेप २</h4>
-                </div>
-                <p className="text-sm text-gray-600">कर प्रकार निवडा आणि रक्कम भरा</p>
-              </div>
-              {/* Step 3 */}
-              <div className="rounded-xl border p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900">स्टेप ३</h4>
-                </div>
-                <p className="text-sm text-gray-600">सुरक्षितपणे पेमेंट कंफर्म करा</p>
-              </div>
-              {/* Step 4 */}
-              <div className="rounded-xl border p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-teal-100 text-teal-700">
-                    <QrCode className="h-5 w-5" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900">स्टेप ४</h4>
-                </div>
-                <p className="text-sm text-gray-600">पावती मिळवा व संदर्भ क्रमांक जतन करा</p>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">पाणीपट्टि फि, पाणी अनामत इं. भरणेसाठी QR Code</h3>
               </div>
             </div>
-
-            <div className="mt-6 text-xs text-gray-500">
-              सूचना: हा विभाग डेमो आहे. प्रत्यक्ष पेमेंटसाठी ग्रामपंचायतकडून अधिकृत UPI हँडल वापरा.
+            <div className="flex flex-col items-center">
+              <div className="rounded-xl border bg-white p-4">
+                <img 
+                  src={waterTaxQrUrl} 
+                  alt="Water Tax QR Code" 
+                  width={220} 
+                  height={220} 
+                  className="h-[220px] w-[220px] object-contain" 
+                />
+              </div>
+              <p className="mt-4 text-sm text-gray-600 text-center">
+                (पाणीपट्टि QR code वरुन रक्कम भरलेनंतर त्याचा screen shot, UTR number, दिनांक ग्रामपंचायतीकडे पाठवावा.)
+              </p>
             </div>
           </motion.div>
         </div>

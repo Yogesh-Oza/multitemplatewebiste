@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { useMemo } from 'react';
 import { Building2, ExternalLink, Crown, Users, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -65,15 +64,6 @@ const leadersData: Leader[] = [
 ];
 
 export function LeadersHierarchySection() {
-  const tiers = useMemo(() => {
-    return {
-      top: leadersData.filter((l) => l.id === 'cm'),
-      deputies: leadersData.filter((l) => l.id.startsWith('dcm')),
-      department: leadersData.filter((l) => l.id.startsWith('minister')),
-      others: leadersData.filter((l) => l.id.startsWith('mos') || l.id.startsWith('ps')),
-    };
-  }, []);
-
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
       {/* Thin pillars (decorative) */}
@@ -134,16 +124,16 @@ export function LeadersHierarchySection() {
           <p className="mt-3 text-gray-600">मा. मुख्यमंत्री, मा. उपमुख्यमंत्री, मंत्रीमंडळ आणि संबंधित विभागीय अधिकारी</p>
         </motion.div>
 
-        {/* CM */}
-        <div className="mb-8 flex justify-center">
-          {tiers.top.map((leader) => (
+        {/* All Leaders in Single Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {leadersData.map((leader, idx) => (
             <motion.div
               key={leader.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
-              className="group w-full max-w-sm rounded-2xl bg-white p-6 shadow hover:shadow-lg transition-shadow"
+              transition={{ duration: 0.5, delay: idx * 0.05 }}
+              className="group w-full rounded-2xl bg-white p-6 shadow hover:shadow-lg transition-shadow"
             >
               <div className="flex flex-col items-center text-center">
                 <div className="relative mb-4 h-28 w-28 overflow-hidden rounded-full ring-4 ring-blue-100">
@@ -157,85 +147,10 @@ export function LeadersHierarchySection() {
           ))}
         </div>
 
-        {/* Deputies */}
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          {tiers.deputies.map((leader, idx) => (
-            <motion.div
-              key={leader.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: idx * 0.05 }}
-              className="group rounded-2xl bg-white p-6 shadow hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full ring-4 ring-emerald-100">
-                  <Image src={leader.imageUrl} alt={leader.name} fill className="object-cover" />
-                </div>
-                <div>
-                  <span className="text-sm text-emerald-700 font-semibold">{leader.role}</span>
-                  <h3 className="text-lg font-bold text-gray-900">{leader.name}</h3>
-                  <span className="text-xs text-gray-500">{leader.roleEn}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Department leads */}
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          {tiers.department.map((leader) => (
-            <motion.div
-              key={leader.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
-              className="group rounded-2xl bg-white p-6 shadow hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full ring-4 ring-indigo-100">
-                  <Image src={leader.imageUrl} alt={leader.name} fill className="object-cover" />
-                </div>
-                <div>
-                  <span className="text-sm text-indigo-700 font-semibold">{leader.role}</span>
-                  <h3 className="text-lg font-bold text-gray-900">{leader.name}</h3>
-                  <span className="text-xs text-gray-500">{leader.roleEn}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Others */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {tiers.others.map((leader, idx) => (
-            <motion.div
-              key={leader.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: idx * 0.05 }}
-              className="group rounded-2xl bg-white p-6 shadow hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full ring-4 ring-fuchsia-100">
-                  <Image src={leader.imageUrl} alt={leader.name} fill className="object-cover" />
-                </div>
-                <div>
-                  <span className="text-sm text-fuchsia-700 font-semibold">{leader.role}</span>
-                  <h3 className="text-lg font-bold text-gray-900">{leader.name}</h3>
-                  <span className="text-xs text-gray-500">{leader.roleEn}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
         {/* Footer note */}
         <div className="mt-6 text-center text-xs text-gray-500 flex items-center justify-center gap-2">
           <Users className="h-4 w-4" />
-          <span>संस्थेची पदसोपान रचना (Hierarchy) अद्ययावत प्रदर्शित</span>
+          <span>संस्थेची पदसोपान रचना अद्ययावत प्रदर्शित</span>
           <Shield className="h-4 w-4" />
         </div>
       </div>

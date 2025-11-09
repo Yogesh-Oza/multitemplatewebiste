@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react';
 interface DailyMessage {
   id: string;
   message: string;
-  author: string;
   authorTitle: string;
   date: string;
   category: 'inspirational' | 'development' | 'community' | 'governance';
@@ -24,7 +23,6 @@ export function DailyMessageSection() {
     {
       id: '1',
       message: 'एकत्रित विकास, सामाजिक न्याय आणि सुशासनाच्या मार्गावर प्रगतीशील गाव बनवण्यासाठी सर्व नागरिकांचा सहभाग आवश्यक आहे.',
-      author: 'श्री. राम पाटील',
       authorTitle: 'सरपंच',
       date: new Date().toLocaleDateString('mr-IN'),
       category: 'governance',
@@ -34,7 +32,6 @@ export function DailyMessageSection() {
     {
       id: '2',
       message: 'शिक्षण हे सर्वांत मोठे शस्त्र आहे ज्याद्वारे तुम्ही जग बदलू शकता. आपल्या मुलांना उत्तम शिक्षण द्या.',
-      author: 'श्रीमती. प्रिया शिंदे',
       authorTitle: 'उपसरपंच',
       date: new Date().toLocaleDateString('mr-IN'),
       category: 'development',
@@ -44,7 +41,6 @@ export function DailyMessageSection() {
     {
       id: '3',
       message: 'स्वच्छता ही आरोग्याची गुरुकिल्ली आहे. स्वच्छ गाव म्हणजे निरोगी गाव.',
-      author: 'श्री. विजय कांबळे',
       authorTitle: 'सदस्य',
       date: new Date().toLocaleDateString('mr-IN'),
       category: 'community',
@@ -168,11 +164,8 @@ export function DailyMessageSection() {
                     {/* Author Details */}
                     <div>
                       <h4 className="text-lg font-bold text-gray-900">
-                        {currentMessage.author}
+                      {currentMessage.authorTitle}
                       </h4>
-                      <p className="text-gray-600 font-medium">
-                        {currentMessage.authorTitle}
-                      </p>
                     </div>
                   </div>
 
