@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -82,6 +83,9 @@ export async function POST(request: NextRequest) {
         subdomainId,
       },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'GovernmentResolution', resolution.id, `Created government resolution: ${title}`);
 
     return NextResponse.json(resolution);
   } catch (error) {

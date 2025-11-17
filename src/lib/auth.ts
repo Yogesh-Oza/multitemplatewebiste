@@ -71,6 +71,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = (user as any).id;
         token.role = (user as any).role;
         token.subdomainId = (user as any).subdomainId;
         token.subdomain = (user as any).subdomain;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(
   request: NextRequest,
@@ -84,6 +85,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'TimelineItem', timelineItem.id, `Updated timeline item: ${title} (${year})`);
+
     return NextResponse.json(timelineItem);
   } catch (error) {
     console.error('Error updating timeline item:', error);
@@ -125,6 +129,9 @@ export async function DELETE(
     await prisma.timelineItem.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'TimelineItem', id, `Deleted timeline item: ${existingItem.title} (${existingItem.year})`);
 
     return NextResponse.json({ message: 'Timeline item deleted successfully' });
   } catch (error) {

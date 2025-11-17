@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function PUT(
   request: NextRequest,
@@ -45,6 +46,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'CulturalHeritage', heritage.id, `Updated cultural heritage: ${title}`);
+
     return NextResponse.json(heritage);
   } catch (error) {
     console.error('Error updating cultural heritage:', error);
@@ -87,6 +91,9 @@ export async function DELETE(
     await prisma.culturalHeritage.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'CulturalHeritage', id, `Deleted cultural heritage: ${existingHeritage.title}`);
 
     return NextResponse.json({ message: 'Cultural heritage deleted successfully' });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 // Default news items
 const defaultNewsItems = [
@@ -112,6 +113,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'NewsItem', newsItem.id, `Created news item: ${title}`);
+
     return NextResponse.json(newsItem);
   } catch (error) {
     console.error('Error creating news item:', error);
@@ -159,6 +163,9 @@ export async function PUT(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : existingItem.isActive,
       },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'NewsItem', newsItem.id, `Updated news item: ${title}`);
 
     return NextResponse.json(newsItem);
   } catch (error) {

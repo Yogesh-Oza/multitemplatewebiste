@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,6 +55,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'Announcement', announcement.id, `Created announcement: ${title}`);
+
     return NextResponse.json(announcement);
   } catch (error) {
     console.error('Error creating announcement:', error);
@@ -101,6 +105,9 @@ export async function PUT(request: NextRequest) {
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'Announcement', announcement.id, `Updated announcement: ${title}`);
+
     return NextResponse.json(announcement);
   } catch (error) {
     console.error('Error updating announcement:', error);
@@ -145,6 +152,9 @@ export async function DELETE(request: NextRequest) {
     await prisma.announcement.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'Announcement', id, `Deleted announcement: ${existingAnnouncement.title}`);
 
     return NextResponse.json({ message: 'Announcement deleted successfully' });
   } catch (error) {

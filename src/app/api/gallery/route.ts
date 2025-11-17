@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -58,6 +59,9 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('Gallery API - Created gallery item:', galleryItem);
+
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'Gallery', galleryItem.id, `Created gallery item: ${title}`);
 
     return NextResponse.json(galleryItem);
   } catch (error) {

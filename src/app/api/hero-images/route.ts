@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -50,6 +51,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'HeroImage', heroImage.id, `Created hero image: ${title || 'Untitled'}`);
+
     return NextResponse.json(heroImage);
   } catch (error) {
     console.error('Error creating hero image:', error);
@@ -93,6 +97,9 @@ export async function PUT(request: NextRequest) {
         isActive,
       },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'HeroImage', heroImage.id, `Updated hero image: ${title || 'Untitled'}`);
 
     return NextResponse.json(heroImage);
   } catch (error) {
@@ -138,6 +145,9 @@ export async function DELETE(request: NextRequest) {
     await prisma.heroImage.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'HeroImage', id, `Deleted hero image: ${existingImage.title || 'Untitled'}`);
 
     return NextResponse.json({ message: 'Hero image deleted successfully' });
   } catch (error) {

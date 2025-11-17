@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 // Default QR code settings
 const defaultSettings = {
@@ -95,6 +96,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Log activity
+    await logCrudActivity(request, existingSettings ? 'UPDATE' : 'CREATE', 'QRCodeSettings', settings.id, `Updated QR code settings`);
+
     return NextResponse.json(settings);
   } catch (error) {
     console.error('Error saving QR code settings:', error);
@@ -138,6 +142,9 @@ export async function PUT(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : existingSettings.isActive,
       },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'QRCodeSettings', settings.id, `Updated QR code settings`);
 
     return NextResponse.json(settings);
   } catch (error) {

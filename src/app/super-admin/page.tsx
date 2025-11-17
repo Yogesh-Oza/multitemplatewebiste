@@ -393,6 +393,15 @@ export default function SuperAdminPage() {
               <FileText className="h-4 w-4 mr-2" />
               Campaign Forms
             </Button>
+            <Link href="/super-admin/activity-logs">
+              <Button
+                variant="ghost"
+                className="px-6"
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                Activity Logs
+              </Button>
+            </Link>
           </div>
         </div>
 

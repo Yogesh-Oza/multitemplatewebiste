@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(
   request: NextRequest,
@@ -95,6 +96,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'GovernmentResolution', resolution.id, `Updated government resolution: ${title}`);
+
     return NextResponse.json(resolution);
   } catch (error) {
     console.error('Error updating government resolution:', error);
@@ -133,6 +137,9 @@ export async function DELETE(
     await prisma.governmentResolution.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'GovernmentResolution', id, `Deleted government resolution: ${existingResolution.title}`);
 
     return NextResponse.json({ message: 'Government resolution deleted successfully' });
   } catch (error) {

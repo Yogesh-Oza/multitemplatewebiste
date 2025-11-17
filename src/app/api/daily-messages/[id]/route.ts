@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function DELETE(
   request: NextRequest,
@@ -30,6 +31,9 @@ export async function DELETE(
     await prisma.dailyMessage.delete({
       where: { id }
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'DailyMessage', id, `Deleted daily message by ${message.authorTitle}`);
 
     return NextResponse.json({ message: 'Daily message deleted successfully' });
   } catch (error) {

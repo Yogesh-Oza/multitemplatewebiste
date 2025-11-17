@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,6 +60,9 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('Programs API - Created program:', program);
+
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'Program', program.id, `Created program: ${title}`);
 
     return NextResponse.json(program);
   } catch (error) {

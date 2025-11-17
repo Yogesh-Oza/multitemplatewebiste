@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 // Default leaders data for all villages
 const defaultLeaders = [
@@ -137,6 +138,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'Leader', leader.id, `Created leader: ${name} (${role})`);
+
     return NextResponse.json(leader);
   } catch (error) {
     console.error('Error creating leader:', error);
@@ -182,6 +186,9 @@ export async function PUT(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : existingLeader.isActive,
       },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'Leader', leader.id, `Updated leader: ${name} (${role})`);
 
     return NextResponse.json(leader);
   } catch (error) {

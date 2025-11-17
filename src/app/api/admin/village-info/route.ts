@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,6 +52,9 @@ export async function PUT(request: NextRequest) {
     };
 
     const result = await prisma.villageInfo.create({ data: payload });
+
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'VillageInfo', result.id, `Updated village information via admin panel`);
 
     return NextResponse.json(result);
   } catch (error) {

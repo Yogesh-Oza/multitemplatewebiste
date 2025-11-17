@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function PUT(
   request: NextRequest,
@@ -42,6 +43,9 @@ export async function PUT(
 
     console.log('Programs API - Updated program:', program);
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'Program', program.id, `Updated program: ${program.title}`);
+
     return NextResponse.json(program);
   } catch (error) {
     console.error('Error updating program:', error);
@@ -66,12 +70,24 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.program.delete({
-      where: { 
-        id: id,
-        subdomainId // Ensure the program belongs to this subdomain
-      },
+    
+    // Get program before deleting for logging
+    const existingProgram = await prisma.program.findFirst({
+      where: { id, subdomainId }
     });
+
+    if (!existingProgram) {
+      return NextResponse.json({ 
+        message: 'Program not found or access denied' 
+      }, { status: 404 });
+    }
+
+    await prisma.program.delete({
+      where: { id },
+    });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'Program', id, `Deleted program: ${existingProgram.title}`);
 
     return NextResponse.json({ message: 'Program deleted successfully' });
   } catch (error) {

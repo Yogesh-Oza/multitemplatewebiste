@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function PUT(
   request: NextRequest,
@@ -49,6 +50,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'IncomeExpense', transaction.id, `Updated ${type} transaction: ${title} (₹${amount})`);
+
     return NextResponse.json(transaction);
   } catch (error) {
     console.error('Error updating income-expense transaction:', error);
@@ -91,6 +95,9 @@ export async function DELETE(
     await prisma.incomeExpense.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'IncomeExpense', id, `Deleted ${existingTransaction.type} transaction: ${existingTransaction.title} (₹${existingTransaction.amount})`);
 
     return NextResponse.json({ message: 'Transaction deleted successfully' });
   } catch (error) {

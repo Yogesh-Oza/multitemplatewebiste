@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function PUT(
   request: NextRequest,
@@ -41,6 +42,9 @@ export async function PUT(
 
     console.log('Team Members API - Updated team member:', teamMember);
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'TeamMember', teamMember.id, `Updated team member: ${name} (${designation})`);
+
     return NextResponse.json(teamMember);
   } catch (error) {
     console.error('Error updating team member:', error);
@@ -65,12 +69,24 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.teamMember.delete({
-      where: { 
-        id: id,
-        subdomainId // Ensure the team member belongs to this subdomain
-      },
+    
+    // Get team member before deleting for logging
+    const existingMember = await prisma.teamMember.findFirst({
+      where: { id, subdomainId }
     });
+
+    if (!existingMember) {
+      return NextResponse.json({ 
+        message: 'Team member not found or access denied' 
+      }, { status: 404 });
+    }
+
+    await prisma.teamMember.delete({
+      where: { id },
+    });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'TeamMember', id, `Deleted team member: ${existingMember.name} (${existingMember.designation})`);
 
     return NextResponse.json({ message: 'Team member deleted successfully' });
   } catch (error) {

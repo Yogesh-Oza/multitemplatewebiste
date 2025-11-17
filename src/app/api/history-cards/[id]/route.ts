@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(
   request: NextRequest,
@@ -84,6 +85,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'HistoryCard', historyCard.id, `Updated history card: ${title}`);
+
     return NextResponse.json(historyCard);
   } catch (error) {
     console.error('Error updating history card:', error);
@@ -125,6 +129,9 @@ export async function DELETE(
     await prisma.historyCard.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'HistoryCard', id, `Deleted history card: ${existingCard.title}`);
 
     return NextResponse.json({ message: 'History card deleted successfully' });
   } catch (error) {

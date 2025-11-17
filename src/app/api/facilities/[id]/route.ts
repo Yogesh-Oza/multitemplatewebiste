@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function PUT(
   request: NextRequest,
@@ -49,6 +50,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'Facility', facility.id, `Updated facility: ${name}`);
+
     return NextResponse.json(facility);
   } catch (error) {
     console.error('Error updating facility:', error);
@@ -91,6 +95,9 @@ export async function DELETE(
     await prisma.facility.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'Facility', id, `Deleted facility: ${existingFacility.name}`);
 
     return NextResponse.json({ message: 'Facility deleted successfully' });
   } catch (error) {

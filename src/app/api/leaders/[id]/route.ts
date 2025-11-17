@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function DELETE(
   request: NextRequest,
@@ -30,6 +31,9 @@ export async function DELETE(
     await prisma.leader.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'Leader', id, `Deleted leader: ${existingLeader.name} (${existingLeader.role})`);
 
     return NextResponse.json({ message: 'Leader deleted successfully' });
   } catch (error) {

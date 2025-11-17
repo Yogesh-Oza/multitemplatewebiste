@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function PUT(
   request: NextRequest,
@@ -41,6 +42,9 @@ export async function PUT(
 
     console.log('Gallery API - Updated gallery item:', galleryItem);
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'Gallery', galleryItem.id, `Updated gallery item: ${galleryItem.title}`);
+
     return NextResponse.json(galleryItem);
   } catch (error) {
     console.error('Error updating gallery item:', error);
@@ -65,12 +69,24 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.gallery.delete({
-      where: { 
-        id: id,
-        subdomainId // Ensure the gallery item belongs to this subdomain
-      },
+    
+    // Get gallery item before deleting for logging
+    const existingItem = await prisma.gallery.findFirst({
+      where: { id, subdomainId }
     });
+
+    if (!existingItem) {
+      return NextResponse.json({ 
+        message: 'Gallery item not found or access denied' 
+      }, { status: 404 });
+    }
+
+    await prisma.gallery.delete({
+      where: { id },
+    });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'Gallery', id, `Deleted gallery item: ${existingItem.title}`);
 
     return NextResponse.json({ message: 'Gallery item deleted successfully' });
   } catch (error) {

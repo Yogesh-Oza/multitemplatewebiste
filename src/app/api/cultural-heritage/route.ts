@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,6 +58,10 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('Cultural Heritage API - Created heritage:', heritage.id);
+    
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'CulturalHeritage', heritage.id, `Created cultural heritage: ${title}`);
+
     return NextResponse.json(heritage);
   } catch (error) {
     console.error('Error creating cultural heritage:', error);

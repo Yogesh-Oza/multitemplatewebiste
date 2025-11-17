@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSubdomainId, validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function PUT(
   request: NextRequest,
@@ -64,6 +65,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'GovernmentScheme', scheme.id, `Updated government scheme: ${title}`);
+
     return NextResponse.json(scheme);
   } catch (error) {
     console.error('Error updating government scheme:', error);
@@ -106,6 +110,9 @@ export async function DELETE(
     await prisma.governmentScheme.delete({
       where: { id },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'GovernmentScheme', id, `Deleted government scheme: ${existingScheme.title}`);
 
     return NextResponse.json({ message: 'Government scheme deleted successfully' });
   } catch (error) {

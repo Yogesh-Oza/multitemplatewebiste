@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -94,14 +95,15 @@ export async function POST(request: NextRequest) {
     const statsData = stats && Array.isArray(stats) ? stats : [];
 
     // First, try to find existing village info for this subdomain
-    let villageInfo = await prisma.villageInfo.findFirst({
+    const existingVillageInfo = await prisma.villageInfo.findFirst({
       where: { subdomainId }
     });
     
-    if (villageInfo) {
+    let villageInfo;
+    if (existingVillageInfo) {
       // Update existing record
       villageInfo = await prisma.villageInfo.update({
-        where: { id: villageInfo.id },
+        where: { id: existingVillageInfo.id },
         data: {
           title,
           description,
@@ -149,6 +151,9 @@ export async function POST(request: NextRequest) {
         },
       });
     }
+
+    // Log activity
+    await logCrudActivity(request, existingVillageInfo ? 'UPDATE' : 'CREATE', 'VillageInfo', villageInfo.id, `Updated village information`);
 
     return NextResponse.json(villageInfo);
   } catch (error) {

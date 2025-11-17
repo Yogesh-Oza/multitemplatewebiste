@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 // Default progress metrics
 const defaultMetrics = [
@@ -128,6 +129,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'ProgressMetric', metric.id, `Created progress metric: ${label}`);
+
     return NextResponse.json(metric);
   } catch (error) {
     console.error('Error creating progress metric:', error);
@@ -176,6 +180,9 @@ export async function PUT(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : existingMetric.isActive,
       },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'ProgressMetric', metric.id, `Updated progress metric: ${label}`);
 
     return NextResponse.json(metric);
   } catch (error) {

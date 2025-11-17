@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 export async function GET(
   request: NextRequest,
@@ -50,6 +51,9 @@ export async function PUT(
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'Announcement', announcement.id, `Updated announcement: ${data.title}`);
+
     return NextResponse.json(announcement);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update announcement' }, { status: 500 });
@@ -68,6 +72,9 @@ export async function DELETE(
     const existing = await prisma.announcement.findFirst({ where: { id, subdomainId } });
     if (!existing) return NextResponse.json({ message: 'Announcement not found' }, { status: 404 });
     await prisma.announcement.delete({ where: { id } });
+
+    // Log activity
+    await logCrudActivity(request, 'DELETE', 'Announcement', id, `Deleted announcement: ${existing.title}`);
 
     return NextResponse.json({ message: 'Announcement deleted successfully' });
   } catch (error) {

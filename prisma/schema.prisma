@@ -378,6 +378,7 @@ model AdminUser {
   isActive  Boolean @default(true)
   subdomainId String? @db.ObjectId
   subdomain Subdomain? @relation(fields: [subdomainId], references: [id])
+  activityLogs ActivityLog[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -441,6 +442,7 @@ model Subdomain {
   newsItems        NewsItem[]
   dailyMessages    DailyMessage[]
   qrCodeSettings   QRCodeSettings[]
+  activityLogs     ActivityLog[]
 
   @@map("subdomains")
 }
@@ -870,4 +872,34 @@ model FormItemValue {
   updatedAt       DateTime @updatedAt
   
   @@map("form_item_values")
+}
+
+// ===== ACTIVITY LOGGING SYSTEM =====
+
+model ActivityLog {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  action        String // CREATE, UPDATE, DELETE
+  model         String // Model name (e.g., "Announcement", "Program", "Gallery")
+  modelId       String // ID of the affected record
+  userId        String @db.ObjectId
+  user          AdminUser @relation(fields: [userId], references: [id])
+  userName      String
+  userEmail     String
+  subdomainId   String? @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  subdomainName String? // Subdomain name (for quick access)
+  villageName   String? // Village name
+  districtName  String? // District name (for filtering)
+  subDistrictName String? // Sub-district name (for filtering)
+  description   String // Human-readable description
+  ipAddress     String? // Optional IP address
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([subdomainId])
+  @@index([createdAt])
+  @@index([action])
+  @@index([model])
+  @@index([districtName, subDistrictName, createdAt])
+  @@map("activity_logs")
 }

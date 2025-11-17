@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
+import { logCrudActivity } from '@/lib/activity-log-helper';
 
 // Default daily messages
 const defaultMessages = [
@@ -90,6 +91,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Log activity
+    await logCrudActivity(request, 'CREATE', 'DailyMessage', dailyMessage.id, `Created daily message by ${authorTitle}`);
+
     return NextResponse.json(dailyMessage);
   } catch (error) {
     console.error('Error creating daily message:', error);
@@ -143,6 +147,9 @@ export async function PUT(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : existingMessage.isActive,
       },
     });
+
+    // Log activity
+    await logCrudActivity(request, 'UPDATE', 'DailyMessage', dailyMessage.id, `Updated daily message by ${authorTitle}`);
 
     return NextResponse.json(dailyMessage);
   } catch (error) {
