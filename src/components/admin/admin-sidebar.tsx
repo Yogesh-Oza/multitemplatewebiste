@@ -60,6 +60,12 @@ const adminNavItems = [
     description: 'प्रतिमा गॅलरी व्यवस्थापन'
   },
   {
+    href: '/admin/announcements-circulars',
+    label: 'घोषणा आणि परिपत्रके',
+    icon: FileText,
+    description: 'बैठकीच्या सूचना, परिपत्रके, महत्त्वाच्या मुदती आणि डाउनलोड विभाग'
+  },
+  {
     href: '/admin/income-expense',
     label: 'जमा-खर्च',
     icon: DollarSign,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,7 +38,7 @@ interface Circular {
     url: string;
     type: 'pdf' | 'doc' | 'image';
     size: string;
-  }[];
+  }[] | any;
   issuedBy: string;
   issuedByEn: string;
   lastUpdated: string;
@@ -47,7 +48,32 @@ interface CircularsSectionProps {
   circulars?: Circular[];
 }
 
-export default function CircularsSection({ circulars = [] }: CircularsSectionProps) {
+export default function CircularsSection({ circulars: propCirculars = [] }: CircularsSectionProps) {
+  const [circulars, setCirculars] = useState<Circular[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (propCirculars.length > 0) {
+      setCirculars(propCirculars);
+      setIsLoading(false);
+    } else {
+      fetchCirculars();
+    }
+  }, [propCirculars]);
+
+  const fetchCirculars = async () => {
+    try {
+      const response = await fetch('/api/circulars');
+      if (response.ok) {
+        const data = await response.json();
+        setCirculars(data);
+      }
+    } catch (error) {
+      console.error('Error fetching circulars:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Demo data for when no circulars are available
   const demoCirculars: Circular[] = [
     {
@@ -185,7 +211,16 @@ export default function CircularsSection({ circulars = [] }: CircularsSectionPro
     }
   ];
 
-  const displayCirculars = circulars.length > 0 ? circulars : demoCirculars;
+  // Normalize attachments from JSON if needed
+  const normalizeCirculars = (circularsData: Circular[]) => {
+    return circularsData.map(circular => ({
+      ...circular,
+      attachments: Array.isArray(circular.attachments) ? circular.attachments : (typeof circular.attachments === 'string' ? JSON.parse(circular.attachments) : [])
+    }));
+  };
+
+  const normalizedCirculars = normalizeCirculars(circulars);
+  const displayCirculars = normalizedCirculars.length > 0 ? normalizedCirculars : demoCirculars;
 
   const getTypeInfo = (type: string) => {
     switch (type) {

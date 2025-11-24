@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,8 +26,8 @@ interface MeetingNotification {
   time: string;
   venue: string;
   venueEn: string;
-  agenda: string[];
-  agendaEn: string[];
+  agenda: string[] | any;
+  agendaEn: string[] | any;
   status: 'upcoming' | 'ongoing' | 'completed';
   priority: 'high' | 'medium' | 'low';
   attendees: number;
@@ -36,7 +37,7 @@ interface MeetingNotification {
     nameEn: string;
     url: string;
     type: 'agenda' | 'minutes' | 'notice' | 'resolution';
-  }[];
+  }[] | any;
   lastUpdated: string;
 }
 
@@ -44,7 +45,32 @@ interface MeetingNotificationsSectionProps {
   meetings?: MeetingNotification[];
 }
 
-export default function MeetingNotificationsSection({ meetings = [] }: MeetingNotificationsSectionProps) {
+export default function MeetingNotificationsSection({ meetings: propMeetings = [] }: MeetingNotificationsSectionProps) {
+  const [meetings, setMeetings] = useState<MeetingNotification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (propMeetings.length > 0) {
+      setMeetings(propMeetings);
+      setIsLoading(false);
+    } else {
+      fetchMeetings();
+    }
+  }, [propMeetings]);
+
+  const fetchMeetings = async () => {
+    try {
+      const response = await fetch('/api/meeting-notifications');
+      if (response.ok) {
+        const data = await response.json();
+        setMeetings(data);
+      }
+    } catch (error) {
+      console.error('Error fetching meetings:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Demo data for when no meetings are available
   const demoMeetings: MeetingNotification[] = [
     {
@@ -168,7 +194,18 @@ export default function MeetingNotificationsSection({ meetings = [] }: MeetingNo
     }
   ];
 
-  const displayMeetings = meetings.length > 0 ? meetings : demoMeetings;
+  // Normalize agenda and documents from JSON if needed
+  const normalizeMeetings = (meetingsData: MeetingNotification[]) => {
+    return meetingsData.map(meeting => ({
+      ...meeting,
+      agenda: Array.isArray(meeting.agenda) ? meeting.agenda : (typeof meeting.agenda === 'string' ? JSON.parse(meeting.agenda) : []),
+      agendaEn: Array.isArray(meeting.agendaEn) ? meeting.agendaEn : (typeof meeting.agendaEn === 'string' ? JSON.parse(meeting.agendaEn) : []),
+      documents: Array.isArray(meeting.documents) ? meeting.documents : (typeof meeting.documents === 'string' ? JSON.parse(meeting.documents) : [])
+    }));
+  };
+
+  const normalizedMeetings = normalizeMeetings(meetings);
+  const displayMeetings = normalizedMeetings.length > 0 ? normalizedMeetings : demoMeetings;
 
   const getMeetingTypeInfo = (type: string) => {
     switch (type) {

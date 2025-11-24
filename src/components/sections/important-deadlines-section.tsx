@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,20 +28,20 @@ interface ImportantDeadline {
   time: string;
   description: string;
   descriptionEn: string;
-  instructions: string[];
-  instructionsEn: string[];
+  instructions: string[] | any;
+  instructionsEn: string[] | any;
   documents: {
     name: string;
     nameEn: string;
     url: string;
     required: boolean;
-  }[];
+  }[] | any;
   contactInfo: {
     name: string;
     nameEn: string;
     phone: string;
     email: string;
-  };
+  } | any;
   priority: 'urgent' | 'high' | 'medium' | 'low';
   status: 'upcoming' | 'due-soon' | 'overdue' | 'completed';
   lastUpdated: string;
@@ -50,7 +51,32 @@ interface ImportantDeadlinesSectionProps {
   deadlines?: ImportantDeadline[];
 }
 
-export default function ImportantDeadlinesSection({ deadlines = [] }: ImportantDeadlinesSectionProps) {
+export default function ImportantDeadlinesSection({ deadlines: propDeadlines = [] }: ImportantDeadlinesSectionProps) {
+  const [deadlines, setDeadlines] = useState<ImportantDeadline[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (propDeadlines.length > 0) {
+      setDeadlines(propDeadlines);
+      setIsLoading(false);
+    } else {
+      fetchDeadlines();
+    }
+  }, [propDeadlines]);
+
+  const fetchDeadlines = async () => {
+    try {
+      const response = await fetch('/api/important-deadlines');
+      if (response.ok) {
+        const data = await response.json();
+        setDeadlines(data);
+      }
+    } catch (error) {
+      console.error('Error fetching deadlines:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Demo data for when no deadlines are available
   const demoDeadlines: ImportantDeadline[] = [
     {
@@ -241,7 +267,19 @@ export default function ImportantDeadlinesSection({ deadlines = [] }: ImportantD
     }
   ];
 
-  const displayDeadlines = deadlines.length > 0 ? deadlines : demoDeadlines;
+  // Normalize JSON fields if needed
+  const normalizeDeadlines = (deadlinesData: ImportantDeadline[]) => {
+    return deadlinesData.map(deadline => ({
+      ...deadline,
+      instructions: Array.isArray(deadline.instructions) ? deadline.instructions : (typeof deadline.instructions === 'string' ? JSON.parse(deadline.instructions) : []),
+      instructionsEn: Array.isArray(deadline.instructionsEn) ? deadline.instructionsEn : (typeof deadline.instructionsEn === 'string' ? JSON.parse(deadline.instructionsEn) : []),
+      documents: Array.isArray(deadline.documents) ? deadline.documents : (typeof deadline.documents === 'string' ? JSON.parse(deadline.documents) : []),
+      contactInfo: typeof deadline.contactInfo === 'object' && deadline.contactInfo !== null ? deadline.contactInfo : (typeof deadline.contactInfo === 'string' ? JSON.parse(deadline.contactInfo) : { name: '', nameEn: '', phone: '', email: '' })
+    }));
+  };
+
+  const normalizedDeadlines = normalizeDeadlines(deadlines);
+  const displayDeadlines = normalizedDeadlines.length > 0 ? normalizedDeadlines : demoDeadlines;
 
   const getTypeInfo = (type: string) => {
     switch (type) {

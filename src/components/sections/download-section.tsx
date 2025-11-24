@@ -17,7 +17,7 @@ import {
   Eye,
   CheckCircle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface DownloadableFile {
   id: string;
@@ -32,16 +32,41 @@ interface DownloadableFile {
   downloads: number;
   lastUpdated: string;
   required: boolean;
-  tags: string[];
+  tags: string[] | any;
 }
 
 interface DownloadSectionProps {
   files?: DownloadableFile[];
 }
 
-export default function DownloadSection({ files = [] }: DownloadSectionProps) {
+export default function DownloadSection({ files: propFiles = [] }: DownloadSectionProps) {
+  const [files, setFiles] = useState<DownloadableFile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  useEffect(() => {
+    if (propFiles.length > 0) {
+      setFiles(propFiles);
+      setIsLoading(false);
+    } else {
+      fetchFiles();
+    }
+  }, [propFiles]);
+
+  const fetchFiles = async () => {
+    try {
+      const response = await fetch('/api/downloadable-files');
+      if (response.ok) {
+        const data = await response.json();
+        setFiles(data);
+      }
+    } catch (error) {
+      console.error('Error fetching files:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Demo data for when no files are available
   const demoFiles: DownloadableFile[] = [
@@ -167,7 +192,16 @@ export default function DownloadSection({ files = [] }: DownloadSectionProps) {
     }
   ];
 
-  const displayFiles = files.length > 0 ? files : demoFiles;
+  // Normalize tags from JSON if needed
+  const normalizeFiles = (filesData: DownloadableFile[]) => {
+    return filesData.map(file => ({
+      ...file,
+      tags: Array.isArray(file.tags) ? file.tags : (typeof file.tags === 'string' ? JSON.parse(file.tags) : [])
+    }));
+  };
+
+  const normalizedFiles = normalizeFiles(files);
+  const displayFiles = normalizedFiles.length > 0 ? normalizedFiles : demoFiles;
 
   const categories = [
     { value: 'all', label: 'सर्व', labelEn: 'All', icon: FileText },

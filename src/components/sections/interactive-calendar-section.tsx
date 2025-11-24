@@ -16,7 +16,7 @@ import {
   Download,
   Share
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface CalendarEvent {
   id: string;
@@ -39,12 +39,12 @@ interface CalendarEvent {
   contactInfo: {
     phone: string;
     email: string;
-  };
+  } | any;
   documents: {
     name: string;
     nameEn: string;
     url: string;
-  }[];
+  }[] | any;
   reminders: boolean;
 }
 
@@ -52,10 +52,35 @@ interface InteractiveCalendarSectionProps {
   events?: CalendarEvent[];
 }
 
-export default function InteractiveCalendarSection({ events = [] }: InteractiveCalendarSectionProps) {
+export default function InteractiveCalendarSection({ events: propEvents = [] }: InteractiveCalendarSectionProps) {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+
+  useEffect(() => {
+    if (propEvents.length > 0) {
+      setEvents(propEvents);
+      setIsLoading(false);
+    } else {
+      fetchEvents();
+    }
+  }, [propEvents]);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch('/api/calendar-events');
+      if (response.ok) {
+        const data = await response.json();
+        setEvents(data);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Demo data for when no events are available
   const demoEvents: CalendarEvent[] = [
@@ -197,7 +222,17 @@ export default function InteractiveCalendarSection({ events = [] }: InteractiveC
     }
   ];
 
-  const displayEvents = events.length > 0 ? events : demoEvents;
+  // Normalize JSON fields if needed
+  const normalizeEvents = (eventsData: CalendarEvent[]) => {
+    return eventsData.map(event => ({
+      ...event,
+      contactInfo: typeof event.contactInfo === 'object' && event.contactInfo !== null ? event.contactInfo : (typeof event.contactInfo === 'string' ? JSON.parse(event.contactInfo) : { phone: '', email: '' }),
+      documents: Array.isArray(event.documents) ? event.documents : (typeof event.documents === 'string' ? JSON.parse(event.documents) : [])
+    }));
+  };
+
+  const normalizedEvents = normalizeEvents(events);
+  const displayEvents = normalizedEvents.length > 0 ? normalizedEvents : demoEvents;
 
   const getEventTypeInfo = (type: string) => {
     switch (type) {

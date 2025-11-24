@@ -804,6 +804,11 @@ model Subdomain {
   adoptedTrees              AdoptedTree[]
   environmentEvents         EnvironmentEvent[]
   environmentContactInfos   EnvironmentContactInfo[]
+  meetingNotifications      MeetingNotification[]
+  circulars                 Circular[]
+  importantDeadlines        ImportantDeadline[]
+  downloadableFiles         DownloadableFile[]
+  calendarEvents            CalendarEvent[]
 
   @@map("subdomains")
 }
@@ -1689,6 +1694,145 @@ model FormItemValue {
   updatedAt        DateTime       @updatedAt
 
   @@map("form_item_values")
+}
+
+// ===== ANNOUNCEMENTS & CIRCULARS SYSTEM =====
+
+model MeetingNotification {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  type          String     // gram-sabha, village-committee, special-meeting
+  date          String     // ISO date string
+  time          String
+  venue         String
+  venueEn       String
+  agenda        Json       // Array of strings
+  agendaEn      Json       // Array of strings
+  status        String     // upcoming, ongoing, completed
+  priority      String     // high, medium, low
+  attendees     Int        @default(0)
+  quorum        Int        @default(0)
+  documents     Json       // Array of {name, nameEn, url, type}
+  lastUpdated   String     // ISO date string
+  isActive      Boolean    @default(true)
+  order         Int        @default(0)
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("meeting_notifications")
+}
+
+model Circular {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  titleEn         String
+  type            String     // circular, order, memo, notification
+  department      String
+  departmentEn    String
+  number          String     // Reference number
+  date            String     // ISO date string
+  priority        String     // high, medium, low
+  status          String     // active, superseded, draft
+  description     String
+  descriptionEn   String
+  content         String
+  contentEn       String
+  attachments     Json       // Array of {name, nameEn, url, type, size}
+  issuedBy        String
+  issuedByEn      String
+  lastUpdated     String     // ISO date string
+  isActive        Boolean    @default(true)
+  order           Int        @default(0)
+  subdomainId     String?    @db.ObjectId
+  subdomain       Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@map("circulars")
+}
+
+model ImportantDeadline {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  titleEn         String
+  type            String     // tax, election, camp, application, meeting, other
+  deadline        String     // ISO date string
+  time            String
+  description     String
+  descriptionEn   String
+  instructions    Json       // Array of strings
+  instructionsEn  Json       // Array of strings
+  documents       Json       // Array of {name, nameEn, url, required}
+  contactInfo     Json       // {name, nameEn, phone, email}
+  priority        String     // urgent, high, medium, low
+  status          String     // upcoming, due-soon, overdue, completed
+  lastUpdated     String     // ISO date string
+  isActive        Boolean    @default(true)
+  order           Int        @default(0)
+  subdomainId     String?    @db.ObjectId
+  subdomain       Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@map("important_deadlines")
+}
+
+model DownloadableFile {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  nameEn        String
+  description   String
+  descriptionEn String
+  category      String     // form, document, pdf, image, archive
+  type          String     // File extension/type (PDF, DOC, JPG, etc.)
+  size          String     // Human-readable size (e.g., "2.5 MB")
+  url           String
+  downloads     Int        @default(0)
+  lastUpdated   String     // ISO date string
+  required      Boolean    @default(false)
+  tags          Json       // Array of strings
+  isActive      Boolean    @default(true)
+  order         Int        @default(0)
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("downloadable_files")
+}
+
+model CalendarEvent {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  titleEn      String
+  date         String     // ISO date string
+  time         String
+  duration     String     // e.g., "2 hours"
+  venue        String
+  venueEn      String
+  type         String     // gram-sabha, village-committee, camp, festival, meeting, other
+  description  String
+  descriptionEn String
+  attendees    Int        @default(0)
+  maxAttendees Int        @default(0)
+  status       String     // upcoming, ongoing, completed, cancelled
+  priority     String     // high, medium, low
+  organizer    String
+  organizerEn  String
+  contactInfo  Json       // {phone, email}
+  documents    Json       // Array of {name, nameEn, url}
+  reminders    Boolean    @default(true)
+  isActive     Boolean    @default(true)
+  order        Int        @default(0)
+  subdomainId  String?    @db.ObjectId
+  subdomain    Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("calendar_events")
 }
 
 // ===== ACTIVITY LOGGING SYSTEM =====
