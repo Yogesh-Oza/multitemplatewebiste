@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(demoResponse());
     }
 
-    const groups = await prisma.fpoGroup.findMany({
+    const groups = await prisma.fPOGroup.findMany({
       where: { subdomainId, isActive: true },
       orderBy: { order: 'asc' }
     });
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const payload = body as FPOGroupData;
 
-    const group = await prisma.fpoGroup.create({
+    const group = await prisma.fPOGroup.create({
       data: {
         ...payload,
         subdomainId,
@@ -96,7 +96,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: 'Group id is required' }, { status: 400 });
     }
 
-    const existing = await prisma.fpoGroup.findFirst({
+    const existing = await prisma.fPOGroup.findFirst({
       where: { id: payload.id, subdomainId }
     });
 
@@ -104,7 +104,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: 'Group not found' }, { status: 404 });
     }
 
-    const group = await prisma.fpoGroup.update({
+    const group = await prisma.fPOGroup.update({
       where: { id: payload.id },
       data: {
         ...payload,
@@ -148,7 +148,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ message: 'Group id is required' }, { status: 400 });
     }
 
-    const existing = await prisma.fpoGroup.findFirst({
+    const existing = await prisma.fPOGroup.findFirst({
       where: { id, subdomainId }
     });
 
@@ -156,7 +156,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ message: 'Group not found' }, { status: 404 });
     }
 
-    await prisma.fpoGroup.delete({ where: { id } });
+    await prisma.fPOGroup.delete({ where: { id } });
 
     await logCrudActivity(
       request,

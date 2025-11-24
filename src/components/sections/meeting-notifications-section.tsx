@@ -371,7 +371,7 @@ export default function MeetingNotificationsSection({ meetings: propMeetings = [
                     अजेंडा
                   </h4>
                   <ul className="space-y-1">
-                    {meeting.agenda.slice(0, 3).map((item, idx) => (
+                    {(Array.isArray(meeting.agenda) ? meeting.agenda.slice(0, 3) : []).map((item: any, idx: number) => typeof item === 'string' ? (
                       <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
                         <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span className="line-clamp-2">{item}</span>

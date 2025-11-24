@@ -154,7 +154,6 @@ export default function ImportantDeadlinesAdmin() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: deadline.id,
           ...deadline,
           isActive: !deadline.isActive
         })

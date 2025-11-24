@@ -168,7 +168,6 @@ export default function CalendarEventsAdmin() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: event.id,
           ...event,
           isActive: !event.isActive
         })

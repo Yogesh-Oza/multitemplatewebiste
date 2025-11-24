@@ -490,12 +490,14 @@ export default function ImportantDeadlinesSection({ deadlines: propDeadlines = [
                 <div className="space-y-2">
                   <h4 className="font-semibold text-gray-700">सूचना</h4>
                   <ul className="space-y-1">
-                    {deadline.instructions.slice(0, 3).map((instruction, idx) => (
-                      <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
-                        <span>{instruction}</span>
-                      </li>
-                    ))}
+                    {(Array.isArray(deadline.instructions) ? deadline.instructions.slice(0, 3) : []).map((instruction: any, idx: number) => 
+                      typeof instruction === 'string' ? (
+                        <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span>{instruction}</span>
+                        </li>
+                      ) : null
+                    )}
                     {deadline.instructions.length > 3 && (
                       <li className="text-sm text-blue-600 font-medium">
                         +{deadline.instructions.length - 3} अधिक सूचना
@@ -512,7 +514,7 @@ export default function ImportantDeadlinesSection({ deadlines: propDeadlines = [
                       आवश्यक कागदपत्रे
                     </h4>
                     <div className="space-y-1">
-                      {deadline.documents.map((doc, idx) => (
+                      {(Array.isArray(deadline.documents) ? deadline.documents : []).map((doc: any, idx: number) => (
                         <div key={idx} className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4 text-gray-500" />

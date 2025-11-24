@@ -157,7 +157,6 @@ export default function MeetingNotificationsAdmin() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: meeting.id,
           ...meeting,
           isActive: !meeting.isActive
         })

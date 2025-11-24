@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
       config = await prisma.applicationProcessConfig.update({
         where: { id: existing.id },
         data: {
-          steps: payload.steps || [],
-          requiredDocuments: payload.requiredDocuments || [],
+          steps: (payload.steps || []) as any,
+          requiredDocuments: (payload.requiredDocuments || []) as any,
           applicationFormUrl: payload.applicationFormUrl || null,
           sampleFormUrl: payload.sampleFormUrl || null,
           isActive: payload.isActive ?? existing.isActive
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
     } else {
       config = await prisma.applicationProcessConfig.create({
         data: {
-          steps: payload.steps || [],
-          requiredDocuments: payload.requiredDocuments || [],
+          steps: (payload.steps || []) as any,
+          requiredDocuments: (payload.requiredDocuments || []) as any,
           applicationFormUrl: payload.applicationFormUrl || null,
           sampleFormUrl: payload.sampleFormUrl || null,
           isActive: payload.isActive ?? true,

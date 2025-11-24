@@ -345,12 +345,14 @@ export default async function EnvironmentPage({ params }: EnvironmentPageProps) 
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-900 text-sm mb-2">फायदे:</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {(Array.isArray(waste.benefits) ? waste.benefits : []).map((benefit: string, index: number) => (
-                        <li key={index} className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          {benefit}
-                        </li>
-                      ))}
+                      {(Array.isArray(waste.benefits) ? waste.benefits : []).map((benefit: any, index: number) => 
+                        typeof benefit === 'string' ? (
+                          <li key={index} className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            {benefit}
+                          </li>
+                        ) : null
+                      )}
                     </ul>
                   </div>
 

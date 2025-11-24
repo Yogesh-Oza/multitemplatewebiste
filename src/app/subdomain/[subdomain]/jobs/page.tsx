@@ -53,7 +53,7 @@ async function fetchJobsData(subdomainId: string) {
         where: { subdomainId, isActive: true },
         orderBy: { order: 'asc' }
       }),
-      prisma.fpoGroup.findMany({
+      prisma.fPOGroup.findMany({
         where: { subdomainId, isActive: true },
         orderBy: { order: 'asc' }
       }),

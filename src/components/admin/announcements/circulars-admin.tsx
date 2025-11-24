@@ -162,7 +162,6 @@ export default function CircularsAdmin() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: circular.id,
           ...circular,
           isActive: !circular.isActive
         })

@@ -253,7 +253,7 @@ export default function DownloadSection({ files: propFiles = [] }: DownloadSecti
   const filteredFiles = displayFiles.filter(file => {
     const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          file.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         file.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+                          (Array.isArray(file.tags) && file.tags.some((tag: any) => typeof tag === 'string' && tag.toLowerCase().includes(searchTerm.toLowerCase())));
     const matchesCategory = selectedCategory === 'all' || file.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -380,11 +380,13 @@ export default function DownloadSection({ files: propFiles = [] }: DownloadSecti
                 <div className="space-y-2">
                   <h4 className="font-semibold text-gray-700 text-sm">टॅग</h4>
                   <div className="flex flex-wrap gap-1">
-                    {file.tags.map((tag, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
+                    {(Array.isArray(file.tags) ? file.tags : []).map((tag: any, idx: number) => 
+                      typeof tag === 'string' ? (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ) : null
+                    )}
                   </div>
                 </div>
 

@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         file.nameEn.toLowerCase().includes(searchLower) ||
         file.description.toLowerCase().includes(searchLower) ||
         file.descriptionEn.toLowerCase().includes(searchLower) ||
-        (Array.isArray(file.tags) && file.tags.some((tag: string) => tag.toLowerCase().includes(searchLower)))
+        (Array.isArray(file.tags) && file.tags.some((tag: any) => typeof tag === 'string' && tag.toLowerCase().includes(searchLower)))
       );
     }
 

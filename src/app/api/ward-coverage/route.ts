@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         ...payload,
         subdomainId,
         coveragePercentage,
-        schemes: payload.schemes || []
+        schemes: (payload.schemes || []) as any
       }
     });
 
@@ -123,7 +123,7 @@ export async function PUT(request: NextRequest) {
         coveragePercentage,
         isActive: payload.isActive ?? existing.isActive,
         order: payload.order ?? existing.order,
-        schemes: payload.schemes || existing.schemes
+        schemes: (payload.schemes || existing.schemes) as any
       }
     });
 

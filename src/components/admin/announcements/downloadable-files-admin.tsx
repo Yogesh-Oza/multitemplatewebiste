@@ -146,7 +146,6 @@ export default function DownloadableFilesAdmin() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: file.id,
           ...file,
           isActive: !file.isActive
         })

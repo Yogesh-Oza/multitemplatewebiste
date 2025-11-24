@@ -412,7 +412,7 @@ export default function CircularsSection({ circulars: propCirculars = [] }: Circ
                       संलग्नक
                     </h4>
                     <div className="space-y-1">
-                      {circular.attachments.map((attachment, idx) => (
+                      {circular.attachments.map((attachment: any, idx: number) => (
                         <Button
                           key={idx}
                           variant="outline"
