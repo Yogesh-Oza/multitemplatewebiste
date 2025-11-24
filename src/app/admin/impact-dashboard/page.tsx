@@ -183,7 +183,6 @@ export default function ImpactDashboardAdminPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: metric.id,
           ...metric,
           isActive: !metric.isActive
         })
@@ -455,7 +454,6 @@ export default function ImpactDashboardAdminPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: item.id,
           ...item,
           isActive: !item.isActive
         })

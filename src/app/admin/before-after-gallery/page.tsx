@@ -206,7 +206,6 @@ export default function BeforeAfterGalleryAdminPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: item.id,
           ...item,
           isActive: !item.isActive
         })

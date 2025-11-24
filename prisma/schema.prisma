@@ -997,6 +997,151 @@ model Employment {
   @@map("employment")
 }
 
+model JobOpportunity {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  titleEn         String
+  organization    String
+  organizationEn  String
+  location        String
+  locationEn      String
+  type            String
+  typeEn          String
+  salary          String
+  experience      String
+  experienceEn    String
+  education       String
+  educationEn     String
+  description     String
+  descriptionEn   String
+  requirements    Json       // Array of strings
+  requirementsEn  Json       // Array of strings
+  postedDate      String
+  lastDate        String
+  applicationUrl String?
+  isUrgent        Boolean    @default(false)
+  isActive         Boolean    @default(true)
+  order            Int        @default(0)
+  subdomainId      String?    @db.ObjectId
+  subdomain        Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@map("job_opportunities")
+}
+
+model Tender {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  value         String
+  lastDate      String
+  category      String
+  categoryEn    String
+  requirements  String
+  requirementsEn String
+  tenderUrl     String?
+  isActive       Boolean    @default(true)
+  order          Int        @default(0)
+  subdomainId    String?    @db.ObjectId
+  subdomain      Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@map("tenders")
+}
+
+model TrainingProgram {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  titleEn         String
+  description     String
+  descriptionEn  String
+  duration        String
+  durationEn      String
+  fee             String
+  feeEn           String
+  instructor      String
+  instructorEn    String
+  startDate       String
+  seats           Int
+  enrolled        Int        @default(0)
+  registrationUrl String?
+  isActive         Boolean    @default(true)
+  order            Int        @default(0)
+  subdomainId      String?    @db.ObjectId
+  subdomain        Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@map("training_programs")
+}
+
+model FPOGroup {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  nameEn        String
+  members       Int
+  established   String
+  contact       String
+  email         String?
+  activities    Json       // Array of strings
+  activitiesEn  Json       // Array of strings
+  achievements  String
+  achievementsEn String
+  joinUrl       String?
+  isActive       Boolean    @default(true)
+  order          Int        @default(0)
+  subdomainId    String?    @db.ObjectId
+  subdomain      Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@map("fpo_groups")
+}
+
+model VillageTalent {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  nameEn        String
+  skill          String
+  skillEn       String
+  experience     String
+  experienceEn   String
+  rating         Float     @default(0)
+  contact        String
+  services       Json      // Array of strings
+  servicesEn     Json      // Array of strings
+  isActive       Boolean   @default(true)
+  order          Int       @default(0)
+  subdomainId    String?   @db.ObjectId
+  subdomain      Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("village_talents")
+}
+
+model EmploymentContactInfo {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  section       String     // jobs, tenders, training, fpo, talent, general
+  officeName    String
+  officeNameEn  String
+  phone         String
+  email         String?
+  address       String
+  addressEn     String
+  isActive      Boolean    @default(true)
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("employment_contact_infos")
+}
+
 model School {
   id           String     @id @default(auto()) @map("_id") @db.ObjectId
   name         String
