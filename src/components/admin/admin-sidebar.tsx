@@ -20,7 +20,11 @@ import {
   BarChart3,
   Search,
   Map,
-  Shield
+  Shield,
+  Gauge,
+  Briefcase,
+  GraduationCap,
+  Leaf
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +34,18 @@ const adminNavItems = [
     label: 'Homepage',
     icon: Users,
     description: 'गावाची मुख्य माहिती, आकडेवारी, होमपेज आणि नेते व्यवस्थापन'
+  },
+  {
+    href: '/admin/impact-dashboard',
+    label: 'प्रमुख प्रकल्प आणि उपक्रम',
+    icon: FolderOpen,
+    description: 'प्रभाव डॅशबोर्ड व्यवस्थापन'
+  },
+  {
+    href: '/admin/sankalp-tracker',
+    label: 'संकल्प ट्रॅकर',
+    icon: Shield,
+    description: 'गावाचा वचन ट्रॅकर व्यवस्थापन'
   },
   {
     href: '/admin/programs',
@@ -50,6 +66,24 @@ const adminNavItems = [
     description: 'आर्थिक माहिती व्यवस्थापन'
   },
   {
+    href: '/admin/employment-skill',
+    label: 'रोजगार आणि कौशल्य विकास',
+    icon: Briefcase,
+    description: 'नोकऱ्या, निविदा, प्रशिक्षण आणि टॅलेंट व्यवस्थापन'
+  },
+  {
+    href: '/admin/education-youth',
+    label: 'शिक्षण आणि युवक कोपरा',
+    icon: GraduationCap,
+    description: 'शाळा, शिष्यवृत्ती, करिअर मार्गदर्शन आणि युवक उपक्रम व्यवस्थापन'
+  },
+  {
+    href: '/admin/environment-sustainability',
+    label: 'पर्यावरण आणि शाश्वत विकास',
+    icon: Leaf,
+    description: 'पर्यावरणीय निर्देशक, हरित उपक्रम, कचरा व्यवस्थापन आणि पाणी संवर्धन'
+  },
+  {
     href: '/admin/government-schemes',
     label: 'शासकीय योजना',
     icon: Building,
@@ -66,6 +100,12 @@ const adminNavItems = [
     label: 'सोई-सुविधा',
     icon: Wrench,
     description: 'सुविधा व्यवस्थापन'
+  },
+  {
+    href: '/admin/infrastructure-smart-village',
+    label: 'स्मार्ट व्हिलेज',
+    icon: Gauge,
+    description: 'पायाभूत सुविधा आणि स्मार्ट डॅशबोर्ड व्यवस्थापन'
   },
   {
     href: '/admin/contact',

@@ -16,9 +16,10 @@ import {
   Info,
   Phone,
   Clock,
-  Users
+  Users,
+  AlertTriangle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface InfrastructureFacility {
   id: string;
@@ -44,10 +45,110 @@ interface GISInfrastructureMapSectionProps {
   facilities?: InfrastructureFacility[];
 }
 
-export default function GISInfrastructureMapSection({ facilities = [] }: GISInfrastructureMapSectionProps) {
+interface FacilityFromAPI {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  descriptionEn: string;
+  category: string;
+  location: string | null;
+  contactInfo: string | null;
+  workingHours: string | null;
+  type: string | null;
+  status: string | null;
+  statusEn: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  services: string[] | null;
+  capacity: string | null;
+  lastMaintenance: string | null;
+  isActive: boolean;
+}
+
+export default function GISInfrastructureMapSection({ facilities: propFacilities }: GISInfrastructureMapSectionProps) {
+  const [apiFacilities, setApiFacilities] = useState<FacilityFromAPI[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [mapView, setMapView] = useState<'satellite' | 'street' | 'hybrid'>('satellite');
   const [selectedFacility, setSelectedFacility] = useState<InfrastructureFacility | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    const fetchFacilities = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/facilities');
+        if (response.ok) {
+          const data = await response.json();
+          // Filter facilities that have coordinates for map display
+          const facilitiesWithCoords = data.filter((f: FacilityFromAPI) => 
+            f.isActive && f.latitude !== null && f.longitude !== null
+          );
+          setApiFacilities(facilitiesWithCoords);
+          setIsDemo(facilitiesWithCoords.length === 0);
+        } else {
+          setError('माहिती लोड करण्यात अडचण आली');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('माहिती लोड करण्यात अडचण आली');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!propFacilities || propFacilities.length === 0) {
+      fetchFacilities();
+    } else {
+      setLoading(false);
+    }
+  }, [propFacilities]);
+
+  // Transform API facility to InfrastructureFacility format
+  const transformFacility = (facility: FacilityFromAPI): InfrastructureFacility => {
+    const statusMap: Record<string, 'operational' | 'maintenance' | 'non-functional'> = {
+      'चालू': 'operational',
+      'operational': 'operational',
+      'देखभाल': 'maintenance',
+      'maintenance': 'maintenance',
+      'बंद': 'non-functional',
+      'non-functional': 'non-functional'
+    };
+
+    const typeMap: Record<string, 'water' | 'sanitation' | 'road' | 'school' | 'health' | 'library' | 'playground' | 'bus_stop' | 'other'> = {
+      'water': 'water',
+      'sanitation': 'sanitation',
+      'road': 'road',
+      'school': 'school',
+      'health': 'health',
+      'library': 'library',
+      'playground': 'playground',
+      'bus_stop': 'bus_stop',
+      'other': 'other'
+    };
+
+    return {
+      id: facility.id,
+      name: facility.name,
+      nameEn: facility.nameEn,
+      type: typeMap[facility.type || ''] || 'other',
+      category: facility.category,
+      status: statusMap[facility.status || ''] || 'operational',
+      location: {
+        lat: facility.latitude || 19.0760,
+        lng: facility.longitude || 72.8777,
+        address: facility.location || ''
+      },
+      capacity: facility.capacity || '',
+      contactInfo: facility.contactInfo || '',
+      workingHours: facility.workingHours || '',
+      lastMaintenance: facility.lastMaintenance || '',
+      description: facility.description,
+      services: Array.isArray(facility.services) ? facility.services : []
+    };
+  };
 
   // Demo data for when no facilities are available
   const demoFacilities: InfrastructureFacility[] = [
@@ -167,7 +268,40 @@ export default function GISInfrastructureMapSection({ facilities = [] }: GISInfr
     }
   ];
 
-  const displayFacilities = facilities.length > 0 ? facilities : demoFacilities;
+  // Determine which facilities to use
+  let displayFacilities: InfrastructureFacility[];
+  let showDemoBadge = false;
+
+  if (propFacilities && propFacilities.length > 0) {
+    displayFacilities = propFacilities;
+  } else if (apiFacilities.length > 0) {
+    displayFacilities = apiFacilities.map(transformFacility);
+    showDemoBadge = isDemo;
+  } else {
+    displayFacilities = demoFacilities;
+    showDemoBadge = true;
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   const facilityTypes = [
     { value: 'all', label: 'सर्व', labelEn: 'All', color: 'bg-gray-500' },
@@ -241,6 +375,11 @@ export default function GISInfrastructureMapSection({ facilities = [] }: GISInfr
         <p className="text-gray-500 max-w-3xl mx-auto">
           गावातील सर्व सुविधांचा इंटरअॅक्टिव्ह नकाशा - क्लिक करण्यायोग्य चिन्हांसह
         </p>
+        {showDemoBadge && (
+          <p className="text-xs text-blue-600 bg-white/80 px-3 py-1 inline-flex rounded-full border border-blue-100 mt-4">
+            डेमो डेटा - प्रशासनामधून अपडेट करा
+          </p>
+        )}
       </div>
 
       {/* Map Controls */}

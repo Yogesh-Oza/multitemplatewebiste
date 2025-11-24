@@ -37,6 +37,15 @@ interface Facility {
   workingHours: string;
   imageUrl: string;
   isActive: boolean;
+  // GIS fields
+  type?: string | null;
+  status?: string | null;
+  statusEn?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  services?: string[] | null;
+  capacity?: string | null;
+  lastMaintenance?: string | null;
 }
 
 
@@ -89,7 +98,15 @@ export default function FacilitiesPage() {
       contactInfo: '',
       workingHours: '',
       imageUrl: '',
-      isActive: true
+      isActive: true,
+      type: null,
+      status: null,
+      statusEn: null,
+      latitude: null,
+      longitude: null,
+      services: null,
+      capacity: null,
+      lastMaintenance: null
     });
     setIsAdding(true);
   };
@@ -442,6 +459,113 @@ export default function FacilitiesPage() {
                 />
               </div>
 
+              {/* GIS Fields Section */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-semibold">GIS नकाशा साठी माहिती (वैकल्पिक)</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="type">प्रकार (GIS साठी)</Label>
+                    <select
+                      id="type"
+                      value={editingFacility.type || ''}
+                      onChange={(e) => setEditingFacility({...editingFacility, type: e.target.value || null})}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">-- निवडा --</option>
+                      <option value="water">पाणी</option>
+                      <option value="sanitation">स्वच्छता</option>
+                      <option value="road">रस्ते</option>
+                      <option value="school">शाळा</option>
+                      <option value="health">आरोग्य</option>
+                      <option value="library">वाचनालय</option>
+                      <option value="playground">मैदान</option>
+                      <option value="bus_stop">बस थांबा</option>
+                      <option value="other">इतर</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="status">स्थिती (मराठी)</Label>
+                    <Input
+                      id="status"
+                      value={editingFacility.status || ''}
+                      onChange={(e) => setEditingFacility({...editingFacility, status: e.target.value || null})}
+                      placeholder="चालू, देखभाल, बंद"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="statusEn">स्थिती (English)</Label>
+                    <Input
+                      id="statusEn"
+                      value={editingFacility.statusEn || ''}
+                      onChange={(e) => setEditingFacility({...editingFacility, statusEn: e.target.value || null})}
+                      placeholder="Operational, Maintenance, Non-functional"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="capacity">क्षमता</Label>
+                    <Input
+                      id="capacity"
+                      value={editingFacility.capacity || ''}
+                      onChange={(e) => setEditingFacility({...editingFacility, capacity: e.target.value || null})}
+                      placeholder="50 रुग्ण, 200 विद्यार्थी"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latitude">अक्षांश (Latitude)</Label>
+                    <Input
+                      id="latitude"
+                      type="number"
+                      step="0.000001"
+                      value={editingFacility.latitude ?? ''}
+                      onChange={(e) => setEditingFacility({...editingFacility, latitude: e.target.value ? Number(e.target.value) : null})}
+                      placeholder="19.0760"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="longitude">रेखांश (Longitude)</Label>
+                    <Input
+                      id="longitude"
+                      type="number"
+                      step="0.000001"
+                      value={editingFacility.longitude ?? ''}
+                      onChange={(e) => setEditingFacility({...editingFacility, longitude: e.target.value ? Number(e.target.value) : null})}
+                      placeholder="72.8777"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="lastMaintenance">अद्यतन तारीख</Label>
+                  <Input
+                    id="lastMaintenance"
+                    value={editingFacility.lastMaintenance || ''}
+                    onChange={(e) => setEditingFacility({...editingFacility, lastMaintenance: e.target.value || null})}
+                    placeholder="अद्यतन: १५/११/२०२४"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="services">सेवा (प्रत्येक सेवा नवीन ओळीवर)</Label>
+                  <Textarea
+                    id="services"
+                    value={Array.isArray(editingFacility.services) ? editingFacility.services.join('\n') : ''}
+                    onChange={(e) => {
+                      const services = e.target.value.split('\n').filter(s => s.trim());
+                      setEditingFacility({...editingFacility, services: services.length > 0 ? services : null});
+                    }}
+                    placeholder="सेवा १&#10;सेवा २&#10;सेवा ३"
+                    rows={4}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">प्रत्येक सेवा नवीन ओळीवर लिहा</p>
+                </div>
+              </div>
 
               <div>
                 <Label htmlFor="image">प्रतिमा</Label>

@@ -66,6 +66,10 @@ export async function PUT(
       fileUrl, 
       category, 
       categoryEn,
+      priority,
+      priorityEn,
+      description,
+      descriptionEn,
       order 
     } = body;
 
@@ -92,6 +96,10 @@ export async function PUT(
         fileUrl,
         category,
         categoryEn,
+        priority: priority || 'मध्यम',
+        priorityEn: priorityEn || 'Medium',
+        description: description || '',
+        descriptionEn: descriptionEn || '',
         order: order || 0,
       },
     });

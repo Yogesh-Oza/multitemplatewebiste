@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,11 @@ import {
   Baby,
   School
 } from 'lucide-react';
+import {
+  educationHealthDemoSnapshot,
+  educationHealthDemoFacilities,
+  EducationHealthApiResponse
+} from '@/lib/demo-education-health';
 
 interface EducationHealthData {
   education: {
@@ -60,7 +66,91 @@ interface EducationHealthSectionProps {
   data?: EducationHealthData;
 }
 
-export default function EducationHealthSection({ data }: EducationHealthSectionProps) {
+export default function EducationHealthSection({ data: propData }: EducationHealthSectionProps) {
+  const [apiData, setApiData] = useState<EducationHealthApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/education-health');
+        if (response.ok) {
+          const payload = await response.json();
+          setApiData(payload);
+        } else {
+          setError('माहिती लोड करण्यात अडचण आली');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('माहिती लोड करण्यात अडचण आली');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!propData) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [propData]);
+
+  // Transform API data to component format
+  const transformApiData = (apiResponse: EducationHealthApiResponse): EducationHealthData => {
+    const snapshot = apiResponse.snapshot;
+    const facilities = apiResponse.facilities;
+
+    // Map status string to type
+    const statusMap: Record<string, 'operational' | 'maintenance' | 'non-functional'> = {
+      'चालू': 'operational',
+      'operational': 'operational',
+      'देखभाल': 'maintenance',
+      'maintenance': 'maintenance',
+      'बंद': 'non-functional',
+      'non-functional': 'non-functional'
+    };
+
+    return {
+      education: {
+        totalSchools: snapshot.educationTotalSchools,
+        primarySchools: snapshot.educationPrimarySchools,
+        secondarySchools: snapshot.educationSecondarySchools,
+        anganwadis: snapshot.educationAnganwadis,
+        totalStudents: snapshot.educationTotalStudents,
+        totalTeachers: snapshot.educationTotalTeachers,
+        literacyRate: snapshot.educationLiteracyRate,
+        lastCensus: snapshot.educationLastCensus
+      },
+      health: {
+        totalCenters: snapshot.healthTotalCenters,
+        primaryHealthCenters: snapshot.healthPrimaryHealthCenters,
+        subCenters: snapshot.healthSubCenters,
+        anganwadiCenters: snapshot.healthAnganwadiCenters,
+        totalDoctors: snapshot.healthTotalDoctors,
+        totalNurses: snapshot.healthTotalNurses,
+        totalBeds: snapshot.healthTotalBeds,
+        lastInspection: snapshot.healthLastInspection
+      },
+      facilities: facilities
+        .filter((f) => f.isActive)
+        .map((f) => ({
+          id: f.id || '',
+          name: f.title,
+          nameEn: f.titleEn,
+          type: f.type as 'school' | 'anganwadi' | 'health_center' | 'hospital',
+          status: statusMap[f.status] || 'operational',
+          location: f.location,
+          capacity: f.capacity,
+          staff: f.staff,
+          lastInspection: f.lastInspection,
+          contactInfo: f.contactNumber,
+          services: Array.isArray(f.services) ? f.services : []
+        }))
+    };
+  };
+
   // Demo data for when no data is available
   const demoData: EducationHealthData = {
     education: {
@@ -139,7 +229,40 @@ export default function EducationHealthSection({ data }: EducationHealthSectionP
     ]
   };
 
-  const displayData = data || demoData;
+  // Determine which data to use
+  let displayData: EducationHealthData;
+  let isDemo = false;
+
+  if (propData) {
+    displayData = propData;
+  } else if (apiData) {
+    displayData = transformApiData(apiData);
+    isDemo = apiData.isDemo;
+  } else {
+    displayData = demoData;
+    isDemo = true;
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -223,15 +346,20 @@ export default function EducationHealthSection({ data }: EducationHealthSectionP
             <GraduationCap className="h-8 w-8 text-blue-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
-            शाळा, अंगणवाडी, आरोग्य केंद्रे
+            {apiData?.snapshot?.sectionTitle || 'शाळा, अंगणवाडी, आरोग्य केंद्रे'}
           </h2>
         </div>
         <p className="text-xl text-gray-600 mb-2">
-          Schools, Anganwadis, Health Centers
+          {apiData?.snapshot?.sectionTitleEn || 'Schools, Anganwadis, Health Centers'}
         </p>
         <p className="text-gray-500 max-w-3xl mx-auto">
-          गावातील शैक्षणिक आणि आरोग्य सुविधा
+          {apiData?.snapshot?.sectionSubtitle || 'गावातील शैक्षणिक आणि आरोग्य सुविधा'}
         </p>
+        {isDemo && (
+          <p className="text-xs text-blue-600 bg-white/80 px-3 py-1 inline-flex rounded-full border border-blue-100 mt-4">
+            डेमो डेटा - प्रशासनामधून अपडेट करा
+          </p>
+        )}
       </div>
 
       {/* Education Overview */}
@@ -239,7 +367,7 @@ export default function EducationHealthSection({ data }: EducationHealthSectionP
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
             <GraduationCap className="h-6 w-6 text-blue-600" />
-            शिक्षण माहिती
+            {apiData?.snapshot?.educationInfoTitle || 'शिक्षण माहिती'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -278,7 +406,7 @@ export default function EducationHealthSection({ data }: EducationHealthSectionP
               </div>
               <div className="text-gray-600">साक्षरता दर</div>
               <div className="text-sm text-gray-500">
-                अद्यतन: {new Date(displayData.education.lastCensus).toLocaleDateString('mr-IN')}
+                {displayData.education.lastCensus}
               </div>
             </div>
           </div>
@@ -290,7 +418,7 @@ export default function EducationHealthSection({ data }: EducationHealthSectionP
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
             <Heart className="h-6 w-6 text-red-600" />
-            आरोग्य माहिती
+            {apiData?.snapshot?.healthInfoTitle || 'आरोग्य माहिती'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -378,7 +506,7 @@ export default function EducationHealthSection({ data }: EducationHealthSectionP
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    <span>अद्यतन: {new Date(facility.lastInspection).toLocaleDateString('mr-IN')}</span>
+                    <span>अद्यतन: {facility.lastInspection}</span>
                   </div>
                 </div>
               </CardHeader>
@@ -424,21 +552,28 @@ export default function EducationHealthSection({ data }: EducationHealthSectionP
             <div className="flex items-center justify-center gap-3 mb-4">
               <BookOpen className="h-8 w-8 text-blue-600" />
               <h3 className="text-2xl font-bold text-gray-900">
-                शिक्षण आणि आरोग्य सेवा
+                {apiData?.snapshot?.issueTitle || 'शिक्षण आणि आरोग्य सेवा'}
               </h3>
             </div>
             <p className="text-gray-600 mb-6">
-              शिक्षण किंवा आरोग्य संबंधित कोणतीही माहिती किंवा सेवा हवी असल्यास संपर्क करा
+              {apiData?.snapshot?.issueDescription || 'शिक्षण किंवा आरोग्य संबंधित कोणतीही माहिती किंवा सेवा हवी असल्यास संपर्क करा'}
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                <GraduationCap className="h-4 w-4 mr-2" />
-                शिक्षण माहिती
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                asChild
+              >
+                <a href={`tel:${(apiData?.snapshot?.issueContactNumber || '+91-XXXX-XXXXXX').replace(/[^0-9+]/g, '')}`}>
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  {apiData?.snapshot?.issueActionLabel1 || 'शिक्षण माहिती'}
+                </a>
               </Button>
-              <Button variant="outline" className="border-red-600 text-red-600 hover:bg-red-50">
-                <Heart className="h-4 w-4 mr-2" />
-                आरोग्य सेवा
-              </Button>
+              {apiData?.snapshot?.issueActionLabel2 && (
+                <Button variant="outline" className="border-red-600 text-red-600 hover:bg-red-50">
+                  <Heart className="h-4 w-4 mr-2" />
+                  {apiData.snapshot.issueActionLabel2}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

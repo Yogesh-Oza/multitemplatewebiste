@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,11 +14,18 @@ import {
   User,
   Building,
   Phone,
-  Globe
+  Globe,
+  AlertTriangle
 } from 'lucide-react';
+import {
+  applicationProcessDemoConfig,
+  ApplicationProcessConfigData,
+  ApplicationStep,
+  RequiredDocument
+} from '@/lib/demo-schemes-beneficiary';
 
 interface ApplicationProcessProps {
-  scheme: {
+  scheme?: {
     id: string;
     title: string;
     titleEn: string;
@@ -28,11 +36,86 @@ interface ApplicationProcessProps {
     contactInfo: string;
     contactInfoEn: string;
     website: string;
+    contactOfficeName?: string;
+    contactOfficeNameEn?: string;
+    contactAddress?: string;
+    contactAddressEn?: string;
+    contactPhone?: string;
+    contactOfficeHours?: string;
+    contactOfficeHoursEn?: string;
   };
 }
 
-export default function ApplicationProcessSection({ scheme }: ApplicationProcessProps) {
-  const applicationSteps = [
+// Icon mapping
+const iconMap: Record<string, any> = {
+  CheckCircle,
+  FileText,
+  User,
+  ArrowRight,
+  Clock
+};
+
+export default function ApplicationProcessSection({ scheme: propScheme }: ApplicationProcessProps) {
+  const [config, setConfig] = useState<ApplicationProcessConfigData>(applicationProcessDemoConfig);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/application-process');
+        if (response.ok) {
+          const data = await response.json();
+          setConfig({
+            steps: data.steps || applicationProcessDemoConfig.steps,
+            requiredDocuments: data.requiredDocuments || applicationProcessDemoConfig.requiredDocuments,
+            applicationFormUrl: data.applicationFormUrl || '',
+            sampleFormUrl: data.sampleFormUrl || '',
+            isActive: data.isActive ?? true
+          });
+          setIsDemo(Boolean(data.isDemo));
+        } else {
+          setError('माहिती लोड करण्यात अडचण आली');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('माहिती लोड करण्यात अडचण आली');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!propScheme) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [propScheme]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const applicationSteps = config.steps || [
     {
       step: 1,
       title: 'पात्रता तपासणी',
@@ -85,7 +168,7 @@ export default function ApplicationProcessSection({ scheme }: ApplicationProcess
     }
   ];
 
-  const requiredDocuments = [
+  const requiredDocuments = config.requiredDocuments || [
     {
       name: 'आधार कार्ड',
       nameEn: 'Aadhaar Card',
@@ -132,6 +215,14 @@ export default function ApplicationProcessSection({ scheme }: ApplicationProcess
 
   return (
     <div className="space-y-8">
+      {isDemo && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+          <p className="text-sm text-blue-800">
+            डेमो डेटा - प्रशासनामधून अपडेट करा
+          </p>
+        </div>
+      )}
+
       {/* Application Process Steps */}
       <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
         <CardHeader className="pb-4">
@@ -146,7 +237,7 @@ export default function ApplicationProcessSection({ scheme }: ApplicationProcess
         <CardContent>
           <div className="space-y-6">
             {applicationSteps.map((step, index) => {
-              const IconComponent = step.icon;
+              const IconComponent = iconMap[step.icon] || CheckCircle;
               return (
                 <div key={step.step} className="flex items-start gap-4">
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full ${step.bgColor} flex items-center justify-center`}>
@@ -213,14 +304,35 @@ export default function ApplicationProcessSection({ scheme }: ApplicationProcess
           {/* Download Forms Button */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="flex flex-wrap gap-3">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Download className="h-4 w-4 mr-2" />
-                अर्ज फॉर्म डाउनलोड करा
-              </Button>
-              <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
-                <FileText className="h-4 w-4 mr-2" />
-                नमुना अर्ज पहा
-              </Button>
+              {config.applicationFormUrl ? (
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => window.open(config.applicationFormUrl, '_blank')}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  अर्ज फॉर्म डाउनलोड करा
+                </Button>
+              ) : (
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white" disabled>
+                  <Download className="h-4 w-4 mr-2" />
+                  अर्ज फॉर्म डाउनलोड करा
+                </Button>
+              )}
+              {config.sampleFormUrl ? (
+                <Button 
+                  variant="outline" 
+                  className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                  onClick={() => window.open(config.sampleFormUrl, '_blank')}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  नमुना अर्ज पहा
+                </Button>
+              ) : (
+                <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50" disabled>
+                  <FileText className="h-4 w-4 mr-2" />
+                  नमुना अर्ज पहा
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
@@ -243,33 +355,43 @@ export default function ApplicationProcessSection({ scheme }: ApplicationProcess
               <div className="flex items-start gap-3">
                 <Building className="h-5 w-5 text-orange-600 mt-1" />
                 <div>
-                  <h4 className="font-semibold text-gray-900">ग्रामपंचायत कार्यालय</h4>
-                  <p className="text-gray-600 text-sm">Gram Panchayat Office</p>
-                  <p className="text-gray-700">{scheme.contactInfo || 'संपर्क माहिती उपलब्ध नाही'}</p>
+                  <h4 className="font-semibold text-gray-900">
+                    {propScheme?.contactOfficeName || 'ग्रामपंचायत कार्यालय'}
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    {propScheme?.contactOfficeNameEn || 'Gram Panchayat Office'}
+                  </p>
+                  <p className="text-gray-700">
+                    {propScheme?.contactAddress || propScheme?.contactInfo || 'संपर्क माहिती उपलब्ध नाही'}
+                  </p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-orange-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900">फोन नंबर</h4>
-                  <p className="text-gray-600 text-sm">Phone Number</p>
-                  <p className="text-gray-700">+91-XXXX-XXXXXX</p>
+              {propScheme?.contactPhone && (
+                <div className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-orange-600 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">फोन नंबर</h4>
+                    <p className="text-gray-600 text-sm">Phone Number</p>
+                    <p className="text-gray-700">{propScheme.contactPhone}</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-orange-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900">कार्यालयीन वेळ</h4>
-                  <p className="text-gray-600 text-sm">Office Hours</p>
-                  <p className="text-gray-700">सकाळी ९:०० ते संध्याकाळी ५:००</p>
+              {propScheme?.contactOfficeHours && (
+                <div className="flex items-start gap-3">
+                  <Clock className="h-5 w-5 text-orange-600 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">कार्यालयीन वेळ</h4>
+                    <p className="text-gray-600 text-sm">Office Hours</p>
+                    <p className="text-gray-700">{propScheme.contactOfficeHours}</p>
+                  </div>
                 </div>
-              </div>
+              )}
               
-              {scheme.website && (
+              {propScheme?.website && (
                 <div className="flex items-start gap-3">
                   <Globe className="h-5 w-5 text-orange-600 mt-1" />
                   <div>
@@ -278,10 +400,10 @@ export default function ApplicationProcessSection({ scheme }: ApplicationProcess
                     <Button 
                       variant="link" 
                       className="p-0 h-auto text-blue-600 hover:text-blue-800"
-                      onClick={() => window.open(scheme.website, '_blank')}
+                      onClick={() => window.open(propScheme.website, '_blank')}
                     >
                       <ExternalLink className="h-4 w-4 mr-1" />
-                      {scheme.website}
+                      {propScheme.website}
                     </Button>
                   </div>
                 </div>

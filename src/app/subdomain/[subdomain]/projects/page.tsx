@@ -4,6 +4,19 @@ import { SubdomainValidator } from '@/components/subdomain-validator';
 import { SankalpTrackerSection } from '@/components/sections/sankalp-tracker-section';
 import { EnhancedBeforeAfterSection } from '@/components/sections/enhanced-before-after-section';
 import { Calendar, DollarSign, Users, TrendingUp, CheckCircle, Clock, Star, BarChart3, Target, Award, Eye, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { DEFAULT_SANKALP_ITEMS, SankalpTrackerItem } from '@/lib/sankalp-defaults';
+
+// Icon mapping for dynamic icons
+const getIconComponent = (iconName: string) => {
+  const icons: Record<string, any> = {
+    Target,
+    BarChart3,
+    Users,
+    DollarSign,
+    CheckCircle
+  };
+  return icons[iconName] || Target;
+};
 
 const prisma = new PrismaClient();
 
@@ -189,48 +202,94 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
     }
   ];
 
-  const impactMetrics = [
-    {
-      id: 1,
-      title: 'एकूण प्रकल्प',
-      titleEn: 'Total Projects',
-      value: projects.length,
-      target: 20,
-      unit: 'प्रकल्प',
-      unitEn: 'Projects',
-      color: 'blue'
+  // Fetch impact dashboard metrics from database
+  let impactMetrics = await prisma.impactDashboardMetric.findMany({
+    where: { 
+      subdomainId: subdomainData.id,
+      isActive: true 
     },
-    {
-      id: 2,
-      title: 'पूर्ण प्रकल्प',
-      titleEn: 'Completed Projects',
-      value: completedProjects.length,
-      target: 15,
-      unit: 'प्रकल्प',
-      unitEn: 'Projects',
-      color: 'green'
+    orderBy: { order: 'asc' }
+  });
+
+  // If no metrics exist, use default values
+  if (impactMetrics.length === 0) {
+    impactMetrics = [
+      {
+        id: 'default-1',
+        title: 'एकूण प्रकल्प',
+        titleEn: 'Total Projects',
+        value: 6,
+        target: 20,
+        unit: 'प्रकल्प',
+        unitEn: 'Projects',
+        color: 'blue',
+        icon: 'Target'
+      },
+      {
+        id: 'default-2',
+        title: 'पूर्ण प्रकल्प',
+        titleEn: 'Completed Projects',
+        value: 3,
+        target: 15,
+        unit: 'प्रकल्प',
+        unitEn: 'Projects',
+        color: 'green',
+        icon: 'CheckCircle'
+      },
+      {
+        id: 'default-3',
+        title: 'एकूण खर्च',
+        titleEn: 'Total Expenditure',
+        value: 10000000,
+        target: 5000000,
+        unit: '₹',
+        unitEn: '₹',
+        color: 'purple',
+        icon: 'DollarSign'
+      },
+      {
+        id: 'default-4',
+        title: 'लाभार्थी',
+        titleEn: 'Beneficiaries',
+        value: 1250,
+        target: 2000,
+        unit: 'लोक',
+        unitEn: 'People',
+        color: 'orange',
+        icon: 'Users'
+      }
+    ] as any;
+  }
+
+  // Fetch Sankalp tracker items
+  const sankalpItemsFromDb = await prisma.sankalpItem.findMany({
+    where: {
+      subdomainId: subdomainData.id,
+      isActive: true,
     },
-    {
-      id: 3,
-      title: 'एकूण खर्च',
-      titleEn: 'Total Expenditure',
-      value: projects.reduce((sum: number, p: any) => sum + (p.budget || 0), 0),
-      target: 5000000,
-      unit: '₹',
-      unitEn: '₹',
-      color: 'purple'
-    },
-    {
-      id: 4,
-      title: 'लाभार्थी',
-      titleEn: 'Beneficiaries',
-      value: 1250,
-      target: 2000,
-      unit: 'लोक',
-      unitEn: 'People',
-      color: 'orange'
-    }
-  ];
+    orderBy: { order: 'asc' },
+  });
+
+  let sankalpItems: SankalpTrackerItem[] = sankalpItemsFromDb.map((item) => ({
+    id: item.id,
+    title: item.title,
+    titleEn: item.titleEn,
+    description: item.description,
+    descriptionEn: item.descriptionEn,
+    currentValue: item.currentValue,
+    targetValue: item.targetValue,
+    unit: item.unit,
+    icon: item.icon,
+    color: item.color,
+    status: item.status as SankalpTrackerItem['status'],
+    priority: item.priority as SankalpTrackerItem['priority'],
+    order: item.order,
+    isActive: item.isActive,
+  }));
+
+  if (sankalpItems.length === 0) {
+    sankalpItems = DEFAULT_SANKALP_ITEMS;
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -278,7 +337,9 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
             प्रभाव डॅशबोर्ड (Impact Dashboard)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {impactMetrics.map((metric) => (
+            {impactMetrics.map((metric: any) => {
+              const IconComponent = getIconComponent(metric.icon || 'Target');
+              return (
               <div key={metric.id} className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className={`p-3 rounded-lg ${
@@ -287,7 +348,7 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
                     metric.color === 'purple' ? 'bg-purple-500 text-white' :
                     'bg-orange-500 text-white'
                   }`}>
-                    <Target className="h-6 w-6" />
+                    <IconComponent className="h-6 w-6" />
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-gray-900">
@@ -320,7 +381,8 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
                   लक्ष्य: {metric.target.toLocaleString('en-IN')} {metric.unit}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -429,7 +491,7 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
         )}
 
         {/* Sankalp Tracker Section */}
-        <SankalpTrackerSection />
+        <SankalpTrackerSection items={sankalpItems} />
 
         {/* All Projects - Beautiful Demo Design */}
         <div className="py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 relative overflow-hidden">

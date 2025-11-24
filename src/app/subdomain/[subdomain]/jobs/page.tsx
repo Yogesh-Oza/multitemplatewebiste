@@ -18,8 +18,17 @@ import {
   Target,
   BookOpen,
   Wrench,
-  Laptop
+  Laptop,
+  AlertTriangle
 } from 'lucide-react';
+import {
+  jobOpportunitiesDemoData,
+  tendersDemoData,
+  trainingProgramsDemoData,
+  fpoGroupsDemoData,
+  villageTalentsDemoData,
+  employmentContactInfoDemoData
+} from '@/lib/demo-employment-skill';
 
 const prisma = new PrismaClient();
 
@@ -27,6 +36,72 @@ interface JobsPageProps {
   params: Promise<{
     subdomain: string;
   }>;
+}
+
+async function fetchJobsData(subdomainId: string) {
+  try {
+    const [jobs, tenders, programs, fpoGroups, talents, contacts] = await Promise.all([
+      prisma.jobOpportunity.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.tender.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.trainingProgram.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.fpoGroup.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.villageTalent.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.employmentContactInfo.findMany({
+        where: { subdomainId, isActive: true }
+      })
+    ]);
+
+    const isDemo = jobs.length === 0 && tenders.length === 0 && programs.length === 0 && 
+                   fpoGroups.length === 0 && talents.length === 0 && contacts.length === 0;
+
+    return {
+      jobs: jobs.length > 0 ? jobs.map(j => ({
+        ...j,
+        requirements: Array.isArray(j.requirements) ? j.requirements : [],
+        requirementsEn: Array.isArray(j.requirementsEn) ? j.requirementsEn : []
+      })) : jobOpportunitiesDemoData,
+      tenders: tenders.length > 0 ? tenders : tendersDemoData,
+      programs: programs.length > 0 ? programs : trainingProgramsDemoData,
+      fpoGroups: fpoGroups.length > 0 ? fpoGroups.map(g => ({
+        ...g,
+        activities: Array.isArray(g.activities) ? g.activities : [],
+        activitiesEn: Array.isArray(g.activitiesEn) ? g.activitiesEn : []
+      })) : fpoGroupsDemoData,
+      talents: talents.length > 0 ? talents.map(t => ({
+        ...t,
+        services: Array.isArray(t.services) ? t.services : [],
+        servicesEn: Array.isArray(t.servicesEn) ? t.servicesEn : []
+      })) : villageTalentsDemoData,
+      contacts: contacts.length > 0 ? contacts : employmentContactInfoDemoData,
+      isDemo
+    };
+  } catch (error) {
+    console.error('Error fetching jobs data:', error);
+    return {
+      jobs: jobOpportunitiesDemoData,
+      tenders: tendersDemoData,
+      programs: trainingProgramsDemoData,
+      fpoGroups: fpoGroupsDemoData,
+      talents: villageTalentsDemoData,
+      contacts: employmentContactInfoDemoData,
+      isDemo: true
+    };
+  }
 }
 
 export default async function JobsPage({ params }: JobsPageProps) {
@@ -41,8 +116,12 @@ export default async function JobsPage({ params }: JobsPageProps) {
     notFound();
   }
 
-  // Static data for Employment & Skill Development
-  const jobListings = [
+  // Fetch dynamic data
+  const { jobs: jobListings, tenders, programs: trainingPrograms, fpoGroups, talents: localTalents, contacts, isDemo } = await fetchJobsData(subdomainData.id);
+
+  // Get contact info for display
+  const generalContact = contacts.find((c: any) => c.section === 'general') || contacts.find((c: any) => c.section === 'jobs') || contacts[0];
+  const employmentContact = contacts.find((c: any) => c.section === 'jobs') || generalContact;
     {
       id: 1,
       title: 'ग्रामसेवक',
@@ -114,140 +193,6 @@ export default async function JobsPage({ params }: JobsPageProps) {
     }
   ];
 
-  const tenders = [
-    {
-      id: 1,
-      title: 'रस्ते दुरुस्ती काम',
-      titleEn: 'Road Repair Work',
-      description: 'गावातील मुख्य रस्त्यांची दुरुस्ती आणि सुधारणा',
-      descriptionEn: 'Repair and improvement of main roads in the village',
-      value: '₹2,50,000',
-      lastDate: '2024-02-20',
-      category: 'बांधकाम',
-      categoryEn: 'Construction',
-      requirements: 'लायसेंस असलेले कंत्राटदार',
-      requirementsEn: 'Licensed contractor'
-    },
-    {
-      id: 2,
-      title: 'स्वच्छता अभियान',
-      titleEn: 'Sanitation Campaign',
-      description: 'गावातील स्वच्छता सुविधांची स्थापना आणि देखभाल',
-      descriptionEn: 'Installation and maintenance of sanitation facilities',
-      value: '₹1,80,000',
-      lastDate: '2024-02-15',
-      category: 'स्वच्छता',
-      categoryEn: 'Sanitation',
-      requirements: 'पर्यावरणीय अनुभव',
-      requirementsEn: 'Environmental experience'
-    }
-  ];
-
-  const trainingPrograms = [
-    {
-      id: 1,
-      title: 'डिजिटल साक्षरता प्रशिक्षण',
-      titleEn: 'Digital Literacy Training',
-      duration: '30 दिवस',
-      durationEn: '30 Days',
-      fee: 'मोफत',
-      feeEn: 'Free',
-      description: 'कंप्युटर, इंटरनेट आणि स्मार्टफोन वापराचे प्रशिक्षण',
-      descriptionEn: 'Training in computer, internet and smartphone usage',
-      instructor: 'राज्य शासन',
-      instructorEn: 'State Government',
-      startDate: '2024-02-01',
-      seats: 25,
-      enrolled: 18
-    },
-    {
-      id: 2,
-      title: 'कृषी तंत्रज्ञान प्रशिक्षण',
-      titleEn: 'Agricultural Technology Training',
-      duration: '15 दिवस',
-      durationEn: '15 Days',
-      fee: '₹500',
-      feeEn: '₹500',
-      description: 'आधुनिक शेती पद्धती, सिंचन तंत्रज्ञान आणि पिकांची काळजी',
-      descriptionEn: 'Modern farming methods, irrigation technology and crop care',
-      instructor: 'कृषी विभाग',
-      instructorEn: 'Agriculture Department',
-      startDate: '2024-02-15',
-      seats: 20,
-      enrolled: 12
-    }
-  ];
-
-  const fpoGroups = [
-    {
-      id: 1,
-      name: 'ग्रामीण उत्पादक संघ',
-      nameEn: 'Rural Producers Association',
-      members: 45,
-      established: '2020',
-      activities: ['सेंद्रिय शेती', 'पशुपालन', 'हस्तकला'],
-      activitiesEn: ['Organic Farming', 'Animal Husbandry', 'Handicrafts'],
-      contact: '+91 98765 43210',
-      email: 'fpo1@example.com',
-      achievements: 'वर्षभरात ₹5 लाख उत्पन्न',
-      achievementsEn: '₹5 Lakh income in one year'
-    },
-    {
-      id: 2,
-      name: 'महिला स्वयंसाहाय्य गट',
-      nameEn: 'Women Self Help Group',
-      members: 20,
-      established: '2019',
-      activities: ['कुटिर उद्योग', 'बचत गट', 'महिला सशक्तीकरण'],
-      activitiesEn: ['Cottage Industry', 'Savings Group', 'Women Empowerment'],
-      contact: '+91 98765 43211',
-      email: 'shg2@example.com',
-      achievements: '15 महिलांना रोजगार',
-      achievementsEn: 'Employment for 15 women'
-    }
-  ];
-
-  const localTalents = [
-    {
-      id: 1,
-      name: 'राम पाटील',
-      nameEn: 'Ram Patil',
-      skill: 'वीजतज्ञ',
-      skillEn: 'Electrician',
-      experience: '10 वर्षे',
-      experienceEn: '10 Years',
-      contact: '+91 98765 43212',
-      rating: 4.8,
-      services: ['घरातील वीज दुरुस्ती', 'नवीन कनेक्शन', 'सौर ऊर्जा स्थापना'],
-      servicesEn: ['Home electrical repair', 'New connections', 'Solar installation']
-    },
-    {
-      id: 2,
-      name: 'सीता शिंदे',
-      nameEn: 'Sita Shinde',
-      skill: 'टेलर',
-      skillEn: 'Tailor',
-      experience: '8 वर्षे',
-      experienceEn: '8 Years',
-      contact: '+91 98765 43213',
-      rating: 4.9,
-      services: ['साड्या शिवणे', 'पुरुषांचे कपडे', 'स्कूल युनिफॉर्म'],
-      servicesEn: ['Saree stitching', 'Men\'s clothing', 'School uniforms']
-    },
-    {
-      id: 3,
-      name: 'विजय कांबळे',
-      nameEn: 'Vijay Kambale',
-      skill: 'राजमिस्त्री',
-      skillEn: 'Mason',
-      experience: '15 वर्षे',
-      experienceEn: '15 Years',
-      contact: '+91 98765 43214',
-      rating: 4.7,
-      services: ['घर बांधकाम', 'दुरुस्ती काम', 'टाइल्स लावणे'],
-      servicesEn: ['House construction', 'Repair work', 'Tile laying']
-    }
-  ];
 
   return (
     <SubdomainValidator subdomain={subdomain}>
@@ -270,6 +215,14 @@ export default async function JobsPage({ params }: JobsPageProps) {
         </div>
 
         <div className="container py-8">
+          {isDemo && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+              <p className="text-sm text-blue-800">
+                डेमो डेटा - प्रशासनामधून अपडेट करा
+              </p>
+            </div>
+          )}
+
           {/* Job Listings */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -278,8 +231,8 @@ export default async function JobsPage({ params }: JobsPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {jobListings.map((job) => (
-                <div key={job.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              {jobListings.map((job: any) => (
+                <div key={job.id || job.title} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -325,7 +278,7 @@ export default async function JobsPage({ params }: JobsPageProps) {
                   <div className="space-y-2 mb-4">
                     <h4 className="font-medium text-gray-900 text-sm">आवश्यकता:</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {job.requirements.map((req, index) => (
+                      {(Array.isArray(job.requirements) ? job.requirements : []).map((req: string, index: number) => (
                         <li key={index} className="flex items-center gap-2">
                           <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                           {req}
@@ -346,12 +299,30 @@ export default async function JobsPage({ params }: JobsPageProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm">
-                      अर्ज करा
-                    </button>
-                    <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm">
-                      <ExternalLink className="h-4 w-4" />
-                    </button>
+                    {job.applicationUrl ? (
+                      <a
+                        href={job.applicationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm text-center"
+                      >
+                        अर्ज करा
+                      </a>
+                    ) : (
+                      <button className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm" disabled>
+                        अर्ज करा
+                      </button>
+                    )}
+                    {job.applicationUrl && (
+                      <a
+                        href={job.applicationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm flex items-center justify-center"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
@@ -366,8 +337,8 @@ export default async function JobsPage({ params }: JobsPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {tenders.map((tender) => (
-                <div key={tender.id} className="bg-white rounded-lg shadow-md p-6">
+              {tenders.map((tender: any) => (
+                <div key={tender.id || tender.title} className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {tender.title}
                   </h3>
@@ -396,9 +367,20 @@ export default async function JobsPage({ params }: JobsPageProps) {
                     <strong>आवश्यकता:</strong> {tender.requirements}
                   </div>
 
-                  <button className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm">
-                    निविदा पहा
-                  </button>
+                  {tender.tenderUrl ? (
+                    <a
+                      href={tender.tenderUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm text-center block"
+                    >
+                      निविदा पहा
+                    </a>
+                  ) : (
+                    <button className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm" disabled>
+                      निविदा पहा
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -412,8 +394,8 @@ export default async function JobsPage({ params }: JobsPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {trainingPrograms.map((program) => (
-                <div key={program.id} className="bg-white rounded-lg shadow-md p-6">
+              {trainingPrograms.map((program: any) => (
+                <div key={program.id || program.title} className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {program.title}
                   </h3>
@@ -445,19 +427,30 @@ export default async function JobsPage({ params }: JobsPageProps) {
                   <div className="mb-4">
                     <div className="flex justify-between text-sm text-gray-600 mb-1">
                       <span>नोंदणी</span>
-                      <span>{program.enrolled}/{program.seats}</span>
+                      <span>{program.enrolled || 0}/{program.seats || 0}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-purple-600 h-2 rounded-full" 
-                        style={{ width: `${(program.enrolled / program.seats) * 100}%` }}
+                        style={{ width: `${program.seats > 0 ? ((program.enrolled || 0) / program.seats) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  <button className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm">
-                    नोंदणी करा
-                  </button>
+                  {program.registrationUrl ? (
+                    <a
+                      href={program.registrationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm text-center block"
+                    >
+                      नोंदणी करा
+                    </a>
+                  ) : (
+                    <button className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm" disabled>
+                      नोंदणी करा
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -471,8 +464,8 @@ export default async function JobsPage({ params }: JobsPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {fpoGroups.map((group) => (
-                <div key={group.id} className="bg-white rounded-lg shadow-md p-6">
+              {fpoGroups.map((group: any) => (
+                <div key={group.id || group.name} className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {group.name}
                   </h3>
@@ -496,7 +489,7 @@ export default async function JobsPage({ params }: JobsPageProps) {
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-900 text-sm mb-2">क्रियाकलाप:</h4>
                     <div className="flex flex-wrap gap-2">
-                      {group.activities.map((activity, index) => (
+                      {(Array.isArray(group.activities) ? group.activities : []).map((activity: string, index: number) => (
                         <span key={index} className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
                           {activity}
                         </span>
@@ -509,12 +502,28 @@ export default async function JobsPage({ params }: JobsPageProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors text-sm">
-                      सामील व्हा
-                    </button>
-                    <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm">
-                      <Phone className="h-4 w-4" />
-                    </button>
+                    {group.joinUrl ? (
+                      <a
+                        href={group.joinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors text-sm text-center"
+                      >
+                        सामील व्हा
+                      </a>
+                    ) : (
+                      <button className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors text-sm" disabled>
+                        सामील व्हा
+                      </button>
+                    )}
+                    {group.contact && (
+                      <a
+                        href={`tel:${group.contact}`}
+                        className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm flex items-center justify-center"
+                      >
+                        <Phone className="h-4 w-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
@@ -529,8 +538,8 @@ export default async function JobsPage({ params }: JobsPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {localTalents.map((talent) => (
-                <div key={talent.id} className="bg-white rounded-lg shadow-md p-6">
+              {localTalents.map((talent: any) => (
+                <div key={talent.id || talent.name} className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
                       <Wrench className="h-6 w-6 text-yellow-600" />
@@ -554,7 +563,7 @@ export default async function JobsPage({ params }: JobsPageProps) {
                       <span className="text-gray-600">रेटिंग:</span>
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="font-medium">{talent.rating}</span>
+                        <span className="font-medium">{talent.rating || 0}</span>
                       </div>
                     </div>
                   </div>
@@ -562,7 +571,7 @@ export default async function JobsPage({ params }: JobsPageProps) {
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-900 text-sm mb-2">सेवा:</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {talent.services.map((service, index) => (
+                      {(Array.isArray(talent.services) ? talent.services : []).map((service: string, index: number) => (
                         <li key={index} className="flex items-center gap-2">
                           <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
                           {service}
@@ -572,12 +581,22 @@ export default async function JobsPage({ params }: JobsPageProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors text-sm">
-                      संपर्क करा
-                    </button>
-                    <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm">
-                      <Phone className="h-4 w-4" />
-                    </button>
+                    {talent.contact && (
+                      <a
+                        href={`tel:${talent.contact}`}
+                        className="flex-1 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors text-sm text-center"
+                      >
+                        संपर्क करा
+                      </a>
+                    )}
+                    {talent.contact && (
+                      <a
+                        href={`tel:${talent.contact}`}
+                        className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm flex items-center justify-center"
+                      >
+                        <Phone className="h-4 w-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
@@ -591,16 +610,36 @@ export default async function JobsPage({ params }: JobsPageProps) {
               अधिक माहितीसाठी संपर्क करा
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-              <div>
-                <strong>ग्रामपंचायत कार्यालय:</strong><br />
-                दूरध्वनी: +91 12345 67890<br />
-                ईमेल: jobs@grampanchayat.com
-              </div>
-              <div>
-                <strong>रोजगार केंद्र:</strong><br />
-                दूरध्वनी: +91 12345 67891<br />
-                ईमेल: employment@grampanchayat.com
-              </div>
+              {generalContact && (
+                <div>
+                  <strong>{generalContact.officeName}:</strong><br />
+                  {generalContact.phone && <>दूरध्वनी: {generalContact.phone}<br /></>}
+                  {generalContact.email && <>ईमेल: {generalContact.email}<br /></>}
+                  {generalContact.address && <>{generalContact.address}</>}
+                </div>
+              )}
+              {employmentContact && employmentContact.section !== generalContact?.section && (
+                <div>
+                  <strong>{employmentContact.officeName}:</strong><br />
+                  {employmentContact.phone && <>दूरध्वनी: {employmentContact.phone}<br /></>}
+                  {employmentContact.email && <>ईमेल: {employmentContact.email}<br /></>}
+                  {employmentContact.address && <>{employmentContact.address}</>}
+                </div>
+              )}
+              {(!generalContact && !employmentContact) && (
+                <>
+                  <div>
+                    <strong>ग्रामपंचायत कार्यालय:</strong><br />
+                    दूरध्वनी: +91 12345 67890<br />
+                    ईमेल: jobs@grampanchayat.com
+                  </div>
+                  <div>
+                    <strong>रोजगार केंद्र:</strong><br />
+                    दूरध्वनी: +91 12345 67891<br />
+                    ईमेल: employment@grampanchayat.com
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

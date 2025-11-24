@@ -27,11 +27,13 @@ export function EnhancedBeforeAfterSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showBefore, setShowBefore] = useState(true);
+  const [beforeAfterData, setBeforeAfterData] = useState<BeforeAfterItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Static before/after data - in real app, this would come from API
-  const beforeAfterData: BeforeAfterItem[] = [
+  // Default before/after data
+  const getDefaultData = (): BeforeAfterItem[] => [
     {
-      id: '1',
+      id: 'default-1',
       title: 'रस्ते दुरुस्ती प्रकल्प',
       titleEn: 'Road Repair Project',
       beforeImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&crop=center',
@@ -43,67 +45,73 @@ export function EnhancedBeforeAfterSection() {
       year: '२०२३',
       cost: '₹२५ लाख',
       category: 'पायाभूत सुविधा'
-    },
-    {
-      id: '2',
-      title: 'स्वच्छता सुविधा',
-      titleEn: 'Sanitation Facilities',
-      beforeImage: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f2c0?w=600&h=400&fit=crop&crop=center',
-      afterImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&crop=center',
-      description: 'स्वच्छतागृहांची स्थापना आणि देखभाल',
-      descriptionEn: 'Installation and maintenance of toilets',
-      impact: 'स्वच्छता सुविधा वाढल्या, आरोग्य सुधारले',
-      impactEn: 'Sanitation facilities increased, health improved',
-      year: '२०२४',
-      cost: '₹१५ लाख',
-      category: 'स्वच्छता'
-    },
-    {
-      id: '3',
-      title: 'शाळा सुधारणा',
-      titleEn: 'School Improvement',
-      beforeImage: 'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=600&h=400&fit=crop&crop=center',
-      afterImage: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop&crop=center',
-      description: 'शाळेची सुधारणा आणि आधुनिकीकरण',
-      descriptionEn: 'School renovation and modernization',
-      impact: 'शिक्षण गुणवत्ता सुधारली, विद्यार्थी संख्या वाढली',
-      impactEn: 'Education quality improved, student enrollment increased',
-      year: '२०२३',
-      cost: '₹३० लाख',
-      category: 'शिक्षण'
-    },
-    {
-      id: '4',
-      title: 'पाणीपुरवठा योजना',
-      titleEn: 'Water Supply Project',
-      beforeImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&crop=center',
-      afterImage: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop&crop=center',
-      description: '२४ तास पाणीपुरवठा सुनिश्चित करणे',
-      descriptionEn: 'Ensuring 24-hour water supply',
-      impact: 'सर्वांना पाणी मिळाले, आरोग्य सुधारले',
-      impactEn: 'Everyone got water access, health improved',
-      year: '२०२४',
-      cost: '₹४० लाख',
-      category: 'पाणीपुरवठा'
     }
   ];
 
+  // Fetch before/after data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/before-after-gallery');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.length > 0) {
+            // Map API data to component format
+            const mappedData: BeforeAfterItem[] = data.map((item: any) => ({
+              id: item.id,
+              title: item.title,
+              titleEn: item.titleEn,
+              beforeImage: item.beforeImage,
+              afterImage: item.afterImage,
+              description: item.description,
+              descriptionEn: item.descriptionEn,
+              impact: item.impact,
+              impactEn: item.impactEn,
+              year: item.year,
+              cost: item.cost,
+              category: item.category
+            }));
+            setBeforeAfterData(mappedData);
+          } else {
+            // Use default data if none exists
+            setBeforeAfterData(getDefaultData());
+          }
+        } else {
+          // Use default data on error
+          setBeforeAfterData(getDefaultData());
+        }
+      } catch (error) {
+        console.error('Error fetching before/after gallery:', error);
+        // Use default data on error
+        setBeforeAfterData(getDefaultData());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   // Auto-play functionality
   useEffect(() => {
-    if (isPlaying) {
+    const dataLength = beforeAfterData.length > 0 ? beforeAfterData.length : getDefaultData().length;
+    if (isPlaying && dataLength > 0) {
       const interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % beforeAfterData.length);
+        setCurrentIndex((prev) => (prev + 1) % dataLength);
       }, 3000);
       return () => clearInterval(interval);
     }
   }, [isPlaying, beforeAfterData.length]);
 
+  // Use default data while loading or if no data exists
+  const displayData = beforeAfterData.length > 0 ? beforeAfterData : getDefaultData();
+
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % beforeAfterData.length);
+    setCurrentIndex((prev) => (prev + 1) % displayData.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + beforeAfterData.length) % beforeAfterData.length);
+    setCurrentIndex((prev) => (prev - 1 + displayData.length) % displayData.length);
   };
 
   const togglePlayPause = () => {
@@ -114,7 +122,7 @@ export function EnhancedBeforeAfterSection() {
     setShowBefore(true);
   };
 
-  const currentItem = beforeAfterData[currentIndex];
+  const currentItem = displayData[currentIndex];
 
   return (
     <section className="py-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
@@ -326,7 +334,7 @@ export function EnhancedBeforeAfterSection() {
 
               {/* Slide Indicators */}
               <div className="flex justify-center gap-2 p-4 bg-gray-50">
-                {beforeAfterData.map((_, index) => (
+                {displayData.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentIndex(index)}

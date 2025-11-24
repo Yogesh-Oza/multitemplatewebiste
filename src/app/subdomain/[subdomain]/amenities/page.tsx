@@ -1,5 +1,5 @@
 import { FacilitiesSection } from '@/components/sections/facilities-section';
-import WaterSanitationSection from '@/components/sections/water-sanitation-section';
+import { WaterSanitationSection } from '@/components/sections/water-sanitation-section';
 import RoadsLightingSection from '@/components/sections/roads-lighting-section';
 import EducationHealthSection from '@/components/sections/education-health-section';
 import GISInfrastructureMapSection from '@/components/sections/gis-infrastructure-map-section';

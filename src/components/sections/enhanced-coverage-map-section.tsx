@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,13 @@ import {
   RefreshCw,
   Info,
   CheckCircle,
+  AlertTriangle,
   AlertCircle
 } from 'lucide-react';
-import { useState } from 'react';
+import {
+  wardCoverageDemoData,
+  WardCoverageDataData
+} from '@/lib/demo-schemes-beneficiary';
 
 interface WardData {
   wardNumber: string;
@@ -37,9 +42,56 @@ interface EnhancedCoverageMapSectionProps {
   wardData?: WardData[];
 }
 
-export default function EnhancedCoverageMapSection({ wardData = [] }: EnhancedCoverageMapSectionProps) {
+export default function EnhancedCoverageMapSection({ wardData: propWardData }: EnhancedCoverageMapSectionProps) {
+  const [apiWards, setApiWards] = useState<WardCoverageDataData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'map' | 'chart'>('map');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/ward-coverage');
+        if (response.ok) {
+          const data = await response.json();
+          setApiWards(data.wards || []);
+          setIsDemo(Boolean(data.isDemo));
+        } else {
+          setError('माहिती लोड करण्यात अडचण आली');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('माहिती लोड करण्यात अडचण आली');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!propWardData || propWardData.length === 0) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [propWardData]);
+
+  // Transform API ward data to component format
+  const transformWards = (apiWards: WardCoverageDataData[]): WardData[] => {
+    return apiWards
+      .filter((w) => w.isActive)
+      .map((w) => ({
+        wardNumber: w.wardNumber,
+        wardName: w.wardName,
+        wardNameEn: w.wardNameEn,
+        totalHouseholds: w.totalHouseholds,
+        beneficiaries: w.beneficiaries,
+        coveragePercentage: w.coveragePercentage,
+        schemes: Array.isArray(w.schemes) ? w.schemes : [],
+        lastUpdated: w.lastUpdated
+      }));
+  };
 
   // Demo data for when no ward data is available
   const demoWardData: WardData[] = [
@@ -105,7 +157,40 @@ export default function EnhancedCoverageMapSection({ wardData = [] }: EnhancedCo
     }
   ];
 
-  const displayWardData = wardData.length > 0 ? wardData : demoWardData;
+  // Determine which ward data to use
+  let displayWardData: WardData[];
+  let showDemoBadge = false;
+
+  if (propWardData && propWardData.length > 0) {
+    displayWardData = propWardData;
+  } else if (apiWards.length > 0) {
+    displayWardData = transformWards(apiWards);
+    showDemoBadge = isDemo;
+  } else {
+    displayWardData = demoWardData;
+    showDemoBadge = true;
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
   const totalHouseholds = displayWardData.reduce((sum, ward) => sum + ward.totalHouseholds, 0);
   const totalBeneficiaries = displayWardData.reduce((sum, ward) => sum + ward.beneficiaries, 0);
   const overallCoverage = totalHouseholds > 0 ? Math.round((totalBeneficiaries / totalHouseholds) * 100) : 0;
@@ -140,6 +225,11 @@ export default function EnhancedCoverageMapSection({ wardData = [] }: EnhancedCo
         <p className="text-gray-500 max-w-3xl mx-auto">
           प्रत्येक वॉर्डनिहाय लाभ घेतलेल्या घरांचा इंटरअॅक्टिव्ह नकाशा आणि सांख्यिकीय विश्लेषण
         </p>
+        {showDemoBadge && (
+          <p className="text-xs text-blue-600 bg-white/80 px-3 py-1 inline-flex rounded-full border border-blue-100 mt-4">
+            डेमो डेटा - प्रशासनामधून अपडेट करा
+          </p>
+        )}
       </div>
 
       {/* Overview Stats */}

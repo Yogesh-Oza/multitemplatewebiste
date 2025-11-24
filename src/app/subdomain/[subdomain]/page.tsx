@@ -12,6 +12,7 @@ import { NewsUpdatesSection } from '@/components/sections/news-updates-section';
 import { DailyMessageSection } from '@/components/sections/daily-message-section';
 import { LeadersHierarchySection } from '@/components/sections/leaders-hierarchy-section';
 import { QRTaxPaymentSection } from '@/components/sections/qr-tax-payment-section';
+import { WaterSanitationSection } from '@/components/sections/water-sanitation-section';
 
 const prisma = new PrismaClient();
 
@@ -90,6 +91,8 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
       <LeadersHierarchySection />
       
       <PragatiMeterSection />
+      
+      <WaterSanitationSection />
       
       <WelcomeVideoSection homepageSettings={homepageSettings && homepageSettings.mainHeading ? {
         welcomeVideo: {

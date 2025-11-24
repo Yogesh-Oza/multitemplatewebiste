@@ -22,8 +22,18 @@ import {
   User,
   School,
   BookMarked,
-  Lightbulb
+  Lightbulb,
+  AlertTriangle
 } from 'lucide-react';
+import {
+  schoolsDemoData,
+  scholarshipSchemesDemoData,
+  studentAchievementsDemoData,
+  careerGuidanceDemoData,
+  nssActivitiesDemoData,
+  youthSuccessStoriesDemoData,
+  educationContactInfoDemoData
+} from '@/lib/demo-education-youth';
 
 const prisma = new PrismaClient();
 
@@ -31,6 +41,72 @@ interface EducationPageProps {
   params: Promise<{
     subdomain: string;
   }>;
+}
+
+async function fetchEducationData(subdomainId: string) {
+  try {
+    const [schools, scholarships, achievements, careerSessions, nssActivities, youthStories, contacts] = await Promise.all([
+      prisma.school.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.scholarshipScheme.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.studentAchievement.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.careerGuidance.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.nSSActivity.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.youthSuccessStory.findMany({
+        where: { subdomainId, isActive: true },
+        orderBy: { order: 'asc' }
+      }),
+      prisma.educationContactInfo.findMany({
+        where: { subdomainId, isActive: true }
+      })
+    ]);
+
+    const isDemo = schools.length === 0 && scholarships.length === 0 && achievements.length === 0 && 
+                   careerSessions.length === 0 && nssActivities.length === 0 && youthStories.length === 0 && contacts.length === 0;
+
+    return {
+      schools: schools.length > 0 ? schools.map(s => ({
+        ...s,
+        facilities: Array.isArray(s.facilities) ? s.facilities : [],
+        facilitiesEn: Array.isArray(s.facilitiesEn) ? s.facilitiesEn : [],
+        achievements: Array.isArray(s.achievements) ? s.achievements : [],
+        achievementsEn: Array.isArray(s.achievementsEn) ? s.achievementsEn : []
+      })) : schoolsDemoData,
+      scholarships: scholarships.length > 0 ? scholarships : scholarshipSchemesDemoData,
+      achievements: achievements.length > 0 ? achievements : studentAchievementsDemoData,
+      careerSessions: careerSessions.length > 0 ? careerSessions : careerGuidanceDemoData,
+      nssActivities: nssActivities.length > 0 ? nssActivities : nssActivitiesDemoData,
+      youthStories: youthStories.length > 0 ? youthStories : youthSuccessStoriesDemoData,
+      contacts: contacts.length > 0 ? contacts : educationContactInfoDemoData,
+      isDemo
+    };
+  } catch (error) {
+    console.error('Error fetching education data:', error);
+    return {
+      schools: schoolsDemoData,
+      scholarships: scholarshipSchemesDemoData,
+      achievements: studentAchievementsDemoData,
+      careerSessions: careerGuidanceDemoData,
+      nssActivities: nssActivitiesDemoData,
+      youthStories: youthSuccessStoriesDemoData,
+      contacts: educationContactInfoDemoData,
+      isDemo: true
+    };
+  }
 }
 
 export default async function EducationPage({ params }: EducationPageProps) {
@@ -45,8 +121,12 @@ export default async function EducationPage({ params }: EducationPageProps) {
     notFound();
   }
 
-  // Static data for Education & Youth Corner
-  const schools = [
+  // Fetch dynamic data
+  const { schools, scholarships, achievements: studentAchievements, careerSessions: careerGuidance, nssActivities, youthStories, contacts, isDemo } = await fetchEducationData(subdomainData.id);
+
+  // Get contact info for display
+  const educationContact = contacts.find((c: any) => c.section === 'education');
+  const youthContact = contacts.find((c: any) => c.section === 'youth');
     {
       id: 1,
       name: 'श्री गणपती प्राथमिक शाळा',
@@ -304,6 +384,14 @@ export default async function EducationPage({ params }: EducationPageProps) {
         </div>
 
         <div className="container py-8">
+          {isDemo && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+              <p className="text-sm text-blue-800">
+                डेमो डेटा - प्रशासनामधून अपडेट करा
+              </p>
+            </div>
+          )}
+
           {/* Schools Information */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -312,8 +400,8 @@ export default async function EducationPage({ params }: EducationPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {schools.map((school) => (
-                <div key={school.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              {schools.map((school: any) => (
+                <div key={school.id || school.name} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {school.name}
                   </h3>
@@ -348,7 +436,7 @@ export default async function EducationPage({ params }: EducationPageProps) {
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-900 text-sm mb-2">सुविधा:</h4>
                     <div className="flex flex-wrap gap-2">
-                      {school.facilities.map((facility, index) => (
+                      {(Array.isArray(school.facilities) ? school.facilities : []).map((facility: string, index: number) => (
                         <span key={index} className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
                           {facility}
                         </span>
@@ -359,7 +447,7 @@ export default async function EducationPage({ params }: EducationPageProps) {
                   <div className="mb-4">
                     <h4 className="font-medium text-gray-900 text-sm mb-2">उपलब्धी:</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {school.achievements.map((achievement, index) => (
+                      {(Array.isArray(school.achievements) ? school.achievements : []).map((achievement: string, index: number) => (
                         <li key={index} className="flex items-center gap-2">
                           <Trophy className="h-4 w-4 text-yellow-500" />
                           {achievement}
@@ -384,8 +472,8 @@ export default async function EducationPage({ params }: EducationPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {scholarships.map((scholarship) => (
-                <div key={scholarship.id} className="bg-white rounded-lg shadow-md p-6">
+              {scholarships.map((scholarship: any) => (
+                <div key={scholarship.id || scholarship.name} className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {scholarship.name}
                   </h3>
@@ -414,9 +502,20 @@ export default async function EducationPage({ params }: EducationPageProps) {
                     <strong>पात्रता:</strong> {scholarship.eligibility}
                   </div>
 
-                  <button className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm">
-                    अर्ज करा
-                  </button>
+                  {scholarship.applicationUrl ? (
+                    <a
+                      href={scholarship.applicationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm text-center block"
+                    >
+                      अर्ज करा
+                    </a>
+                  ) : (
+                    <button className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm" disabled>
+                      अर्ज करा
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -430,8 +529,8 @@ export default async function EducationPage({ params }: EducationPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {studentAchievements.map((achievement) => (
-                <div key={achievement.id} className="bg-white rounded-lg shadow-md p-6">
+              {studentAchievements.map((achievement: any) => (
+                <div key={achievement.id || achievement.name} className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
                       <Star className="h-6 w-6 text-yellow-600" />
@@ -484,8 +583,8 @@ export default async function EducationPage({ params }: EducationPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {careerGuidance.map((guidance) => (
-                <div key={guidance.id} className="bg-white rounded-lg shadow-md p-6">
+              {careerGuidance.map((guidance: any) => (
+                <div key={guidance.id || guidance.title} className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {guidance.title}
                   </h3>
@@ -521,8 +620,20 @@ export default async function EducationPage({ params }: EducationPageProps) {
                   </div>
 
                   <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm">
-                    नोंदणी करा
-                  </button>
+                    {session.registrationUrl ? (
+                      <a
+                        href={session.registrationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm text-center block"
+                      >
+                        नोंदणी करा
+                      </a>
+                    ) : (
+                      <button className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm" disabled>
+                        नोंदणी करा
+                      </button>
+                    )}
                 </div>
               ))}
             </div>
@@ -536,8 +647,8 @@ export default async function EducationPage({ params }: EducationPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {nssActivities.map((activity) => (
-                <div key={activity.id} className="bg-white rounded-lg shadow-md p-6">
+              {nssActivities.map((activity: any) => (
+                <div key={activity.id || activity.title} className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {activity.title}
                   </h3>
@@ -579,8 +690,8 @@ export default async function EducationPage({ params }: EducationPageProps) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {youthStories.map((story) => (
-                <div key={story.id} className="bg-white rounded-lg shadow-md p-6">
+              {youthStories.map((story: any) => (
+                <div key={story.id || story.name} className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
                       <User className="h-6 w-6 text-indigo-600" />
@@ -623,16 +734,36 @@ export default async function EducationPage({ params }: EducationPageProps) {
               अधिक माहितीसाठी संपर्क करा
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-              <div>
-                <strong>शिक्षण विभाग:</strong><br />
-                दूरध्वनी: +91 12345 67890<br />
-                ईमेल: education@grampanchayat.com
-              </div>
-              <div>
-                <strong>युवक कल्याण केंद्र:</strong><br />
-                दूरध्वनी: +91 12345 67891<br />
-                ईमेल: youth@grampanchayat.com
-              </div>
+              {educationContact && (
+                <div>
+                  <strong>{educationContact.officeName}:</strong><br />
+                  {educationContact.phone && <>दूरध्वनी: {educationContact.phone}<br /></>}
+                  {educationContact.email && <>ईमेल: {educationContact.email}<br /></>}
+                  {educationContact.address && <>{educationContact.address}</>}
+                </div>
+              )}
+              {youthContact && (
+                <div>
+                  <strong>{youthContact.officeName}:</strong><br />
+                  {youthContact.phone && <>दूरध्वनी: {youthContact.phone}<br /></>}
+                  {youthContact.email && <>ईमेल: {youthContact.email}<br /></>}
+                  {youthContact.address && <>{youthContact.address}</>}
+                </div>
+              )}
+              {(!educationContact && !youthContact) && (
+                <>
+                  <div>
+                    <strong>शिक्षण विभाग:</strong><br />
+                    दूरध्वनी: +91 12345 67890<br />
+                    ईमेल: education@grampanchayat.com
+                  </div>
+                  <div>
+                    <strong>युवक कल्याण केंद्र:</strong><br />
+                    दूरध्वनी: +91 12345 67891<br />
+                    ईमेल: youth@grampanchayat.com
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

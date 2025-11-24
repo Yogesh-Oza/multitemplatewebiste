@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const priority = searchParams.get('priority');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
@@ -23,8 +24,12 @@ export async function GET(request: NextRequest) {
       isActive: true 
     };
 
-    if (category) {
+    if (category && category !== 'all') {
       whereClause.category = category;
+    }
+
+    if (priority && priority !== 'all') {
+      whereClause.priority = priority;
     }
 
     const resolutions = await prisma.governmentResolution.findMany({
@@ -65,6 +70,10 @@ export async function POST(request: NextRequest) {
       fileUrl, 
       category, 
       categoryEn,
+      priority,
+      priorityEn,
+      description,
+      descriptionEn,
       order 
     } = body;
 
@@ -79,6 +88,10 @@ export async function POST(request: NextRequest) {
         fileUrl,
         category,
         categoryEn,
+        priority: priority || 'मध्यम',
+        priorityEn: priorityEn || 'Medium',
+        description: description || '',
+        descriptionEn: descriptionEn || '',
         order: order || 0,
         subdomainId,
       },

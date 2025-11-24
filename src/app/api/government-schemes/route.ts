@@ -43,7 +43,9 @@ export async function POST(request: NextRequest) {
       title, titleEn, description, descriptionEn, category, 
       eligibility, eligibilityEn, benefits, benefitsEn, 
       documents, documentsEn, applicationProcess, applicationProcessEn, 
-      contactInfo, contactInfoEn, website, imageUrl, startDate, endDate, isActive 
+      contactInfo, contactInfoEn, website, imageUrl, startDate, endDate, isActive,
+      contactOfficeName, contactOfficeNameEn, contactAddress, contactAddressEn,
+      contactPhone, contactOfficeHours, contactOfficeHoursEn
     } = body;
 
     const schemeData = {
@@ -67,6 +69,13 @@ export async function POST(request: NextRequest) {
       startDate: startDate || '',
       endDate: endDate || '',
       isActive: isActive !== undefined ? isActive : true,
+      contactOfficeName: contactOfficeName || null,
+      contactOfficeNameEn: contactOfficeNameEn || null,
+      contactAddress: contactAddress || null,
+      contactAddressEn: contactAddressEn || null,
+      contactPhone: contactPhone || null,
+      contactOfficeHours: contactOfficeHours || null,
+      contactOfficeHoursEn: contactOfficeHoursEn || null,
       subdomainId,
     };
 

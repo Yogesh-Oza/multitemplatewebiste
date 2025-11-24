@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, nameEn, description, descriptionEn, category, location, contactInfo, workingHours, isActive, imageUrl } = body;
+    const { 
+      name, nameEn, description, descriptionEn, category, location, contactInfo, workingHours, 
+      isActive, imageUrl, type, status, statusEn, latitude, longitude, services, capacity, lastMaintenance 
+    } = body;
 
     const facility = await prisma.facility.create({
       data: {
@@ -53,6 +56,14 @@ export async function POST(request: NextRequest) {
         workingHours: workingHours || null,
         isActive: isActive !== undefined ? isActive : true,
         imageUrl: imageUrl || null,
+        type: type || null,
+        status: status || null,
+        statusEn: statusEn || null,
+        latitude: latitude !== undefined ? latitude : null,
+        longitude: longitude !== undefined ? longitude : null,
+        services: services ? (Array.isArray(services) ? services : []) : null,
+        capacity: capacity || null,
+        lastMaintenance: lastMaintenance || null,
         subdomainId,
       },
     });

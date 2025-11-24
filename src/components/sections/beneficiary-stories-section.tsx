@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,8 +14,13 @@ import {
   Heart,
   TrendingUp,
   Users,
-  DollarSign
+  DollarSign,
+  AlertTriangle
 } from 'lucide-react';
+import {
+  beneficiaryStoriesDemoData,
+  BeneficiaryStoryData
+} from '@/lib/demo-schemes-beneficiary';
 
 interface BeneficiaryStory {
   id: string;
@@ -41,7 +47,39 @@ interface BeneficiaryStoriesSectionProps {
   stories?: BeneficiaryStory[];
 }
 
-export default function BeneficiaryStoriesSection({ stories = [] }: BeneficiaryStoriesSectionProps) {
+export default function BeneficiaryStoriesSection({ stories: propStories }: BeneficiaryStoriesSectionProps) {
+  const [apiStories, setApiStories] = useState<BeneficiaryStoryData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/beneficiary-stories');
+        if (response.ok) {
+          const data = await response.json();
+          setApiStories(data.stories || []);
+          setIsDemo(Boolean(data.isDemo));
+        } else {
+          setError('माहिती लोड करण्यात अडचण आली');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('माहिती लोड करण्यात अडचण आली');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!propStories || propStories.length === 0) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [propStories]);
+
   // Demo data for when no stories are available
   const demoStories: BeneficiaryStory[] = [
     {
@@ -106,7 +144,66 @@ export default function BeneficiaryStoriesSection({ stories = [] }: BeneficiaryS
     }
   ];
 
-  const displayStories = stories.length > 0 ? stories : demoStories;
+  // Transform API stories to component format
+  const transformStories = (apiStories: BeneficiaryStoryData[]): BeneficiaryStory[] => {
+    return apiStories
+      .filter((s) => s.isActive)
+      .map((s) => ({
+        id: s.id || '',
+        name: s.name,
+        nameEn: s.nameEn,
+        age: s.age,
+        scheme: s.scheme,
+        schemeEn: s.schemeEn,
+        story: s.story,
+        storyEn: s.storyEn,
+        impact: s.impact,
+        impactEn: s.impactEn,
+        beforeImage: s.beforeImage,
+        afterImage: s.afterImage,
+        location: s.location,
+        locationEn: s.locationEn,
+        date: s.date,
+        benefits: Array.isArray(s.benefits) ? s.benefits : [],
+        rating: s.rating,
+        isStar: s.isStar
+      }));
+  };
+
+  // Determine which stories to use
+  let displayStories: BeneficiaryStory[];
+  let showDemoBadge = false;
+
+  if (propStories && propStories.length > 0) {
+    displayStories = propStories;
+  } else if (apiStories.length > 0) {
+    displayStories = transformStories(apiStories);
+    showDemoBadge = isDemo;
+  } else {
+    displayStories = demoStories;
+    showDemoBadge = true;
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -127,6 +224,11 @@ export default function BeneficiaryStoriesSection({ stories = [] }: BeneficiaryS
           योजनांच्या माध्यमातून जीवन बदलणाऱ्या लाभार्थ्यांच्या प्रेरणादायी कथा. 
           त्यांच्या संघर्ष, यश आणि सामाजिक बदलाच्या अनुभवांची मालिका.
         </p>
+        {showDemoBadge && (
+          <p className="text-xs text-blue-600 bg-white/80 px-3 py-1 inline-flex rounded-full border border-blue-100 mt-4">
+            डेमो डेटा - प्रशासनामधून अपडेट करा
+          </p>
+        )}
       </div>
 
       {/* Stories Grid */}

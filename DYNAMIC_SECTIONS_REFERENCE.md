@@ -49,6 +49,17 @@ All sections below are **DYNAMIC** and can be managed via the Admin Panel at `/a
   - YouTube/Vimeo URL
   - Video title, description
 
+### 5A. Water & Sanitation Section
+- **Component**: `WaterSanitationSection`
+- **Data Models**: `WaterSanitationSnapshot`, `WaterSanitationFacility`
+- **Admin Path**: `/admin/water-sanitation`
+- **Dynamic Fields**:
+  - Water supply stats (connections, supply hours, storage)
+  - Sanitation stats (functional/public toilets, waste collection, drainage)
+  - Issue CTA copy & emergency contact
+  - Facility cards (treatment plant, tanks, sanitation centers, waste processing) with status, location, capacity, contact
+  - Demo data auto-fills until first save
+
 ### 6. QR Tax Payment Section
 - **Component**: `QRTaxPaymentSection`
 - **Data Model**: `QRCodeSettings`

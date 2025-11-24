@@ -18,7 +18,10 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { name, nameEn, description, descriptionEn, category, location, contactInfo, workingHours, isActive, imageUrl } = body;
+    const { 
+      name, nameEn, description, descriptionEn, category, location, contactInfo, workingHours, 
+      isActive, imageUrl, type, status, statusEn, latitude, longitude, services, capacity, lastMaintenance 
+    } = body;
 
     // Verify the facility belongs to this subdomain
     const existingFacility = await prisma.facility.findFirst({
@@ -42,11 +45,19 @@ export async function PUT(
         description,
         descriptionEn,
         category,
-        location: location || null,
-        contactInfo: contactInfo || null,
-        workingHours: workingHours || null,
-        isActive,
-        imageUrl: imageUrl || null,
+        location: location !== undefined ? (location || null) : existingFacility.location,
+        contactInfo: contactInfo !== undefined ? (contactInfo || null) : existingFacility.contactInfo,
+        workingHours: workingHours !== undefined ? (workingHours || null) : existingFacility.workingHours,
+        isActive: isActive !== undefined ? isActive : existingFacility.isActive,
+        imageUrl: imageUrl !== undefined ? (imageUrl || null) : existingFacility.imageUrl,
+        type: type !== undefined ? (type || null) : existingFacility.type,
+        status: status !== undefined ? (status || null) : existingFacility.status,
+        statusEn: statusEn !== undefined ? (statusEn || null) : existingFacility.statusEn,
+        latitude: latitude !== undefined ? (latitude !== null ? latitude : null) : existingFacility.latitude,
+        longitude: longitude !== undefined ? (longitude !== null ? longitude : null) : existingFacility.longitude,
+        services: services !== undefined ? (services ? (Array.isArray(services) ? services : []) : null) : existingFacility.services,
+        capacity: capacity !== undefined ? (capacity || null) : existingFacility.capacity,
+        lastMaintenance: lastMaintenance !== undefined ? (lastMaintenance || null) : existingFacility.lastMaintenance,
       },
     });
 

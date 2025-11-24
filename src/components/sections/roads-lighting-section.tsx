@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,11 @@ import {
   Car,
   Users
 } from 'lucide-react';
+import {
+  roadsLightingDemoSnapshot,
+  roadsLightingDemoFacilities,
+  RoadsLightingApiResponse
+} from '@/lib/demo-roads-lighting';
 
 interface RoadsLightingData {
   roads: {
@@ -54,7 +60,109 @@ interface RoadsLightingSectionProps {
   data?: RoadsLightingData;
 }
 
-export default function RoadsLightingSection({ data }: RoadsLightingSectionProps) {
+export default function RoadsLightingSection({ data: propData }: RoadsLightingSectionProps) {
+  const [apiData, setApiData] = useState<RoadsLightingApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/roads-lighting');
+        if (response.ok) {
+          const payload = await response.json();
+          setApiData(payload);
+        } else {
+          setError('माहिती लोड करण्यात अडचण आली');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('माहिती लोड करण्यात अडचण आली');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!propData) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [propData]);
+
+  // Transform API data to component format
+  const transformApiData = (apiResponse: RoadsLightingApiResponse): RoadsLightingData => {
+    const snapshot = apiResponse.snapshot;
+    const facilities = apiResponse.facilities;
+
+    // Map condition string to type
+    const conditionMap: Record<string, 'excellent' | 'good' | 'fair' | 'poor'> = {
+      'उत्कृष्ट': 'excellent',
+      'excellent': 'excellent',
+      'चांगले': 'good',
+      'good': 'good',
+      'सामान्य': 'fair',
+      'fair': 'fair',
+      'खराब': 'poor',
+      'poor': 'poor'
+    };
+
+    // Map energy source string to type
+    const energySourceMap: Record<string, 'grid' | 'solar' | 'hybrid'> = {
+      'ग्रिड': 'grid',
+      'grid': 'grid',
+      'सौर': 'solar',
+      'solar': 'solar',
+      'हायब्रीड': 'hybrid',
+      'hybrid': 'hybrid'
+    };
+
+    // Map status string to type
+    const statusMap: Record<string, 'operational' | 'maintenance' | 'non-functional'> = {
+      'चालू': 'operational',
+      'operational': 'operational',
+      'देखभाल': 'maintenance',
+      'maintenance': 'maintenance',
+      'बंद': 'non-functional',
+      'non-functional': 'non-functional'
+    };
+
+    return {
+      roads: {
+        totalLength: snapshot.roadsTotalLength,
+        pavedRoads: snapshot.roadsPavedLength,
+        unpavedRoads: snapshot.roadsUnpavedLength,
+        condition: conditionMap[snapshot.roadsCondition] || 'good',
+        lastMaintenance: snapshot.roadsLastMaintenance,
+        upcomingWork: Array.isArray(snapshot.roadsUpcomingWork) ? snapshot.roadsUpcomingWork : []
+      },
+      streetLighting: {
+        totalLights: snapshot.lightingTotalLights,
+        functionalLights: snapshot.lightingFunctionalLights,
+        ledLights: snapshot.lightingLedLights,
+        traditionalLights: snapshot.lightingTraditionalLights,
+        workingHours: snapshot.lightingWorkingHours,
+        lastMaintenance: snapshot.lightingLastMaintenance,
+        energySource: energySourceMap[snapshot.lightingEnergySource] || 'hybrid'
+      },
+      facilities: facilities
+        .filter((f) => f.isActive)
+        .map((f) => ({
+          id: f.id || '',
+          name: f.title,
+          nameEn: f.titleEn,
+          type: f.type as 'road' | 'bridge' | 'streetlight' | 'traffic',
+          status: statusMap[f.status] || 'operational',
+          location: f.location,
+          length: f.length,
+          capacity: f.capacity,
+          lastMaintenance: f.lastMaintenance,
+          contactInfo: f.contactNumber
+        }))
+    };
+  };
+
   // Demo data for when no data is available
   const demoData: RoadsLightingData = {
     roads: {
@@ -125,7 +233,40 @@ export default function RoadsLightingSection({ data }: RoadsLightingSectionProps
     ]
   };
 
-  const displayData = data || demoData;
+  // Determine which data to use
+  let displayData: RoadsLightingData;
+  let isDemo = false;
+
+  if (propData) {
+    displayData = propData;
+  } else if (apiData) {
+    displayData = transformApiData(apiData);
+    isDemo = apiData.isDemo;
+  } else {
+    displayData = demoData;
+    isDemo = true;
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   const getConditionColor = (condition: string) => {
     switch (condition) {
@@ -272,15 +413,20 @@ export default function RoadsLightingSection({ data }: RoadsLightingSectionProps
             <RoadIcon className="h-8 w-8 text-gray-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
-            रस्ते आणि रस्त्यावरील दिवे
+            {apiData?.snapshot?.sectionTitle || 'रस्ते आणि रस्त्यावरील दिवे'}
           </h2>
         </div>
         <p className="text-xl text-gray-600 mb-2">
-          Roads & Street Lighting
+          {apiData?.snapshot?.sectionTitleEn || 'Roads & Street Lighting'}
         </p>
         <p className="text-gray-500 max-w-3xl mx-auto">
-          गावातील रस्ते, पुल, स्ट्रीट लाइट्स आणि वाहतूक व्यवस्था
+          {apiData?.snapshot?.sectionSubtitle || 'गावातील रस्ते, पुल, स्ट्रीट लाइट्स आणि वाहतूक व्यवस्था'}
         </p>
+        {isDemo && (
+          <p className="text-xs text-blue-600 bg-white/80 px-3 py-1 inline-flex rounded-full border border-blue-100 mt-4">
+            डेमो डेटा - प्रशासनामधून अपडेट करा
+          </p>
+        )}
       </div>
 
       {/* Roads Overview */}
@@ -288,7 +434,7 @@ export default function RoadsLightingSection({ data }: RoadsLightingSectionProps
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
             <RoadIcon className="h-6 w-6 text-gray-600" />
-            रस्ते माहिती
+            {apiData?.snapshot?.roadsInfoTitle || 'रस्ते माहिती'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -339,7 +485,7 @@ export default function RoadsLightingSection({ data }: RoadsLightingSectionProps
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
             <Lightbulb className="h-6 w-6 text-yellow-600" />
-            स्ट्रीट लाइटिंग माहिती
+            {apiData?.snapshot?.lightingInfoTitle || 'स्ट्रीट लाइटिंग माहिती'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -487,21 +633,28 @@ export default function RoadsLightingSection({ data }: RoadsLightingSectionProps
           <div className="flex items-center justify-center gap-3 mb-4">
             <RoadIcon className="h-8 w-8 text-gray-600" />
             <h3 className="text-2xl font-bold text-gray-900">
-              रस्ते आणि दिवे समस्या
+              {apiData?.snapshot?.issueTitle || 'रस्ते आणि दिवे समस्या'}
             </h3>
           </div>
             <p className="text-gray-600 mb-6">
-              रस्ते, पुल किंवा स्ट्रीट लाइट्स संबंधित कोणतीही समस्या असल्यास ताबडतोब संपर्क करा
+              {apiData?.snapshot?.issueDescription || 'रस्ते, पुल किंवा स्ट्रीट लाइट्स संबंधित कोणतीही समस्या असल्यास ताबडतोब संपर्क करा'}
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button className="bg-gray-600 hover:bg-gray-700 text-white">
-                <Phone className="h-4 w-4 mr-2" />
-                तातडीचा संपर्क
+              <Button 
+                className="bg-gray-600 hover:bg-gray-700 text-white"
+                asChild
+              >
+                <a href={`tel:${(apiData?.snapshot?.issueContactNumber || '+91-XXXX-XXXXXX').replace(/[^0-9+]/g, '')}`}>
+                  <Phone className="h-4 w-4 mr-2" />
+                  {apiData?.snapshot?.issueActionLabel || 'तातडीचा संपर्क'}
+                </a>
               </Button>
-              <Button variant="outline" className="border-yellow-600 text-yellow-600 hover:bg-yellow-50">
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                तक्रार नोंदवा
-              </Button>
+              {apiData?.snapshot?.issueActionLabel2 && (
+                <Button variant="outline" className="border-yellow-600 text-yellow-600 hover:bg-yellow-50">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  {apiData.snapshot.issueActionLabel2}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

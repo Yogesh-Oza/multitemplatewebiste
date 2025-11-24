@@ -47,6 +47,13 @@ interface GovernmentScheme {
   startDate: string;
   endDate: string;
   imageUrl: string;
+  contactOfficeName?: string;
+  contactOfficeNameEn?: string;
+  contactAddress?: string;
+  contactAddressEn?: string;
+  contactPhone?: string;
+  contactOfficeHours?: string;
+  contactOfficeHoursEn?: string;
 }
 
 
@@ -119,7 +126,14 @@ export default function GovernmentSchemesPage() {
       status: 'active',
       startDate: '',
       endDate: '',
-      imageUrl: ''
+      imageUrl: '',
+      contactOfficeName: '',
+      contactOfficeNameEn: '',
+      contactAddress: '',
+      contactAddressEn: '',
+      contactPhone: '',
+      contactOfficeHours: '',
+      contactOfficeHoursEn: ''
     });
     setIsAdding(true);
   };
@@ -576,6 +590,85 @@ export default function GovernmentSchemesPage() {
                     onChange={(e) => setEditingScheme({...editingScheme, website: e.target.value})}
                     placeholder="https://example.com"
                   />
+                </div>
+              </div>
+
+              {/* Contact Information Section */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-semibold">संपर्क माहिती (Contact Information)</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="contactOfficeName">कार्यालय नाव (मराठी)</Label>
+                    <Input
+                      id="contactOfficeName"
+                      value={editingScheme.contactOfficeName || ''}
+                      onChange={(e) => setEditingScheme({...editingScheme, contactOfficeName: e.target.value})}
+                      placeholder="ग्रामपंचायत कार्यालय"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contactOfficeNameEn">कार्यालय नाव (English)</Label>
+                    <Input
+                      id="contactOfficeNameEn"
+                      value={editingScheme.contactOfficeNameEn || ''}
+                      onChange={(e) => setEditingScheme({...editingScheme, contactOfficeNameEn: e.target.value})}
+                      placeholder="Gram Panchayat Office"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="contactAddress">पत्ता (मराठी)</Label>
+                    <Textarea
+                      id="contactAddress"
+                      value={editingScheme.contactAddress || ''}
+                      onChange={(e) => setEditingScheme({...editingScheme, contactAddress: e.target.value})}
+                      placeholder="ग्रामपंचायत कार्यालय, गाव"
+                      rows={2}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contactAddressEn">पत्ता (English)</Label>
+                    <Textarea
+                      id="contactAddressEn"
+                      value={editingScheme.contactAddressEn || ''}
+                      onChange={(e) => setEditingScheme({...editingScheme, contactAddressEn: e.target.value})}
+                      placeholder="Gram Panchayat Office, Village"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="contactPhone">फोन नंबर</Label>
+                    <Input
+                      id="contactPhone"
+                      value={editingScheme.contactPhone || ''}
+                      onChange={(e) => setEditingScheme({...editingScheme, contactPhone: e.target.value})}
+                      placeholder="+91-XXXX-XXXXXX"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contactOfficeHours">कार्यालयीन वेळ (मराठी)</Label>
+                    <Input
+                      id="contactOfficeHours"
+                      value={editingScheme.contactOfficeHours || ''}
+                      onChange={(e) => setEditingScheme({...editingScheme, contactOfficeHours: e.target.value})}
+                      placeholder="सकाळी ९:०० ते संध्याकाळी ५:००"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contactOfficeHoursEn">कार्यालयीन वेळ (English)</Label>
+                    <Input
+                      id="contactOfficeHoursEn"
+                      value={editingScheme.contactOfficeHoursEn || ''}
+                      onChange={(e) => setEditingScheme({...editingScheme, contactOfficeHoursEn: e.target.value})}
+                      placeholder="9:00 AM to 5:00 PM"
+                    />
+                  </div>
                 </div>
               </div>
 

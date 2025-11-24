@@ -22,7 +22,9 @@ export async function PUT(
       title, titleEn, description, descriptionEn, category, 
       eligibility, eligibilityEn, benefits, benefitsEn, 
       documents, documentsEn, applicationProcess, applicationProcessEn, 
-      contactInfo, contactInfoEn, website, imageUrl, startDate, endDate, isActive 
+      contactInfo, contactInfoEn, website, imageUrl, startDate, endDate, isActive,
+      contactOfficeName, contactOfficeNameEn, contactAddress, contactAddressEn,
+      contactPhone, contactOfficeHours, contactOfficeHoursEn
     } = body;
 
     // Verify the scheme belongs to this subdomain
@@ -62,6 +64,13 @@ export async function PUT(
         startDate,
         endDate,
         isActive,
+        contactOfficeName: contactOfficeName !== undefined ? (contactOfficeName || null) : existingScheme.contactOfficeName,
+        contactOfficeNameEn: contactOfficeNameEn !== undefined ? (contactOfficeNameEn || null) : existingScheme.contactOfficeNameEn,
+        contactAddress: contactAddress !== undefined ? (contactAddress || null) : existingScheme.contactAddress,
+        contactAddressEn: contactAddressEn !== undefined ? (contactAddressEn || null) : existingScheme.contactAddressEn,
+        contactPhone: contactPhone !== undefined ? (contactPhone || null) : existingScheme.contactPhone,
+        contactOfficeHours: contactOfficeHours !== undefined ? (contactOfficeHours || null) : existingScheme.contactOfficeHours,
+        contactOfficeHoursEn: contactOfficeHoursEn !== undefined ? (contactOfficeHoursEn || null) : existingScheme.contactOfficeHoursEn,
       },
     });
 

@@ -3,172 +3,74 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Target, 
-  CheckCircle, 
-  Clock, 
-  TrendingUp, 
-  Users, 
-  BookOpen, 
-  Leaf, 
-  Heart, 
-  Briefcase, 
-  GraduationCap, 
-  Shield, 
+import {
+  Target,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  Users,
+  BookOpen,
+  Leaf,
+  Heart,
+  Briefcase,
+  GraduationCap,
+  Shield,
   Zap,
   Star,
   Award,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
+import {
+  DEFAULT_SANKALP_ITEMS,
+  SankalpPriority,
+  SankalpStatus,
+  SankalpTrackerItem,
+} from '@/lib/sankalp-defaults';
+import { useEffect, useState } from 'react';
 
-interface SankalpItem {
-  id: string;
-  title: string;
-  titleEn: string;
-  description: string;
-  currentValue: number;
-  targetValue: number;
-  unit: string;
-  icon: string;
-  color: string;
-  status: 'completed' | 'in-progress' | 'pending';
-  priority: 'high' | 'medium' | 'low';
+interface SankalpTrackerSectionProps {
+  items?: SankalpTrackerItem[];
 }
 
-export function SankalpTrackerSection() {
-  // 10-point village commitment tracker as per GR requirements
-  const sankalpItems: SankalpItem[] = [
-    {
-      id: '1',
-      title: 'स्वच्छता',
-      titleEn: 'Sanitation',
-      description: 'स्वच्छ गाव - 100% स्वच्छतागृह कव्हरेज',
-      currentValue: 85,
-      targetValue: 100,
-      unit: '%',
-      icon: 'Shield',
-      color: 'from-green-500 to-emerald-600',
-      status: 'in-progress',
-      priority: 'high'
-    },
-    {
-      id: '2',
-      title: 'डिजिटल साक्षरता',
-      titleEn: 'Digital Literacy',
-      description: 'सर्व नागरिकांना डिजिटल साक्षरता प्रदान',
-      currentValue: 65,
-      targetValue: 100,
-      unit: '%',
-      icon: 'BookOpen',
-      color: 'from-blue-500 to-indigo-600',
-      status: 'in-progress',
-      priority: 'high'
-    },
-    {
-      id: '3',
-      title: 'हरित ऊर्जा',
-      titleEn: 'Green Energy',
-      description: 'सौर ऊर्जा आणि नवीकरणीय ऊर्जा वापर',
-      currentValue: 40,
-      targetValue: 80,
-      unit: '%',
-      icon: 'Zap',
-      color: 'from-yellow-500 to-orange-600',
-      status: 'in-progress',
-      priority: 'medium'
-    },
-    {
-      id: '4',
-      title: 'शिक्षण',
-      titleEn: 'Education',
-      description: '100% साक्षरता आणि गुणवत्तापूर्ण शिक्षण',
-      currentValue: 92,
-      targetValue: 100,
-      unit: '%',
-      icon: 'GraduationCap',
-      color: 'from-purple-500 to-pink-600',
-      status: 'in-progress',
-      priority: 'high'
-    },
-    {
-      id: '5',
-      title: 'आरोग्य',
-      titleEn: 'Health',
-      description: 'सर्वांसाठी आरोग्य सुविधा आणि सेवा',
-      currentValue: 78,
-      targetValue: 100,
-      unit: '%',
-      icon: 'Heart',
-      color: 'from-red-500 to-pink-600',
-      status: 'in-progress',
-      priority: 'high'
-    },
-    {
-      id: '6',
-      title: 'रोजगार',
-      titleEn: 'Employment',
-      description: 'युवकांसाठी रोजगार आणि कौशल्य विकास',
-      currentValue: 55,
-      targetValue: 90,
-      unit: '%',
-      icon: 'Briefcase',
-      color: 'from-indigo-500 to-blue-600',
-      status: 'in-progress',
-      priority: 'medium'
-    },
-    {
-      id: '7',
-      title: 'महिला सक्षमीकरण',
-      titleEn: 'Women Empowerment',
-      description: 'महिलांचे सक्षमीकरण आणि सहभाग',
-      currentValue: 70,
-      targetValue: 100,
-      unit: '%',
-      icon: 'Users',
-      color: 'from-pink-500 to-rose-600',
-      status: 'in-progress',
-      priority: 'high'
-    },
-    {
-      id: '8',
-      title: 'युवक विकास',
-      titleEn: 'Youth Development',
-      description: 'युवकांचा विकास आणि नेतृत्व',
-      currentValue: 60,
-      targetValue: 85,
-      unit: '%',
-      icon: 'TrendingUp',
-      color: 'from-cyan-500 to-blue-600',
-      status: 'in-progress',
-      priority: 'medium'
-    },
-    {
-      id: '9',
-      title: 'पर्यावरण संरक्षण',
-      titleEn: 'Environment Protection',
-      description: 'पर्यावरण संरक्षण आणि वृक्षारोपण',
-      currentValue: 75,
-      targetValue: 100,
-      unit: '%',
-      icon: 'Leaf',
-      color: 'from-green-600 to-teal-600',
-      status: 'in-progress',
-      priority: 'high'
-    },
-    {
-      id: '10',
-      title: 'सामाजिक न्याय',
-      titleEn: 'Social Justice',
-      description: 'सर्वांसाठी समानता आणि न्याय',
-      currentValue: 88,
-      targetValue: 100,
-      unit: '%',
-      icon: 'Award',
-      color: 'from-orange-500 to-red-600',
-      status: 'in-progress',
-      priority: 'high'
+export function SankalpTrackerSection({ items }: SankalpTrackerSectionProps) {
+  const [fetchedItems, setFetchedItems] = useState<SankalpTrackerItem[]>([]);
+
+  useEffect(() => {
+    if (items && items.length > 0) {
+      setFetchedItems([]);
+      return;
     }
-  ];
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/sankalp-items');
+        if (response.ok) {
+          const data = await response.json();
+          setFetchedItems(
+            data.length > 0
+              ? data
+              : DEFAULT_SANKALP_ITEMS
+          );
+        } else {
+          setFetchedItems(DEFAULT_SANKALP_ITEMS);
+        }
+      } catch (error) {
+        console.error('Error fetching Sankalp tracker data:', error);
+        setFetchedItems(DEFAULT_SANKALP_ITEMS);
+      }
+    };
+
+    if (!items) {
+      fetchData();
+    }
+  }, [items]);
+
+  const displayItems =
+    items && items.length > 0
+      ? items
+      : fetchedItems.length > 0
+        ? fetchedItems
+        : DEFAULT_SANKALP_ITEMS;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -284,9 +186,16 @@ export function SankalpTrackerSection() {
   };
 
   // Calculate overall progress
-  const overallProgress = Math.round(
-    sankalpItems.reduce((sum, item) => sum + (item.currentValue / item.targetValue) * 100, 0) / sankalpItems.length
-  );
+  const activeItems = displayItems.filter((item) => item.isActive !== false);
+  const overallProgress =
+    activeItems.length > 0
+      ? Math.round(
+          activeItems.reduce(
+            (sum, item) => sum + (item.currentValue / item.targetValue) * 100,
+            0
+          ) / activeItems.length
+        )
+      : 0;
 
   return (
     <section className="py-20 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
@@ -350,7 +259,7 @@ export function SankalpTrackerSection() {
                   />
                 </div>
                 <p className="text-lg text-indigo-100">
-                  {sankalpItems.filter(item => item.status === 'completed').length} / {sankalpItems.length} संकल्प पूर्ण
+                  {displayItems.filter(item => item.status === 'completed').length} / {displayItems.length} संकल्प पूर्ण
                 </p>
               </div>
             </CardContent>
@@ -365,7 +274,7 @@ export function SankalpTrackerSection() {
           viewport={{ once: true }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {sankalpItems.map((item, index) => (
+          {displayItems.map((item, index) => (
             <motion.div key={item.id} variants={itemVariants}>
               <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm group">
                 <CardContent className="p-6">
@@ -461,19 +370,19 @@ export function SankalpTrackerSection() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-600 mb-2">
-                      {sankalpItems.filter(item => item.status === 'completed').length}
+                      {displayItems.filter(item => item.status === 'completed').length}
                     </div>
                     <div className="text-gray-600">पूर्ण संकल्प</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-blue-600 mb-2">
-                      {sankalpItems.filter(item => item.status === 'in-progress').length}
+                      {displayItems.filter(item => item.status === 'in-progress').length}
                     </div>
                     <div className="text-gray-600">चालू संकल्प</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-purple-600 mb-2">
-                      {sankalpItems.filter(item => item.priority === 'high').length}
+                      {displayItems.filter(item => item.priority === 'high').length}
                     </div>
                     <div className="text-gray-600">उच्च प्राधान्य</div>
                   </div>

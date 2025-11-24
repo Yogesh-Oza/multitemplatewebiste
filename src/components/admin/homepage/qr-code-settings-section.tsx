@@ -9,9 +9,23 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { QrCode as QrCodeIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import type { QRCodeSettings } from './types';
+import { extractUpiId, extractPayeeName, buildUpiString } from '@/lib/upi-utils';
+
+interface UpiFormData {
+  propertyTaxUpiId: string;
+  propertyTaxPayeeName: string;
+  waterTaxUpiId: string;
+  waterTaxPayeeName: string;
+}
 
 export function QRCodeSettingsSection() {
   const [qrSettings, setQrSettings] = useState<QRCodeSettings | null>(null);
+  const [upiFormData, setUpiFormData] = useState<UpiFormData>({
+    propertyTaxUpiId: '',
+    propertyTaxPayeeName: '',
+    waterTaxUpiId: '',
+    waterTaxPayeeName: '',
+  });
   const [isLoadingQrSettings, setIsLoadingQrSettings] = useState(true);
   const [isSavingQrSettings, setIsSavingQrSettings] = useState(false);
 
@@ -25,6 +39,14 @@ export function QRCodeSettingsSection() {
       if (response.ok) {
         const data = await response.json();
         setQrSettings(data);
+        
+        // Extract UPI ID and payee name from existing full UPI strings
+        setUpiFormData({
+          propertyTaxUpiId: extractUpiId(data.propertyTaxQrData || ''),
+          propertyTaxPayeeName: extractPayeeName(data.propertyTaxQrData || ''),
+          waterTaxUpiId: extractUpiId(data.waterTaxQrData || ''),
+          waterTaxPayeeName: extractPayeeName(data.waterTaxQrData || ''),
+        });
       }
     } catch (error) {
       console.error('Error fetching QR settings:', error);
@@ -36,17 +58,37 @@ export function QRCodeSettingsSection() {
 
   const handleSave = async () => {
     if (!qrSettings) return;
-    if (!qrSettings.propertyTaxQrData || !qrSettings.waterTaxQrData) {
-      toast.error('कृपया सर्व फील्ड भरा');
+    
+    // Validate UPI IDs
+    if (!upiFormData.propertyTaxUpiId || !upiFormData.waterTaxUpiId) {
+      toast.error('कृपया दोन्ही UPI ID भरा');
       return;
     }
+
+    // Build full UPI strings from UPI IDs
+    const propertyTaxQrData = buildUpiString(
+      upiFormData.propertyTaxUpiId,
+      upiFormData.propertyTaxPayeeName,
+      'Property Tax'
+    );
+    const waterTaxQrData = buildUpiString(
+      upiFormData.waterTaxUpiId,
+      upiFormData.waterTaxPayeeName,
+      'Water Tax'
+    );
+
+    const settingsToSave = {
+      ...qrSettings,
+      propertyTaxQrData,
+      waterTaxQrData,
+    };
 
     setIsSavingQrSettings(true);
     try {
       const response = await fetch('/api/qr-code-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(qrSettings),
+        body: JSON.stringify(settingsToSave),
       });
 
       if (response.ok) {
@@ -94,14 +136,37 @@ export function QRCodeSettingsSection() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Property Tax Section */}
                     <div className="md:col-span-2">
-                      <Label htmlFor="propertyTaxQrData">मालमत्ता कर QR Data</Label>
-                      <Input
-                        id="propertyTaxQrData"
-                        value={qrSettings.propertyTaxQrData}
-                        onChange={(e) => setQrSettings({ ...qrSettings, propertyTaxQrData: e.target.value })}
-                        placeholder="upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Property Tax"
-                      />
+                      <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">मालमत्ता कर (Property Tax)</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="propertyTaxUpiId">UPI ID *</Label>
+                            <Input
+                              id="propertyTaxUpiId"
+                              type="text"
+                              value={upiFormData.propertyTaxUpiId}
+                              onChange={(e) => setUpiFormData({ ...upiFormData, propertyTaxUpiId: e.target.value })}
+                              placeholder="rupeshmore2006@okaxis"
+                              className="mt-1"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">फक्त UPI ID टाइप करा (उदा: yourname@okaxis, yourname@paytm)</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="propertyTaxPayeeName">पेमेंट नाव (Payee Name)</Label>
+                            <Input
+                              id="propertyTaxPayeeName"
+                              type="text"
+                              value={upiFormData.propertyTaxPayeeName}
+                              onChange={(e) => setUpiFormData({ ...upiFormData, propertyTaxPayeeName: e.target.value })}
+                              placeholder="Rupesh More"
+                              className="mt-1"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">वैकल्पिक - UPI पेमेंटमध्ये दिसणारे नाव</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <div className="md:col-span-2">
                       <Label htmlFor="propertyTaxInstruction">मालमत्ता कर सूचना</Label>
@@ -112,14 +177,38 @@ export function QRCodeSettingsSection() {
                         className="w-full min-h-[80px] px-3 py-2 border rounded-md"
                       />
                     </div>
+                    
+                    {/* Water Tax Section */}
                     <div className="md:col-span-2">
-                      <Label htmlFor="waterTaxQrData">पाणी कर QR Data</Label>
-                      <Input
-                        id="waterTaxQrData"
-                        value={qrSettings.waterTaxQrData}
-                        onChange={(e) => setQrSettings({ ...qrSettings, waterTaxQrData: e.target.value })}
-                        placeholder="upi://pay?pa=gp-pay@upi&pn=GramPanchayat&am=0&cu=INR&tn=Water Tax"
-                      />
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">पाणी कर (Water Tax)</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="waterTaxUpiId">UPI ID *</Label>
+                            <Input
+                              id="waterTaxUpiId"
+                              type="text"
+                              value={upiFormData.waterTaxUpiId}
+                              onChange={(e) => setUpiFormData({ ...upiFormData, waterTaxUpiId: e.target.value })}
+                              placeholder="rupeshmore2006@okaxis"
+                              className="mt-1"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">फक्त UPI ID टाइप करा (उदा: yourname@okaxis, yourname@paytm)</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="waterTaxPayeeName">पेमेंट नाव (Payee Name)</Label>
+                            <Input
+                              id="waterTaxPayeeName"
+                              type="text"
+                              value={upiFormData.waterTaxPayeeName}
+                              onChange={(e) => setUpiFormData({ ...upiFormData, waterTaxPayeeName: e.target.value })}
+                              placeholder="Rupesh More"
+                              className="mt-1"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">वैकल्पिक - UPI पेमेंटमध्ये दिसणारे नाव</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <div className="md:col-span-2">
                       <Label htmlFor="waterTaxInstruction">पाणी कर सूचना</Label>

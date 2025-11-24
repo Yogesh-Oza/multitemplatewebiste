@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { GOVERNMENT_RESOLUTION_DEMO_DATA } from '@/lib/demo-government-resolutions';
 
 interface GovernmentResolution {
   id: string;
@@ -20,6 +22,10 @@ interface GovernmentResolution {
   fileUrl: string;
   category: string;
   categoryEn: string;
+  priority: string;
+  priorityEn: string;
+  description: string;
+  descriptionEn: string;
   isActive: boolean;
   order: number;
   createdAt: string;
@@ -28,6 +34,7 @@ interface GovernmentResolution {
 
 export default function GovernmentResolutionsAdminPage() {
   const [resolutions, setResolutions] = useState<GovernmentResolution[]>([]);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResolution, setEditingResolution] = useState<GovernmentResolution | null>(null);
@@ -41,6 +48,10 @@ export default function GovernmentResolutionsAdminPage() {
     fileUrl: '',
     category: '',
     categoryEn: '',
+    priority: 'मध्यम',
+    priorityEn: 'Medium',
+    description: '',
+    descriptionEn: '',
     isActive: true,
     order: 0
   });
@@ -52,10 +63,17 @@ export default function GovernmentResolutionsAdminPage() {
   const fetchResolutions = async () => {
     try {
       const response = await fetch('/api/government-resolutions');
-      const data = await response.json();
-      setResolutions(data);
+      if (response.ok) {
+        const data = await response.json();
+        const useDemoData = !data || data.length === 0;
+        setIsDemoMode(useDemoData);
+        setResolutions(useDemoData ? (GOVERNMENT_RESOLUTION_DEMO_DATA as GovernmentResolution[]) : data);
+      } else {
+        toast.error('Failed to fetch resolutions');
+      }
     } catch (error) {
       console.error('Error fetching resolutions:', error);
+      toast.error('Failed to fetch resolutions');
     } finally {
       setIsLoading(false);
     }
@@ -81,13 +99,22 @@ export default function GovernmentResolutionsAdminPage() {
         setIsModalOpen(false);
         setEditingResolution(null);
         resetForm();
+        toast.success(editingResolution ? 'Resolution updated successfully' : 'Resolution added successfully');
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Failed to save resolution');
       }
     } catch (error) {
       console.error('Error saving resolution:', error);
+      toast.error('Failed to save resolution');
     }
   };
 
   const handleEdit = (resolution: GovernmentResolution) => {
+    if (resolution.id.startsWith('demo-')) {
+      toast.info('कृपया नवीन निर्णय जोडा. Demo डेटा संपादित करू शकत नाही.');
+      return;
+    }
     setEditingResolution(resolution);
     setFormData({
       title: resolution.title,
@@ -99,6 +126,10 @@ export default function GovernmentResolutionsAdminPage() {
       fileUrl: resolution.fileUrl,
       category: resolution.category,
       categoryEn: resolution.categoryEn,
+      priority: resolution.priority || 'मध्यम',
+      priorityEn: resolution.priorityEn || 'Medium',
+      description: resolution.description || '',
+      descriptionEn: resolution.descriptionEn || '',
       isActive: resolution.isActive,
       order: resolution.order
     });
@@ -106,12 +137,22 @@ export default function GovernmentResolutionsAdminPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (id.startsWith('demo-')) {
+      toast.info('Demo डेटा हटवू शकत नाही. कृपया नवीन निर्णय जोडा.');
+      return;
+    }
     if (confirm('Are you sure you want to delete this resolution?')) {
       try {
-        await fetch(`/api/government-resolutions/${id}`, { method: 'DELETE' });
-        await fetchResolutions();
+        const response = await fetch(`/api/government-resolutions/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+          await fetchResolutions();
+          toast.success('Resolution deleted successfully');
+        } else {
+          toast.error('Failed to delete resolution');
+        }
       } catch (error) {
         console.error('Error deleting resolution:', error);
+        toast.error('Failed to delete resolution');
       }
     }
   };
@@ -127,6 +168,10 @@ export default function GovernmentResolutionsAdminPage() {
       fileUrl: '',
       category: '',
       categoryEn: '',
+      priority: 'मध्यम',
+      priorityEn: 'Medium',
+      description: '',
+      descriptionEn: '',
       isActive: true,
       order: 0
     });
@@ -168,17 +213,26 @@ export default function GovernmentResolutionsAdminPage() {
 
       {/* Resolutions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {resolutions.map((resolution) => (
-          <Card key={resolution.id} className="hover:shadow-lg transition-shadow">
+        {resolutions.map((resolution) => {
+          const isDemoResolution = resolution.id.startsWith('demo-');
+          return (
+            <Card key={resolution.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-lg">{resolution.title}</CardTitle>
                   <p className="text-sm text-gray-600 mt-1">{resolution.titleEn}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge className={getCategoryColor(resolution.category)}>
                     {resolution.category}
+                  </Badge>
+                  <Badge className={
+                    resolution.priority === 'उच्च' ? 'bg-red-100 text-red-800' :
+                    resolution.priority === 'मध्यम' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-green-100 text-green-800'
+                  }>
+                    {resolution.priority || 'मध्यम'}
                   </Badge>
                   {resolution.isActive ? (
                     <Badge variant="secondary" className="bg-green-100 text-green-800">
@@ -229,6 +283,8 @@ export default function GovernmentResolutionsAdminPage() {
                     size="sm"
                     onClick={() => handleEdit(resolution)}
                     className="flex-1"
+                    disabled={isDemoResolution}
+                    title={isDemoResolution ? 'Demo data cannot be edited' : undefined}
                   >
                     <Edit className="h-4 w-4 mr-1" />
                     Edit
@@ -237,15 +293,18 @@ export default function GovernmentResolutionsAdminPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(resolution.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 disabled:text-gray-400"
+                    disabled={isDemoResolution}
+                    title={isDemoResolution ? 'Demo data cannot be deleted' : undefined}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             </CardContent>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
       {/* Add/Edit Modal */}
@@ -342,6 +401,11 @@ export default function GovernmentResolutionsAdminPage() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="अभियान">अभियान</SelectItem>
+                        <SelectItem value="निर्देश">निर्देश</SelectItem>
+                        <SelectItem value="कार्यक्रम">कार्यक्रम</SelectItem>
+                        <SelectItem value="योजना">योजना</SelectItem>
+                        <SelectItem value="उपक्रम">उपक्रम</SelectItem>
                         <SelectItem value="सामान्य">सामान्य</SelectItem>
                         <SelectItem value="वित्त">वित्त</SelectItem>
                         <SelectItem value="कृषी">कृषी</SelectItem>
@@ -363,6 +427,11 @@ export default function GovernmentResolutionsAdminPage() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="Campaign">Campaign</SelectItem>
+                        <SelectItem value="Guidelines">Guidelines</SelectItem>
+                        <SelectItem value="Program">Program</SelectItem>
+                        <SelectItem value="Scheme">Scheme</SelectItem>
+                        <SelectItem value="Initiative">Initiative</SelectItem>
                         <SelectItem value="General">General</SelectItem>
                         <SelectItem value="Finance">Finance</SelectItem>
                         <SelectItem value="Agriculture">Agriculture</SelectItem>
@@ -371,6 +440,92 @@ export default function GovernmentResolutionsAdminPage() {
                         <SelectItem value="Development">Development</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Priority (Marathi) *
+                    </label>
+                    <Select
+                      value={formData.priority}
+                      onValueChange={(value) => {
+                        const priorityMap: { [key: string]: string } = {
+                          'उच्च': 'High',
+                          'मध्यम': 'Medium',
+                          'कमी': 'Low'
+                        };
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          priority: value,
+                          priorityEn: priorityMap[value] || 'Medium'
+                        }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="उच्च">उच्च (High)</SelectItem>
+                        <SelectItem value="मध्यम">मध्यम (Medium)</SelectItem>
+                        <SelectItem value="कमी">कमी (Low)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Priority (English) *
+                    </label>
+                    <Select
+                      value={formData.priorityEn}
+                      onValueChange={(value) => {
+                        const priorityMap: { [key: string]: string } = {
+                          'High': 'उच्च',
+                          'Medium': 'मध्यम',
+                          'Low': 'कमी'
+                        };
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          priorityEn: value,
+                          priority: priorityMap[value] || 'मध्यम'
+                        }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="High">High (उच्च)</SelectItem>
+                        <SelectItem value="Medium">Medium (मध्यम)</SelectItem>
+                        <SelectItem value="Low">Low (कमी)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description (Marathi)
+                    </label>
+                    <Textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="निर्णयाचे वर्णन..."
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description (English)
+                    </label>
+                    <Textarea
+                      value={formData.descriptionEn}
+                      onChange={(e) => setFormData(prev => ({ ...prev, descriptionEn: e.target.value }))}
+                      placeholder="Resolution description..."
+                      rows={4}
+                    />
                   </div>
                 </div>
 
