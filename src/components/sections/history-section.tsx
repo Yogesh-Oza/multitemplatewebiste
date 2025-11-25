@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { History, BookOpen, Users, ChevronRight, TrendingUp, Palette } from 'lucide-react';
+import { History, BookOpen, Users, ChevronRight, TrendingUp, Palette, Globe } from 'lucide-react';
+import Image from 'next/image';
 
 interface HistoryCard {
   id: string;
@@ -22,6 +23,7 @@ interface TimelineItem {
   titleEn: string;
   description: string;
   descriptionEn: string;
+  imageUrl?: string;
   side: string;
 }
 
@@ -51,6 +53,85 @@ export function HistorySection({ historyCards, timelineItems }: HistorySectionPr
       },
     },
   };
+
+  const imageVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        delay: 0.2,
+      },
+    },
+  };
+
+  const dotVariants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 200,
+        damping: 15,
+      },
+    },
+    pulse: {
+      scale: [1, 1.2, 1],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      },
+    },
+  };
+
+  // Demo timeline items when no data exists
+  const getDemoTimelineItems = (): TimelineItem[] => [
+    {
+      id: 'demo-1',
+      year: '1950',
+      title: 'गावाची स्थापना',
+      titleEn: 'Village Foundation',
+      description: 'आमच्या गावाची स्थापना आणि पहिले निवासी',
+      descriptionEn: 'Foundation of our village and first residents',
+      imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&h=400&fit=crop',
+      side: 'left',
+    },
+    {
+      id: 'demo-2',
+      year: '1970',
+      title: 'पहिली ग्रामपंचायत',
+      titleEn: 'First Gram Panchayat',
+      description: 'लोकशाही व्यवस्थेची सुरुवात आणि स्थानिक स्वराज्य',
+      descriptionEn: 'Beginning of democratic system and local self-governance',
+      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&h=400&fit=crop',
+      side: 'right',
+    },
+    {
+      id: 'demo-3',
+      year: '1990',
+      title: 'शिक्षणाची सुरुवात',
+      titleEn: 'Education Begins',
+      description: 'पहिले शाळा आणि शिक्षणाच्या सुविधांची सुरुवात',
+      descriptionEn: 'First schools and beginning of educational facilities',
+      imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop',
+      side: 'left',
+    },
+    {
+      id: 'demo-4',
+      year: '2010',
+      title: 'डिजिटल युग',
+      titleEn: 'Digital Era',
+      description: 'तंत्रज्ञानाचा वापर आणि आधुनिकीकरण',
+      descriptionEn: 'Use of technology and modernization',
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop',
+      side: 'right',
+    },
+  ];
+
+  const displayTimelineItems = timelineItems.length > 0 ? timelineItems : getDemoTimelineItems();
 
   return (
     <section className="py-20 bg-white">
@@ -94,6 +175,9 @@ export function HistorySection({ historyCards, timelineItems }: HistorySectionPr
                         {card.icon === 'BookOpen' && <BookOpen className="h-16 w-16 mx-auto" />}
                         {card.icon === 'Palette' && <Palette className="h-16 w-16 mx-auto" />}
                         {card.icon === 'TrendingUp' && <TrendingUp className="h-16 w-16 mx-auto" />}
+                        {card.icon === 'Users' && <Users className="h-16 w-16 mx-auto" />}
+                        {card.icon === 'History' && <History className="h-16 w-16 mx-auto" />}
+                        {card.icon === 'Globe' && <Globe className="h-16 w-16 mx-auto" />}
                       </div>
                     </div>
                   </div>
@@ -133,41 +217,79 @@ export function HistorySection({ historyCards, timelineItems }: HistorySectionPr
 
             {/* Timeline Items */}
             <div className="space-y-12">
-              {timelineItems.length > 0 ? timelineItems.map((item, index) => (
+              {displayTimelineItems.map((item, index) => (
                 <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: item.side === 'left' ? -50 : 50 }}
+                  key={item.id}
+                  initial={{ opacity: 0, x: item.side === 'left' ? -100 : 100 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
-                  viewport={{ once: true }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: index * 0.15,
+                    type: 'spring',
+                    stiffness: 100
+                  }}
+                  viewport={{ once: true, margin: '-100px' }}
                   className={`flex items-center ${
                     item.side === 'left' ? 'flex-row' : 'flex-row-reverse'
                   }`}
                 >
                   <div className={`w-1/2 ${item.side === 'left' ? 'pr-8 text-right' : 'pl-8'}`}>
-                    <Card className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300">
-                      <CardContent className="p-6">
-                        <div className="text-2xl font-bold text-blue-600 mb-2">{item.year}</div>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h4>
-                        <p className="text-gray-600">{item.description}</p>
-                        {item.titleEn && (
-                          <p className="text-sm text-gray-500 italic mt-2">{item.titleEn}</p>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <motion.div
+                      whileHover={{ y: -5, scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Card className="border-0 shadow-lg bg-white hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                        <CardContent className="p-0">
+                          {/* Image */}
+                          {item.imageUrl && (
+                            <motion.div
+                              variants={imageVariants}
+                              initial="hidden"
+                              whileInView="visible"
+                              viewport={{ once: true }}
+                              className="relative h-48 w-full overflow-hidden"
+                            >
+                              <Image
+                                src={item.imageUrl}
+                                alt={item.title}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                              <div className="absolute bottom-4 left-4 right-4">
+                                <div className="text-3xl font-bold text-white mb-1">{item.year}</div>
+                              </div>
+                            </motion.div>
+                          )}
+                          <div className="p-6">
+                            {!item.imageUrl && (
+                              <div className="text-2xl font-bold text-blue-600 mb-2">{item.year}</div>
+                            )}
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h4>
+                            <p className="text-gray-600 mb-2">{item.description}</p>
+                            {item.titleEn && (
+                              <p className="text-sm text-gray-500 italic">{item.titleEn}</p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   </div>
                   
-                  {/* Timeline Dot */}
-                  <div className="relative z-10 w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-4 border-white shadow-lg"></div>
+                  {/* Timeline Dot with Pulse Animation */}
+                  <motion.div
+                    variants={dotVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    animate="pulse"
+                    className="relative z-10 w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-4 border-white shadow-xl"
+                  ></motion.div>
                   
                   <div className="w-1/2"></div>
                 </motion.div>
-              )) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">कोणतेही टाइमलाइन आयटम नाहीत</p>
-                  <p className="text-gray-400 text-sm mt-2">प्रशासक पैनलमधून टाइमलाइन आयटम जोडा</p>
-                </div>
-              )}
+              ))}
             </div>
           </div>
         </motion.div>

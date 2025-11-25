@@ -13,9 +13,13 @@ interface Role {
   color: string;
 }
 
-export function RolesResponsibilitiesSection() {
-  // Static roles data - in real app, this would come from API
-  const roles: Role[] = [
+interface RolesResponsibilitiesSectionProps {
+  roles?: Role[] | null;
+}
+
+export function RolesResponsibilitiesSection({ roles: propRoles }: RolesResponsibilitiesSectionProps) {
+  // Demo/fallback roles data
+  const demoRoles: Role[] = [
     {
       title: 'सरपंच',
       titleEn: 'Sarpanch',
@@ -73,6 +77,9 @@ export function RolesResponsibilitiesSection() {
       color: 'from-orange-500 to-red-600'
     }
   ];
+
+  // Use provided data or fallback to demo
+  const roles = propRoles && propRoles.length > 0 ? propRoles : demoRoles;
 
   const containerVariants = {
     hidden: { opacity: 0 },

@@ -30,9 +30,13 @@ interface EmergencyContact {
   category: string;
 }
 
-export function CompleteEmergencyContactsSection() {
-  // Complete emergency contacts as per GR requirements
-  const emergencyContacts: EmergencyContact[] = [
+interface CompleteEmergencyContactsSectionProps {
+  emergencyContacts?: EmergencyContact[] | null;
+}
+
+export function CompleteEmergencyContactsSection({ emergencyContacts: propEmergencyContacts }: CompleteEmergencyContactsSectionProps) {
+  // Demo/fallback emergency contacts as per GR requirements
+  const demoEmergencyContacts: EmergencyContact[] = [
     {
       id: '1',
       name: 'पोलीस',
@@ -133,6 +137,9 @@ export function CompleteEmergencyContactsSection() {
       category: 'सुविधा'
     }
   ];
+
+  // Use provided data or fallback to demo
+  const emergencyContacts = propEmergencyContacts && propEmergencyContacts.length > 0 ? propEmergencyContacts : demoEmergencyContacts;
 
   const containerVariants = {
     hidden: { opacity: 0 },

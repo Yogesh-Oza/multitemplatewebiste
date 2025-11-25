@@ -33,7 +33,7 @@ export default async function SubdomainHistoryPage({ params }: HistoryPageProps)
   // Fetch timeline items
   const timelineItems = await prisma.timelineItem.findMany({
     where: { subdomainId: subdomainData.id, isActive: true },
-    orderBy: { year: 'asc' }
+    orderBy: { order: 'asc' }
   });
 
   return (

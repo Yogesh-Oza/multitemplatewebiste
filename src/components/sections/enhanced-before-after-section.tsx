@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, Eye, Award } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { getDemoBeforeAfterItems } from '@/lib/projects-demo-data';
 
 interface BeforeAfterItem {
   id: string;
@@ -30,23 +31,24 @@ export function EnhancedBeforeAfterSection() {
   const [beforeAfterData, setBeforeAfterData] = useState<BeforeAfterItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Default before/after data
-  const getDefaultData = (): BeforeAfterItem[] => [
-    {
-      id: 'default-1',
-      title: 'रस्ते दुरुस्ती प्रकल्प',
-      titleEn: 'Road Repair Project',
-      beforeImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&crop=center',
-      afterImage: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop&crop=center',
-      description: 'गावातील मुख्य रस्त्यांची दुरुस्ती आणि सुधारणा',
-      descriptionEn: 'Repair and improvement of main roads in the village',
-      impact: 'रस्ते सुधारले, वाहतूक सुगम झाली, दुर्घटना कमी झाल्या',
-      impactEn: 'Roads improved, traffic became smoother, accidents reduced',
-      year: '२०२३',
-      cost: '₹२५ लाख',
-      category: 'पायाभूत सुविधा'
-    }
-  ];
+  // Get default before/after data from utility
+  const getDefaultData = (): BeforeAfterItem[] => {
+    const demoItems = getDemoBeforeAfterItems();
+    return demoItems.map(item => ({
+      id: item.id,
+      title: item.title,
+      titleEn: item.titleEn,
+      beforeImage: item.beforeImage,
+      afterImage: item.afterImage,
+      description: item.description,
+      descriptionEn: item.descriptionEn,
+      impact: item.impact,
+      impactEn: item.impactEn,
+      year: item.year,
+      cost: item.cost,
+      category: item.category
+    }));
+  };
 
   // Fetch before/after data from API
   useEffect(() => {

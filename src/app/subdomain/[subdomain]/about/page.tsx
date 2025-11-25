@@ -20,7 +20,20 @@ export default async function SubdomainAboutPage({ params }: AboutPageProps) {
   const subdomainData = await prisma.subdomain.findUnique({
     where: { subdomain },
     include: {
-      villageInfo: true
+      villageInfo: true,
+      officeDetails: {
+        where: { isActive: true },
+        orderBy: { createdAt: 'desc' },
+        take: 1
+      },
+      roles: {
+        where: { isActive: true },
+        orderBy: { order: 'asc' }
+      },
+      emergencyContacts: {
+        where: { isActive: true },
+        orderBy: { order: 'asc' }
+      }
     }
   });
 
@@ -38,15 +51,50 @@ export default async function SubdomainAboutPage({ params }: AboutPageProps) {
       : []
   } : null;
 
+  // Transform office details
+  const officeDetails = subdomainData.officeDetails?.[0] ? {
+    address: subdomainData.officeDetails[0].address,
+    addressEn: subdomainData.officeDetails[0].addressEn,
+    phone: subdomainData.officeDetails[0].phone,
+    email: subdomainData.officeDetails[0].email,
+    workingHours: subdomainData.officeDetails[0].workingHours,
+    workingHoursEn: subdomainData.officeDetails[0].workingHoursEn,
+    importantNotice: subdomainData.officeDetails[0].importantNotice || undefined,
+    importantNoticeEn: subdomainData.officeDetails[0].importantNoticeEn || undefined
+  } : null;
+
+  // Transform roles
+  const roles = subdomainData.roles && subdomainData.roles.length > 0 ? subdomainData.roles.map(role => ({
+    title: role.title,
+    titleEn: role.titleEn,
+    description: role.description,
+    responsibilities: Array.isArray(role.responsibilities) ? role.responsibilities as string[] : [],
+    icon: role.icon,
+    color: role.color
+  })) : null;
+
+  // Transform emergency contacts
+  const emergencyContacts = subdomainData.emergencyContacts && subdomainData.emergencyContacts.length > 0 ? subdomainData.emergencyContacts.map(contact => ({
+    id: contact.id,
+    name: contact.name,
+    nameEn: contact.nameEn,
+    phone: contact.phone,
+    description: contact.description,
+    icon: contact.icon,
+    color: contact.color,
+    priority: contact.priority as 'high' | 'medium' | 'low',
+    category: contact.category
+  })) : null;
+
   return (
     <div className="min-h-screen">
       <AboutSection villageInfo={villageInfo} />
       
-      <OfficeInformationSection />
+      <OfficeInformationSection officeDetails={officeDetails} />
       
-      <RolesResponsibilitiesSection />
+      <RolesResponsibilitiesSection roles={roles} />
       
-      <CompleteEmergencyContactsSection />
+      <CompleteEmergencyContactsSection emergencyContacts={emergencyContacts} />
     </div>
   );
 }

@@ -24,7 +24,9 @@ import {
   Gauge,
   Briefcase,
   GraduationCap,
-  Leaf
+  Leaf,
+  Info,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -36,16 +38,22 @@ const adminNavItems = [
     description: 'गावाची मुख्य माहिती, आकडेवारी, होमपेज आणि नेते व्यवस्थापन'
   },
   {
+    href: '/admin/about',
+    label: 'ग्रामपंचायतीबद्दल',
+    icon: Info,
+    description: 'ग्रामपंचायत माहिती व्यवस्थापन'
+  },
+  {
+    href: '/admin/history',
+    label: 'आमचे गाव – ओळख आणि संस्कृती',
+    icon: History,
+    description: 'गावाचा इतिहास, टाइमलाइन आणि इतिहास कार्ड व्यवस्थापन'
+  },
+  {
     href: '/admin/impact-dashboard',
     label: 'प्रमुख प्रकल्प आणि उपक्रम',
     icon: FolderOpen,
-    description: 'प्रभाव डॅशबोर्ड व्यवस्थापन'
-  },
-  {
-    href: '/admin/sankalp-tracker',
-    label: 'संकल्प ट्रॅकर',
-    icon: Shield,
-    description: 'गावाचा वचन ट्रॅकर व्यवस्थापन'
+    description: 'प्रभाव डॅशबोर्ड, पूर्वी/नंतर गॅलरी, प्रकल्प आणि संकल्प ट्रॅकर व्यवस्थापन'
   },
   {
     href: '/admin/programs',
@@ -118,13 +126,6 @@ const adminNavItems = [
     label: 'संपर्क',
     icon: Phone,
     description: 'संपर्क माहिती व्यवस्थापन'
-  },
-  // New sections
-  {
-    href: '/admin/projects',
-    label: 'प्रकल्प',
-    icon: FolderOpen,
-    description: 'विकास प्रकल्प व्यवस्थापन'
   },
   {
     href: '/admin/government-resolutions',

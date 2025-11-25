@@ -67,6 +67,7 @@ model TimelineItem {
   titleEn       String
   description   String
   descriptionEn String
+  imageUrl      String?
   side          String     @default("left") // left, right
   order         Int        @default(0)
   isActive      Boolean    @default(true)
@@ -237,20 +238,60 @@ model Contact {
 }
 
 model OfficeDetails {
-  id             String     @id @default(auto()) @map("_id") @db.ObjectId
-  address        String
-  addressEn      String
-  phone          String
-  email          String
-  workingHours   String
-  workingHoursEn String
-  isActive       Boolean    @default(true)
-  subdomainId    String?    @db.ObjectId
-  subdomain      Subdomain? @relation(fields: [subdomainId], references: [id])
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id               String     @id @default(auto()) @map("_id") @db.ObjectId
+  address          String
+  addressEn        String
+  phone            String
+  email            String
+  workingHours     String
+  workingHoursEn   String
+  importantNotice  String?
+  importantNoticeEn String?
+  isActive         Boolean    @default(true)
+  subdomainId      String?    @db.ObjectId
+  subdomain        Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
   @@map("office_details")
+}
+
+model Role {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  title           String     // e.g., "सरपंच"
+  titleEn         String     // e.g., "Sarpanch"
+  description     String
+  responsibilities Json      // Array of responsibility strings
+  icon            String     // Icon name (Users, Shield, FileText, Home)
+  color           String     // Gradient color class
+  order           Int        @default(0)
+  isActive        Boolean    @default(true)
+  subdomainId     String?    @db.ObjectId
+  subdomain       Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@map("roles")
+}
+
+model EmergencyContact {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String     // e.g., "पोलीस"
+  nameEn      String     // e.g., "Police"
+  phone       String     // e.g., "100 / +91 12345 11111"
+  description String
+  icon        String     // Icon name (Shield, Stethoscope, Flame, etc.)
+  color       String     // Gradient color class
+  priority    String     // "high" | "medium" | "low"
+  category    String     // Category in Marathi
+  order       Int        @default(0)
+  isActive    Boolean    @default(true)
+  subdomainId String?    @db.ObjectId
+  subdomain   Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("emergency_contacts")
 }
 
 model TeamMember {
@@ -771,6 +812,8 @@ model Subdomain {
   dailyMessages            DailyMessage[]
   qrCodeSettings           QRCodeSettings[]
   impactDashboardMetrics   ImpactDashboardMetric[]
+  roles                    Role[]
+  emergencyContacts        EmergencyContact[]
   beforeAfterGallery       BeforeAfterGallery[]
   sankalpItems             SankalpItem[]
   activityLogs             ActivityLog[]
@@ -940,6 +983,7 @@ model Project {
   category      String
   categoryEn    String
   isFeatured    Boolean    @default(false)
+  isActive      Boolean    @default(true)
   order         Int        @default(0)
   subdomainId   String?    @db.ObjectId
   subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])

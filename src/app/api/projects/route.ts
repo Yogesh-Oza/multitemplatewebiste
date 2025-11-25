@@ -21,8 +21,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const whereClause: any = { 
-      subdomainId,
-      isActive: true 
+      subdomainId
     };
 
     if (status) {

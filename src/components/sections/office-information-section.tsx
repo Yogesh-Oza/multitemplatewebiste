@@ -11,18 +11,29 @@ interface OfficeDetails {
   email: string;
   workingHours: string;
   workingHoursEn: string;
+  importantNotice?: string;
+  importantNoticeEn?: string;
 }
 
-export function OfficeInformationSection() {
-  // Static office data - in real app, this would come from API
-  const officeDetails: OfficeDetails = {
+interface OfficeInformationSectionProps {
+  officeDetails?: OfficeDetails | null;
+}
+
+export function OfficeInformationSection({ officeDetails: propOfficeDetails }: OfficeInformationSectionProps) {
+  // Demo/fallback office data
+  const demoOfficeDetails: OfficeDetails = {
     address: 'ग्रामपंचायत कार्यालय, गाव, तालुका, जिल्हा, महाराष्ट्र, भारत - ४११००१',
     addressEn: 'Gram Panchayat Office, Village, Taluka, District, Maharashtra, India - 411001',
     phone: '+91 12345 67890',
     email: 'info@grampanchayat.com',
     workingHours: 'सोमवार ते शनिवार: सकाळी ९:०० ते संध्याकाळी ६:००',
-    workingHoursEn: 'Monday to Saturday: 9:00 AM to 6:00 PM'
+    workingHoursEn: 'Monday to Saturday: 9:00 AM to 6:00 PM',
+    importantNotice: 'ग्रामपंचायत कार्यालयात येण्यापूर्वी कृपया संपर्क करा. आपत्कालीन प्रसंगी २४ तास संपर्क सुविधा उपलब्ध आहे. सर्व कागदपत्रे आणि आवश्यक दस्तऐवज घेऊन येण्याची कृपा करा.',
+    importantNoticeEn: 'Please contact before visiting the Gram Panchayat office. 24-hour contact facility is available for emergencies. Please bring all documents and necessary paperwork.'
   };
+
+  // Use provided data or fallback to demo
+  const officeDetails = propOfficeDetails || demoOfficeDetails;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -190,8 +201,7 @@ export function OfficeInformationSection() {
                   <h3 className="text-2xl font-bold text-gray-900">महत्त्वाची सूचना</h3>
                 </div>
                 <p className="text-gray-700 leading-relaxed max-w-4xl mx-auto">
-                  ग्रामपंचायत कार्यालयात येण्यापूर्वी कृपया संपर्क करा. आपत्कालीन प्रसंगी २४ तास संपर्क सुविधा उपलब्ध आहे. 
-                  सर्व कागदपत्रे आणि आवश्यक दस्तऐवज घेऊन येण्याची कृपा करा.
+                  {officeDetails.importantNotice || 'ग्रामपंचायत कार्यालयात येण्यापूर्वी कृपया संपर्क करा. आपत्कालीन प्रसंगी २४ तास संपर्क सुविधा उपलब्ध आहे. सर्व कागदपत्रे आणि आवश्यक दस्तऐवज घेऊन येण्याची कृपा करा.'}
                 </p>
               </div>
             </CardContent>

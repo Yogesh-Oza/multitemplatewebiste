@@ -108,6 +108,7 @@ export interface TimelineItem {
   titleEn: string;
   description: string;
   descriptionEn: string;
+  imageUrl?: string;
   side: string;
   order?: number;
   isActive?: boolean;

@@ -55,7 +55,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { year, title, titleEn, description, descriptionEn, side, order, isActive } = body;
+    const { year, title, titleEn, description, descriptionEn, imageUrl, side, order, isActive } = body;
 
     // Verify the timeline item belongs to this subdomain
     const existingItem = await prisma.timelineItem.findFirst({
@@ -79,9 +79,10 @@ export async function PUT(
         titleEn,
         description,
         descriptionEn,
+        imageUrl: imageUrl !== undefined ? imageUrl : existingItem.imageUrl,
         side: side || 'left',
-        order: order || 0,
-        isActive: isActive !== undefined ? isActive : true,
+        order: order !== undefined ? order : existingItem.order,
+        isActive: isActive !== undefined ? isActive : existingItem.isActive,
       },
     });
 
