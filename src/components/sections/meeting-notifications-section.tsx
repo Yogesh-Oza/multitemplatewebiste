@@ -371,12 +371,14 @@ export default function MeetingNotificationsSection({ meetings: propMeetings = [
                     अजेंडा
                   </h4>
                   <ul className="space-y-1">
-                    {(Array.isArray(meeting.agenda) ? meeting.agenda.slice(0, 3) : []).map((item: any, idx: number) => typeof item === 'string' ? (
-                      <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
-                        <span className="line-clamp-2">{item}</span>
-                      </li>
-                    ))}
+                    {(Array.isArray(meeting.agenda) ? meeting.agenda.slice(0, 3) : []).map((item: any, idx: number) => 
+                      typeof item === 'string' ? (
+                        <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span className="line-clamp-2">{item}</span>
+                        </li>
+                      ) : null
+                    )}
                     {meeting.agenda.length > 3 && (
                       <li className="text-sm text-blue-600 font-medium">
                         +{meeting.agenda.length - 3} अधिक मुद्दे
@@ -393,7 +395,7 @@ export default function MeetingNotificationsSection({ meetings: propMeetings = [
                       दस्तावेज
                     </h4>
                     <div className="space-y-1">
-                      {meeting.documents.map((doc, idx) => (
+                      {meeting.documents.map((doc: { name: string; nameEn: string; url: string; type: 'agenda' | 'minutes' | 'notice' | 'resolution' }, idx: number) => (
                         <Button
                           key={idx}
                           variant="outline"
