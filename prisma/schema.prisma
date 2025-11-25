@@ -804,6 +804,13 @@ model Subdomain {
   educationItems           EducationItem[]
   environmentInitiatives   EnvironmentInitiative[]
   dashboardMetrics         DashboardMetric[]
+  dashboardOverview        DashboardOverview[]
+  dashboardKpiMetrics      DashboardKpiMetric[]
+  dashboardProgressItems   DashboardProgressIndicator[]
+  dashboardContentStats    DashboardContentStat[]
+  dashboardWardComparisons DashboardWardComparison[]
+  dashboardAchievements    DashboardAchievement[]
+  dashboardActivities      DashboardRecentActivity[]
   socialFeeds              SocialFeed[]
   formSubmissions          FormSubmission[]
   leaders                  Leader[]
@@ -817,6 +824,7 @@ model Subdomain {
   beforeAfterGallery       BeforeAfterGallery[]
   sankalpItems             SankalpItem[]
   activityLogs             ActivityLog[]
+  infrastructurePageSettings InfrastructurePageSetting[]
   infrastructureFacilities InfrastructureFacility[]
   smartVillageMetrics      SmartVillageMetric[]
   serviceStatusItems       ServiceStatusItem[]
@@ -903,6 +911,43 @@ model GovernmentResolution {
   updatedAt     DateTime   @updatedAt
 
   @@map("government_resolutions")
+}
+
+model InfrastructurePageSetting {
+  id                   String     @id @default(auto()) @map("_id") @db.ObjectId
+  heroTagline          String     @default("")
+  heroTaglineEn        String     @default("")
+  heroTitle            String
+  heroTitleEn          String
+  heroSubtitle         String     @default("")
+  heroSubtitleEn       String     @default("")
+  heroDescription      String     @default("")
+  heroDescriptionEn    String     @default("")
+  highlightPills       Json?
+  overviewHeading      String     @default("")
+  overviewHeadingEn    String     @default("")
+  overviewDescription  String     @default("")
+  overviewDescriptionEn String     @default("")
+  ctaTitle             String     @default("")
+  ctaTitleEn           String     @default("")
+  ctaDescription       String     @default("")
+  ctaDescriptionEn     String     @default("")
+  ctaSubtext           String     @default("")
+  ctaSubtextEn         String     @default("")
+  ctaPrimaryAction     String?
+  ctaPrimaryActionEn   String?
+  ctaSecondaryAction   String?
+  ctaSecondaryActionEn String?
+  governmentBadge      String?
+  governmentBadgeEn    String?
+  smartDashboardMeta   Json?
+  isActive             Boolean    @default(true)
+  subdomainId          String?    @db.ObjectId
+  subdomain            Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  @@map("infrastructure_page_settings")
 }
 
 model InfrastructureFacility {
@@ -1676,6 +1721,148 @@ model ImpactDashboardMetric {
   updatedAt   DateTime   @updatedAt
 
   @@map("impact_dashboard_metrics")
+}
+
+model DashboardOverview {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  title          String     @default("माझे गाव, माझी प्रगती")
+  titleEn        String     @default("My Village, My Progress")
+  subtitle       String     @default("ग्रामपंचायत - विकास आणि प्रगतीचा डॅशबोर्ड")
+  subtitleEn     String     @default("Gram Panchayat - Development & Progress Dashboard")
+  description    String?
+  descriptionEn  String?
+  highlightText  String?
+  highlightTextEn String?
+  isActive       Boolean    @default(true)
+  subdomainId    String?    @db.ObjectId
+  subdomain      Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@map("dashboard_overview")
+}
+
+model DashboardKpiMetric {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  value         Float
+  unit          String?
+  unitEn        String?
+  icon          String
+  color         String     @default("blue")
+  order         Int        @default(0)
+  isActive      Boolean    @default(true)
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("dashboard_kpi_metrics")
+}
+
+model DashboardProgressIndicator {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  value         Float
+  unit          String     @default("%")
+  icon          String
+  color         String     @default("blue")
+  order         Int        @default(0)
+  isActive      Boolean    @default(true)
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("dashboard_progress_indicators")
+}
+
+model DashboardContentStat {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  description   String?
+  descriptionEn String?
+  value         Float
+  unit          String?
+  icon          String?
+  color         String     @default("blue")
+  order         Int        @default(0)
+  isActive      Boolean    @default(true)
+  breakdown     Json?
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("dashboard_content_stats")
+}
+
+model DashboardWardComparison {
+  id                  String     @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  nameEn              String
+  population          Int
+  households          Int
+  sanitation          Float
+  waterSupply         Float
+  electricity         Float
+  projects            Int
+  complaints          Int
+  resolvedComplaints  Int
+  order               Int        @default(0)
+  isActive            Boolean    @default(true)
+  subdomainId         String?    @db.ObjectId
+  subdomain           Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@map("dashboard_wards")
+}
+
+model DashboardAchievement {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  impact        String
+  impactEn      String
+  category      String
+  categoryEn    String
+  year          String
+  icon          String     @default("Award")
+  order         Int        @default(0)
+  isActive      Boolean    @default(true)
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("dashboard_achievements")
+}
+
+model DashboardRecentActivity {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  activityDate  DateTime
+  icon          String     @default("Activity")
+  color         String     @default("green")
+  order         Int        @default(0)
+  isActive      Boolean    @default(true)
+  subdomainId   String?    @db.ObjectId
+  subdomain     Subdomain? @relation(fields: [subdomainId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("dashboard_recent_activity")
 }
 
 model SankalpItem {

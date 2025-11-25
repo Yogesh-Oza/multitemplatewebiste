@@ -72,6 +72,15 @@ interface ServiceStatusItem {
   order: number;
 }
 
+interface SmartVillageDashboardSectionProps {
+  metaLabels?: {
+    statusLabel?: string;
+    statusLabelEn?: string;
+    updatedLabel?: string;
+    updatedLabelEn?: string;
+  };
+}
+
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Droplet: Droplets,
   MapPin,
@@ -105,7 +114,9 @@ const statusColorMap: Record<string, string> = {
   अनुपलब्ध: 'bg-red-100 text-red-700'
 };
 
-export default function SmartVillageDashboardSection() {
+export default function SmartVillageDashboardSection({
+  metaLabels
+}: SmartVillageDashboardSectionProps = {}) {
   const [facilities, setFacilities] = useState<InfrastructureFacility[]>(
     DEMO_INFRASTRUCTURE_FACILITIES as InfrastructureFacility[]
   );
@@ -117,6 +128,9 @@ export default function SmartVillageDashboardSection() {
   );
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const statusHeading = metaLabels?.statusLabel || 'रियल-टाइम स्थिती';
+  const updatedHeading = metaLabels?.updatedLabel || 'अद्यतन';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -272,7 +286,8 @@ export default function SmartVillageDashboardSection() {
           दररोजचा वीजपुरवठा, पाण्याची उपलब्धता आणि इतर सुविधांची रियल-टाइम माहिती
         </p>
         <p className="text-sm text-gray-500">
-          रियल-टाइम स्थिती • अद्यतन: {lastUpdated ? formatDate(lastUpdated) : 'थेट डेटा'}
+          {statusHeading} • {updatedHeading}:{' '}
+          {lastUpdated ? formatDate(lastUpdated) : 'थेट डेटा'}
         </p>
       </div>
 
@@ -307,7 +322,7 @@ export default function SmartVillageDashboardSection() {
         <CardHeader>
           <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-3">
             <Activity className="h-6 w-6 text-blue-600" />
-            रियल-टाइम स्थिती
+            {statusHeading}
           </CardTitle>
         </CardHeader>
         <CardContent>

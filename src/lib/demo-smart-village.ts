@@ -1,3 +1,75 @@
+export interface InfrastructureHighlightPill {
+  label: string;
+  labelEn: string;
+}
+
+export interface InfrastructurePageSettingContent {
+  heroTagline?: string;
+  heroTaglineEn?: string;
+  heroTitle: string;
+  heroTitleEn: string;
+  heroSubtitle: string;
+  heroSubtitleEn: string;
+  heroDescription: string;
+  heroDescriptionEn: string;
+  highlightPills: InfrastructureHighlightPill[];
+  overviewHeading: string;
+  overviewHeadingEn: string;
+  overviewDescription: string;
+  overviewDescriptionEn: string;
+  ctaTitle: string;
+  ctaTitleEn: string;
+  ctaDescription: string;
+  ctaDescriptionEn: string;
+  ctaSubtext?: string;
+  ctaSubtextEn?: string;
+  ctaPrimaryAction?: string;
+  ctaPrimaryActionEn?: string;
+  ctaSecondaryAction?: string;
+  ctaSecondaryActionEn?: string;
+  governmentBadge?: string;
+  governmentBadgeEn?: string;
+  smartDashboardMeta?: Record<string, any>;
+}
+
+export const DEMO_INFRASTRUCTURE_PAGE_SETTING: InfrastructurePageSettingContent = {
+  heroTagline: 'पायाभूत',
+  heroTaglineEn: 'Infrastructure',
+  heroTitle: 'ग्राम पायाभूत सुविधा आणि सुविधा',
+  heroTitleEn: 'Village Infrastructure & Facilities',
+  heroSubtitle: 'पायाभूत सुविधा आणि स्मार्ट व्हिलेज',
+  heroSubtitleEn: 'Infrastructure & Smart Village',
+  heroDescription: 'पाणीपुरवठा, स्वच्छता, रस्ते, शाळा, आरोग्य केंद्रे आणि इतर सुविधा',
+  heroDescriptionEn: 'Water supply, sanitation, roads, schools, health centers and other amenities',
+  highlightPills: [
+    { label: 'पाणीपुरवठा', labelEn: 'Water Supply' },
+    { label: 'रस्ते आणि दिवे', labelEn: 'Roads & Lighting' },
+    { label: 'शाळा आणि आरोग्य', labelEn: 'Schools & Health' }
+  ],
+  overviewHeading: 'मूलभूत सुविधा',
+  overviewHeadingEn: 'Core Facilities',
+  overviewDescription: 'ग्राम पायाभूत सुविधांची माहिती',
+  overviewDescriptionEn: 'Comprehensive overview of village infrastructure',
+  ctaTitle: 'महाराष्ट्र शासन',
+  ctaTitleEn: 'Government of Maharashtra',
+  ctaDescription: 'सर्व पायाभूत सुविधा भारत सरकार आणि महाराष्ट्र शासनाच्या मार्गदर्शनाखाली विकसित',
+  ctaDescriptionEn: 'All infrastructure facilities developed under the guidance of Government of India and Maharashtra Government',
+  ctaSubtext: 'शासनाच्या मार्गदर्शक तत्त्वांचे संपूर्ण पालन',
+  ctaSubtextEn: 'Fully compliant with Government development guidelines',
+  ctaPrimaryAction: 'लाइव्ह स्थिती',
+  ctaPrimaryActionEn: 'Live Status',
+  ctaSecondaryAction: 'तपशील पहा',
+  ctaSecondaryActionEn: 'View Details',
+  governmentBadge: 'महाराष्ट्र शासन',
+  governmentBadgeEn: 'Maharashtra Government',
+  smartDashboardMeta: {
+    statusLabel: 'रियल-टाइम स्थिती',
+    statusLabelEn: 'Real-time Status',
+    updatedLabel: 'अद्यतन',
+    updatedLabelEn: 'Updated On'
+  }
+};
+
 export const DEMO_INFRASTRUCTURE_FACILITIES = [
   {
     id: 'demo-facility-1',

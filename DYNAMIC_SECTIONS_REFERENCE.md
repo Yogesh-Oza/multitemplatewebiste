@@ -133,6 +133,21 @@ All sections below are **DYNAMIC** and can be managed via the Admin Panel at `/a
   - Contact information
   - Government branding for footer
 
+### 14. “My Village, My Progress” Dashboard
+- **Frontend Page**: `/subdomain/[subdomain]/dashboard`
+- **Admin Path**: `/admin/dashboard-metrics`
+- **Data Models**: `DashboardOverview`, `DashboardKpiMetric`, `DashboardProgressIndicator`, `DashboardContentStat`, `DashboardWardComparison`, `DashboardAchievement`, `DashboardRecentActivity`
+- **API Routes**: `/api/dashboard/overview`, `/api/dashboard/kpis`, `/api/dashboard/progress`, `/api/dashboard/content-stats`, `/api/dashboard/wards`, `/api/dashboard/achievements`, `/api/dashboard/activities`
+- **Dynamic Fields**:
+  - Hero titles/subtitles and highlight text
+  - KPI cards with icons, colors, units, order, and active state
+  - Progress indicators (value %, color, icon, order)
+  - Content stats with optional breakdown chips
+  - Ward wise comparison rows (population, sanitation, utilities, complaints)
+  - Top achievements with category, impact, year, icon
+  - Recent activity entries with icon, color, date (relative label computed on frontend)
+- **Notes**: When a section has no saved records, curated demo data is rendered on both Admin and Public pages to keep the layout intact.
+
 ## Other Dynamic Pages
 
 ### Programs Page (`/programs`)

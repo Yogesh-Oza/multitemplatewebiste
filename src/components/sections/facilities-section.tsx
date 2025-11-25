@@ -39,11 +39,93 @@ const categoryColors = {
   'अन्य': 'bg-gray-500'
 };
 
+const demoFacilities: Facility[] = [
+  {
+    id: 'demo-facility-water',
+    name: 'पाणी शोधन केंद्र',
+    nameEn: 'Water Treatment Plant',
+    description: 'गावाच्या पूर्व भागातील मुख्य पाणी शोधन केंद्र',
+    descriptionEn: 'Primary water treatment facility in the eastern cluster',
+    category: 'पाणी',
+    location: 'गावाच्या पूर्व भागात',
+    contactInfo: '+91-XXXX-XXXXXX',
+    workingHours: '24x7',
+    imageUrl: '/images/hero-1.jpg',
+    isActive: true
+  },
+  {
+    id: 'demo-facility-school',
+    name: 'प्राथमिक शाळा',
+    nameEn: 'Primary School',
+    description: 'स्मार्ट क्लासरूम आणि ई-लर्निंग सुविधा',
+    descriptionEn: 'Smart classrooms with e-learning support',
+    category: 'शिक्षण',
+    location: 'गावाच्या मध्य भागात',
+    contactInfo: '+91-XXXX-XXXXXX',
+    workingHours: '8:00 AM - 4:00 PM',
+    imageUrl: '/images/hero-2.jpg',
+    isActive: true
+  },
+  {
+    id: 'demo-facility-health',
+    name: 'प्राथमिक आरोग्य केंद्र',
+    nameEn: 'Primary Health Center',
+    description: '२४x७ प्राथमिक आरोग्य सेवा आणि आपत्कालीन सुविधा',
+    descriptionEn: '24x7 primary health services with emergency care',
+    category: 'आरोग्य',
+    location: 'ग्रामपंचायत कार्यालयजवळ',
+    contactInfo: '+91-XXXX-XXXXXX',
+    workingHours: '24x7',
+    imageUrl: '/images/hero-3.jpg',
+    isActive: true
+  },
+  {
+    id: 'demo-facility-library',
+    name: 'सार्वजनिक वाचनालय',
+    nameEn: 'Public Library',
+    description: 'सामुदायिक भवनातील आधुनिक वाचनालय आणि ई-लर्निंग हब',
+    descriptionEn: 'Modern library with e-learning hub inside the community hall',
+    category: 'संचार',
+    location: 'सामुदायिक भवनात',
+    contactInfo: '+91-XXXX-XXXXXX',
+    workingHours: '10:00 AM - 6:00 PM',
+    imageUrl: '/images/hero-4.jpg',
+    isActive: true
+  },
+  {
+    id: 'demo-facility-playground',
+    name: 'खेळाचे मैदान',
+    nameEn: 'Playground',
+    description: 'शाळेजवळील बहुउद्देशीय खेळाचे मैदान',
+    descriptionEn: 'Multi-purpose sports ground near the school',
+    category: 'अन्य',
+    location: 'शाळेजवळ',
+    contactInfo: '+91-XXXX-XXXXXX',
+    workingHours: '6:00 AM - 8:00 PM',
+    imageUrl: '/images/hero-5.jpg',
+    isActive: true
+  },
+  {
+    id: 'demo-facility-bus',
+    name: 'बस थांबा',
+    nameEn: 'Bus Stop',
+    description: 'मुख्य रस्त्यावरच्या प्रमुख बस आणि ऑटो सुविधा',
+    descriptionEn: 'Primary bus and auto-rickshaw stop on the main road',
+    category: 'वाहतूक',
+    location: 'मुख्य रस्ता',
+    contactInfo: '+91-XXXX-XXXXXX',
+    workingHours: '24x7',
+    imageUrl: '/images/hero-1.jpg',
+    isActive: true
+  }
+];
+
 export function FacilitiesSection() {
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('सर्व');
+  const [isDemo, setIsDemo] = useState(false);
 
   const categories = ['सर्व', 'पाणी', 'वीज', 'स्वच्छता', 'वाहतूक', 'संचार', 'शिक्षण', 'आरोग्य', 'अन्य'];
 
@@ -53,7 +135,14 @@ export function FacilitiesSection() {
         const response = await fetch('/api/facilities');
         if (response.ok) {
           const data = await response.json();
-          setFacilities(data.filter((facility: Facility) => facility.isActive));
+          const activeFacilities = data.filter((facility: Facility) => facility.isActive);
+          if (!activeFacilities.length) {
+            setFacilities(demoFacilities);
+            setIsDemo(true);
+          } else {
+            setFacilities(activeFacilities);
+            setIsDemo(false);
+          }
         } else {
           setError('सुविधा लोड करताना त्रुटी आली');
         }
@@ -114,6 +203,11 @@ export function FacilitiesSection() {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             गावातील विविध सुविधा आणि त्यांची माहिती
           </p>
+          {isDemo && (
+            <p className="text-xs text-blue-600 bg-white/80 px-3 py-1 inline-flex rounded-full border border-blue-100 mt-4">
+              डेमो डेटा - प्रशासनामधून अपडेट करा
+            </p>
+          )}
         </div>
 
         {/* Category Filter */}

@@ -117,7 +117,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/infrastructure-smart-village',
-    label: 'स्मार्ट व्हिलेज',
+    label: 'ग्राम पायाभूत सुविधा आणि सुविधा',
     icon: Gauge,
     description: 'पायाभूत सुविधा आणि स्मार्ट डॅशबोर्ड व्यवस्थापन'
   },
@@ -141,7 +141,7 @@ const adminNavItems = [
   },
   {
     href: '/admin/dashboard-metrics',
-    label: 'डॅशबोर्ड',
+    label: 'डॅशबोर्ड – माझे गाव, माझी प्रगती',
     icon: BarChart3,
     description: 'डॅशबोर्ड मेट्रिक्स व्यवस्थापन'
   },

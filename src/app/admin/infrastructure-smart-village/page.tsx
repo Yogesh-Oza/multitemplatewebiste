@@ -12,7 +12,10 @@ import { toast } from 'sonner';
 import {
   DEMO_INFRASTRUCTURE_FACILITIES,
   DEMO_SMART_VILLAGE_METRICS,
-  DEMO_SERVICE_STATUS_ITEMS
+  DEMO_SERVICE_STATUS_ITEMS,
+  DEMO_INFRASTRUCTURE_PAGE_SETTING,
+  InfrastructureHighlightPill,
+  InfrastructurePageSettingContent
 } from '@/lib/demo-smart-village';
 
 interface InfrastructureFacility {
@@ -59,9 +62,24 @@ interface ServiceStatusItem {
   order: number;
 }
 
-type TabKey = 'facilities' | 'metrics' | 'services';
+interface InfrastructurePageSetting extends InfrastructurePageSettingContent {
+  id?: string;
+  isActive: boolean;
+}
+
+type InfrastructurePageSettingForm = Omit<InfrastructurePageSettingContent, 'smartDashboardMeta'> & {
+  smartDashboardMeta: string;
+  isActive: boolean;
+};
+
+type TabKey = 'overview' | 'facilities' | 'metrics' | 'services';
 
 const tabs: { id: TabKey; label: string; description: string }[] = [
+  {
+    id: 'overview',
+    label: 'पृष्ठ सेटिंग्स',
+    description: 'हीरो, हायलाइट्स आणि CTA कॉपी'
+  },
   {
     id: 'facilities',
     label: 'मूलभूत सुविधा',
@@ -86,20 +104,102 @@ const formatDateForInput = (value?: string | null) => {
   return date.toISOString().slice(0, 16);
 };
 
-export default function InfrastructureSmartVillageAdminPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('facilities');
+const emptyHighlightPill: InfrastructureHighlightPill = { label: '', labelEn: '' };
 
+const ensureHighlightPills = (items?: InfrastructureHighlightPill[] | null) => {
+  if (!items || items.length === 0) {
+    return [{ ...emptyHighlightPill }];
+  }
+  return items.map((pill) => ({
+    label: pill?.label || '',
+    labelEn: pill?.labelEn || ''
+  }));
+};
+
+const mapSettingToForm = (
+  setting: InfrastructurePageSetting | (InfrastructurePageSettingContent & { isActive?: boolean })
+): InfrastructurePageSettingForm => ({
+  heroTagline: setting.heroTagline || '',
+  heroTaglineEn: setting.heroTaglineEn || '',
+  heroTitle: setting.heroTitle || '',
+  heroTitleEn: setting.heroTitleEn || '',
+  heroSubtitle: setting.heroSubtitle || '',
+  heroSubtitleEn: setting.heroSubtitleEn || '',
+  heroDescription: setting.heroDescription || '',
+  heroDescriptionEn: setting.heroDescriptionEn || '',
+  highlightPills: ensureHighlightPills(setting.highlightPills),
+  overviewHeading: setting.overviewHeading || '',
+  overviewHeadingEn: setting.overviewHeadingEn || '',
+  overviewDescription: setting.overviewDescription || '',
+  overviewDescriptionEn: setting.overviewDescriptionEn || '',
+  ctaTitle: setting.ctaTitle || '',
+  ctaTitleEn: setting.ctaTitleEn || '',
+  ctaDescription: setting.ctaDescription || '',
+  ctaDescriptionEn: setting.ctaDescriptionEn || '',
+  ctaSubtext: setting.ctaSubtext || '',
+  ctaSubtextEn: setting.ctaSubtextEn || '',
+  ctaPrimaryAction: setting.ctaPrimaryAction || '',
+  ctaPrimaryActionEn: setting.ctaPrimaryActionEn || '',
+  ctaSecondaryAction: setting.ctaSecondaryAction || '',
+  ctaSecondaryActionEn: setting.ctaSecondaryActionEn || '',
+  governmentBadge: setting.governmentBadge || '',
+  governmentBadgeEn: setting.governmentBadgeEn || '',
+  smartDashboardMeta: setting.smartDashboardMeta
+    ? JSON.stringify(setting.smartDashboardMeta, null, 2)
+    : '',
+  isActive: 'isActive' in setting ? Boolean((setting as InfrastructurePageSetting).isActive) : true
+});
+
+const createEmptyPageSettingForm = (): InfrastructurePageSettingForm =>
+  mapSettingToForm({
+    heroTagline: '',
+    heroTaglineEn: '',
+    heroTitle: '',
+    heroTitleEn: '',
+    heroSubtitle: '',
+    heroSubtitleEn: '',
+    heroDescription: '',
+    heroDescriptionEn: '',
+    highlightPills: [],
+    overviewHeading: '',
+    overviewHeadingEn: '',
+    overviewDescription: '',
+    overviewDescriptionEn: '',
+    ctaTitle: '',
+    ctaTitleEn: '',
+    ctaDescription: '',
+    ctaDescriptionEn: '',
+    ctaSubtext: '',
+    ctaSubtextEn: '',
+    ctaPrimaryAction: '',
+    ctaPrimaryActionEn: '',
+    ctaSecondaryAction: '',
+    ctaSecondaryActionEn: '',
+    governmentBadge: '',
+    governmentBadgeEn: ''
+  });
+
+export default function InfrastructureSmartVillageAdminPage() {
+  const [activeTab, setActiveTab] = useState<TabKey>('overview');
+
+  const [pageSetting, setPageSetting] = useState<InfrastructurePageSetting | null>(null);
+  const [pageSettingForm, setPageSettingForm] = useState<InfrastructurePageSettingForm>(
+    createEmptyPageSettingForm()
+  );
   const [facilities, setFacilities] = useState<InfrastructureFacility[]>([]);
   const [metrics, setMetrics] = useState<SmartVillageMetric[]>([]);
   const [services, setServices] = useState<ServiceStatusItem[]>([]);
 
+  const [isPageSettingLoading, setIsPageSettingLoading] = useState(true);
   const [isFacilitiesDemo, setIsFacilitiesDemo] = useState(false);
   const [isMetricsDemo, setIsMetricsDemo] = useState(false);
   const [isServicesDemo, setIsServicesDemo] = useState(false);
 
+  const [isPageSettingDemo, setIsPageSettingDemo] = useState(false);
   const [isFacilitiesLoading, setIsFacilitiesLoading] = useState(true);
   const [isMetricsLoading, setIsMetricsLoading] = useState(true);
   const [isServicesLoading, setIsServicesLoading] = useState(true);
+  const [isSavingPageSetting, setIsSavingPageSetting] = useState(false);
 
   const [isFacilityModalOpen, setIsFacilityModalOpen] = useState(false);
   const [editingFacility, setEditingFacility] = useState<InfrastructureFacility | null>(null);
@@ -149,10 +249,50 @@ export default function InfrastructureSmartVillageAdminPage() {
   });
 
   useEffect(() => {
+    fetchPageSetting();
     fetchFacilities();
     fetchMetrics();
     fetchServices();
   }, []);
+
+  const fetchPageSetting = async () => {
+    setIsPageSettingLoading(true);
+    try {
+      const response = await fetch('/api/infrastructure-page-settings');
+      if (response.ok) {
+        const data = await response.json();
+        const rawSetting = data?.setting;
+        const normalizedSetting: InfrastructurePageSetting | null = rawSetting
+          ? {
+              ...rawSetting,
+              highlightPills: ensureHighlightPills(
+                (rawSetting.highlightPills as InfrastructureHighlightPill[]) || []
+              ),
+              smartDashboardMeta: rawSetting.smartDashboardMeta ?? null,
+              isActive: rawSetting.isActive ?? true
+            }
+          : null;
+
+        const fallbackSource =
+          normalizedSetting ??
+          ({
+            ...DEMO_INFRASTRUCTURE_PAGE_SETTING,
+            isActive: true
+          } as InfrastructurePageSetting);
+
+        setPageSetting(normalizedSetting);
+        setIsPageSettingDemo(Boolean(data?.isDemo) || !normalizedSetting);
+        setPageSettingForm(mapSettingToForm(fallbackSource));
+      } else {
+        toast.error('पृष्ठ सेटिंग्स लोड करू शकलो नाही');
+      }
+    } catch (error) {
+      console.error('Error fetching infrastructure page settings:', error);
+      toast.error('पृष्ठ सेटिंग्स लोड करताना त्रुटी आली');
+    } finally {
+      setIsPageSettingLoading(false);
+    }
+  };
 
   const fetchFacilities = async () => {
     setIsFacilitiesLoading(true);
@@ -271,6 +411,103 @@ export default function InfrastructureSmartVillageAdminPage() {
       order: 0,
       isActive: true
     });
+  };
+
+  const handleHighlightChange = (
+    index: number,
+    field: keyof InfrastructureHighlightPill,
+    value: string
+  ) => {
+    setPageSettingForm((prev) => {
+      const highlightPills = [...prev.highlightPills];
+      highlightPills[index] = {
+        ...highlightPills[index],
+        [field]: value
+      };
+      return { ...prev, highlightPills };
+    });
+  };
+
+  const handleAddHighlightPill = () => {
+    setPageSettingForm((prev) => ({
+      ...prev,
+      highlightPills: [...prev.highlightPills, { ...emptyHighlightPill }]
+    }));
+  };
+
+  const handleRemoveHighlightPill = (index: number) => {
+    setPageSettingForm((prev) => {
+      const highlightPills = prev.highlightPills.filter((_, idx) => idx !== index);
+      return {
+        ...prev,
+        highlightPills: highlightPills.length ? highlightPills : [{ ...emptyHighlightPill }]
+      };
+    });
+  };
+
+  const resetPageSettingForm = (
+    source?: InfrastructurePageSetting | (InfrastructurePageSettingContent & { isActive?: boolean })
+  ) => {
+    if (source) {
+      setPageSettingForm(mapSettingToForm(source));
+      return;
+    }
+
+    if (pageSetting) {
+      setPageSettingForm(mapSettingToForm(pageSetting));
+      return;
+    }
+
+    setPageSettingForm(
+      mapSettingToForm({
+        ...DEMO_INFRASTRUCTURE_PAGE_SETTING,
+        isActive: true
+      })
+    );
+  };
+
+  const handlePageSettingSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    let parsedMeta: Record<string, any> | null = null;
+
+    if (pageSettingForm.smartDashboardMeta.trim()) {
+      try {
+        parsedMeta = JSON.parse(pageSettingForm.smartDashboardMeta);
+      } catch (error) {
+        toast.error('Smart Dashboard Metadata साठी वैध JSON द्या');
+        return;
+      }
+    }
+
+    const { smartDashboardMeta, ...rest } = pageSettingForm;
+    const payload = {
+      ...rest,
+      highlightPills: rest.highlightPills,
+      smartDashboardMeta: parsedMeta
+    };
+
+    setIsSavingPageSetting(true);
+    try {
+      const method = pageSetting?.id ? 'PUT' : 'POST';
+      const body = pageSetting?.id ? { id: pageSetting.id, ...payload } : payload;
+      const response = await fetch('/api/infrastructure-page-settings', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (response.ok) {
+        toast.success('पृष्ठ सेटिंग्स सेव्ह केल्या');
+        await fetchPageSetting();
+      } else {
+        toast.error('पृष्ठ सेटिंग्स सेव्ह करताना त्रुटी आली');
+      }
+    } catch (error) {
+      console.error('Error saving infrastructure page settings:', error);
+      toast.error('पृष्ठ सेटिंग्स सेव्ह करताना त्रुटी आली');
+    } finally {
+      setIsSavingPageSetting(false);
+    }
   };
 
   const handleFacilitySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -456,6 +693,522 @@ export default function InfrastructureSmartVillageAdminPage() {
       </div>
     </div>
   );
+
+  const renderOverviewTab = () => {
+    let dashboardMetaPreview: Record<string, any> | null = null;
+    let dashboardMetaError = false;
+    if (pageSettingForm.smartDashboardMeta.trim()) {
+      try {
+        dashboardMetaPreview = JSON.parse(pageSettingForm.smartDashboardMeta);
+      } catch {
+        dashboardMetaError = true;
+      }
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900">पृष्ठ सेटिंग्स</h2>
+            <p className="text-gray-600">हीरो, हायलाइट्स आणि CTA कॉपी व्यवस्थापित करा</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => resetPageSettingForm()}>
+              {pageSetting ? 'रीसेट' : 'डेमो डेटा'}
+            </Button>
+            <Button variant="outline" onClick={() => fetchPageSetting()}>
+              रीफ्रेश
+            </Button>
+          </div>
+        </div>
+
+        {isPageSettingDemo &&
+          renderDemoNotice(
+            'हे डेमो कॉन्टेंट आहे. नवीन मजकूर सेव्ह करून स्वतःचा डेटा सेट करा.'
+          )}
+
+        {isPageSettingLoading ? (
+          <div className="h-40 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">कॉपी संपादित करा</CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  हीरो विभाग, हायलाइट्स आणि CTA ब्लॉक अपडेट करा
+                </p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePageSettingSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>हीरो टॅगलाइन (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.heroTagline}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, heroTagline: e.target.value }))
+                        }
+                        placeholder="पायाभूत"
+                      />
+                    </div>
+                    <div>
+                      <Label>Hero Tagline (English)</Label>
+                      <Input
+                        value={pageSettingForm.heroTaglineEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, heroTaglineEn: e.target.value }))
+                        }
+                        placeholder="Infrastructure"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>हीरो शीर्षक (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.heroTitle}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, heroTitle: e.target.value }))
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Hero Title (English)</Label>
+                      <Input
+                        value={pageSettingForm.heroTitleEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, heroTitleEn: e.target.value }))
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>हीरो उपशीर्षक (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.heroSubtitle}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, heroSubtitle: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Hero Subtitle (English)</Label>
+                      <Input
+                        value={pageSettingForm.heroSubtitleEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, heroSubtitleEn: e.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>हीरो वर्णन (मराठी)</Label>
+                      <Textarea
+                        rows={3}
+                        value={pageSettingForm.heroDescription}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            heroDescription: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Hero Description (English)</Label>
+                      <Textarea
+                        rows={3}
+                        value={pageSettingForm.heroDescriptionEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            heroDescriptionEn: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-base">हायलाइट पिल्स</Label>
+                      <Button type="button" variant="outline" size="sm" onClick={handleAddHighlightPill}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        नवीन जोडा
+                      </Button>
+                    </div>
+                    {pageSettingForm.highlightPills.map((pill, index) => (
+                      <div
+                        key={`highlight-${index}`}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-4 relative"
+                      >
+                        <div>
+                          <Label>लेबल (मराठी)</Label>
+                          <Input
+                            value={pill.label}
+                            onChange={(e) => handleHighlightChange(index, 'label', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Label (English)</Label>
+                          <Input
+                            value={pill.labelEn}
+                            onChange={(e) => handleHighlightChange(index, 'labelEn', e.target.value)}
+                          />
+                        </div>
+                        {pageSettingForm.highlightPills.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="absolute top-2 right-2 text-red-600 hover:text-red-700"
+                            onClick={() => handleRemoveHighlightPill(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>आढावा शीर्षक (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.overviewHeading}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            overviewHeading: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Overview Title (English)</Label>
+                      <Input
+                        value={pageSettingForm.overviewHeadingEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            overviewHeadingEn: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>आढावा वर्णन (मराठी)</Label>
+                      <Textarea
+                        rows={3}
+                        value={pageSettingForm.overviewDescription}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            overviewDescription: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Overview Description (English)</Label>
+                      <Textarea
+                        rows={3}
+                        value={pageSettingForm.overviewDescriptionEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            overviewDescriptionEn: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>CTA शीर्षक (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.ctaTitle}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, ctaTitle: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>CTA Title (English)</Label>
+                      <Input
+                        value={pageSettingForm.ctaTitleEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, ctaTitleEn: e.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>CTA वर्णन (मराठी)</Label>
+                      <Textarea
+                        rows={3}
+                        value={pageSettingForm.ctaDescription}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            ctaDescription: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>CTA Description (English)</Label>
+                      <Textarea
+                        rows={3}
+                        value={pageSettingForm.ctaDescriptionEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            ctaDescriptionEn: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>CTA सबटेक्स्ट (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.ctaSubtext}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, ctaSubtext: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>CTA Subtext (English)</Label>
+                      <Input
+                        value={pageSettingForm.ctaSubtextEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({ ...prev, ctaSubtextEn: e.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>प्राथमिक बटण (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.ctaPrimaryAction}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            ctaPrimaryAction: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Primary Action (English)</Label>
+                      <Input
+                        value={pageSettingForm.ctaPrimaryActionEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            ctaPrimaryActionEn: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>दुसरे बटण (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.ctaSecondaryAction}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            ctaSecondaryAction: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Secondary Action (English)</Label>
+                      <Input
+                        value={pageSettingForm.ctaSecondaryActionEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            ctaSecondaryActionEn: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>गव्हर्नमेंट बॅज (मराठी)</Label>
+                      <Input
+                        value={pageSettingForm.governmentBadge}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            governmentBadge: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Government Badge (English)</Label>
+                      <Input
+                        value={pageSettingForm.governmentBadgeEn}
+                        onChange={(e) =>
+                          setPageSettingForm((prev) => ({
+                            ...prev,
+                            governmentBadgeEn: e.target.value
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Smart Dashboard Metadata (JSON)</Label>
+                    <Textarea
+                      rows={4}
+                      value={pageSettingForm.smartDashboardMeta}
+                      onChange={(e) =>
+                        setPageSettingForm((prev) => ({
+                          ...prev,
+                          smartDashboardMeta: e.target.value
+                        }))
+                      }
+                      placeholder='{ "statusLabel": "रियल-टाइम स्थिती" }'
+                    />
+                    {dashboardMetaError && (
+                      <p className="text-sm text-red-600 mt-1">JSON वैध नाही</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={pageSettingForm.isActive}
+                      onChange={(e) =>
+                        setPageSettingForm((prev) => ({ ...prev, isActive: e.target.checked }))
+                      }
+                    />
+                    <span className="text-sm text-gray-700">सक्रिय</span>
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <Button type="button" variant="outline" onClick={() => resetPageSettingForm()}>
+                      रीसेट
+                    </Button>
+                    <Button type="submit" disabled={isSavingPageSetting}>
+                      {isSavingPageSetting ? 'सेव्ह होत आहे...' : 'सेव्ह करा'}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-md">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="text-blue-700 border-blue-200">
+                      {pageSettingForm.heroTagline || 'टॅगलाइन'}
+                    </Badge>
+                    {pageSettingForm.heroTaglineEn && (
+                      <span className="text-xs text-gray-500">{pageSettingForm.heroTaglineEn}</span>
+                    )}
+                  </div>
+                  <CardTitle className="text-2xl text-gray-900 mt-3">
+                    {pageSettingForm.heroTitle || 'ग्राम पायाभूत सुविधा आणि सुविधा'}
+                  </CardTitle>
+                  <p className="text-gray-600 mt-2">{pageSettingForm.heroDescription}</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {pageSettingForm.highlightPills.map((pill, index) => (
+                      <Badge key={`preview-pill-${index}`} variant="secondary">
+                        {pill.label || pill.labelEn || 'हायलाइट'}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-0 shadow-md">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    {pageSettingForm.governmentBadge && (
+                      <Badge variant="outline" className="text-green-700 border-green-200">
+                        {pageSettingForm.governmentBadge}
+                      </Badge>
+                    )}
+                    {pageSettingForm.governmentBadgeEn && (
+                      <span className="text-xs text-gray-500">{pageSettingForm.governmentBadgeEn}</span>
+                    )}
+                  </div>
+                  <CardTitle className="text-xl text-gray-900 mt-3">
+                    {pageSettingForm.ctaTitle || 'महाराष्ट्र शासन'}
+                  </CardTitle>
+                  <p className="text-gray-700 mt-2">{pageSettingForm.ctaDescription}</p>
+                  <p className="text-sm text-gray-500">{pageSettingForm.ctaDescriptionEn}</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">{pageSettingForm.ctaSubtext}</p>
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    {pageSettingForm.ctaPrimaryAction && (
+                      <Button size="sm">{pageSettingForm.ctaPrimaryAction}</Button>
+                    )}
+                    {pageSettingForm.ctaSecondaryAction && (
+                      <Button size="sm" variant="outline">
+                        {pageSettingForm.ctaSecondaryAction}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {dashboardMetaPreview && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Smart Dashboard Labels</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    {Object.entries(dashboardMetaPreview).map(([key, value]) => (
+                      <div key={key} className="flex justify-between text-gray-700">
+                        <span>{key}</span>
+                        <span className="font-semibold text-gray-900">{String(value)}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderFacilitiesTab = () => (
     <div className="space-y-6">
@@ -800,6 +1553,7 @@ export default function InfrastructureSmartVillageAdminPage() {
       </div>
 
       <div>
+        {activeTab === 'overview' && renderOverviewTab()}
         {activeTab === 'facilities' && renderFacilitiesTab()}
         {activeTab === 'metrics' && renderMetricsTab()}
         {activeTab === 'services' && renderServicesTab()}
