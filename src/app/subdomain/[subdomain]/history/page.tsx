@@ -31,10 +31,21 @@ export default async function SubdomainHistoryPage({ params }: HistoryPageProps)
   }
 
   // Fetch timeline items
-  const timelineItems = await prisma.timelineItem.findMany({
+  const timelineItemsData = await prisma.timelineItem.findMany({
     where: { subdomainId: subdomainData.id, isActive: true },
     orderBy: { order: 'asc' }
   });
+
+  const timelineItems = timelineItemsData.map(item => ({
+    id: item.id,
+    year: item.year,
+    title: item.title,
+    titleEn: item.titleEn,
+    description: item.description,
+    descriptionEn: item.descriptionEn,
+    imageUrl: item.imageUrl ?? undefined,
+    side: item.side,
+  }));
 
   return (
     <div className="min-h-screen">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
 import { logCrudActivity } from '@/lib/activity-log-helper';
+import { Prisma } from '@prisma/client';
 
 // Demo data for roles
 const getDemoRoles = () => [
@@ -184,13 +185,19 @@ export async function PUT(request: NextRequest) {
       }, { status: 404 });
     }
 
+    const normalizedResponsibilities: Prisma.JsonArray = Array.isArray(responsibilities)
+      ? (responsibilities as Prisma.JsonArray)
+      : Array.isArray(existingRole.responsibilities)
+        ? (existingRole.responsibilities as Prisma.JsonArray)
+        : [];
+
     const role = await prisma.role.update({
       where: { id },
       data: {
         title,
         titleEn,
         description,
-        responsibilities: Array.isArray(responsibilities) ? responsibilities : existingRole.responsibilities,
+        responsibilities: normalizedResponsibilities,
         icon,
         color,
         order: order !== undefined ? order : existingRole.order,

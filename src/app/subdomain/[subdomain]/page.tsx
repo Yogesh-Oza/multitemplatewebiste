@@ -51,7 +51,7 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
   });
 
   // Fetch additional data needed by sections
-  const [homepageSettings, timelineItems, dashboardMetrics] = await Promise.all([
+  const [homepageSettings, timelineItemsData, dashboardMetrics] = await Promise.all([
     prisma.homepageSettings.findFirst({
       where: { subdomainId: subdomainData?.id }
     }),
@@ -64,6 +64,17 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
       orderBy: { order: 'asc' }
     })
   ]);
+
+  const timelineItems = timelineItemsData.map(item => ({
+    id: item.id,
+    year: item.year,
+    title: item.title,
+    titleEn: item.titleEn,
+    description: item.description,
+    descriptionEn: item.descriptionEn,
+    imageUrl: item.imageUrl ?? undefined,
+    side: item.side,
+  }));
 
   if (!subdomainData || !subdomainData.isActive) {
     // Redirect to main site for invalid subdomains
