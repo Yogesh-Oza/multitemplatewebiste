@@ -376,7 +376,7 @@ export default function MeetingNotificationsSection({ meetings: propMeetings = [
                         <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span className="line-clamp-2">{item}</span>
                       </li>
-                    ))}
+                    ) : null)}
                     {meeting.agenda.length > 3 && (
                       <li className="text-sm text-blue-600 font-medium">
                         +{meeting.agenda.length - 3} अधिक मुद्दे
@@ -393,7 +393,7 @@ export default function MeetingNotificationsSection({ meetings: propMeetings = [
                       दस्तावेज
                     </h4>
                     <div className="space-y-1">
-                      {meeting.documents.map((doc, idx) => (
+                      {meeting.documents.map((doc: any, idx: number) => (
                         <Button
                           key={idx}
                           variant="outline"
