@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Download, FileText, Calendar, Building } from 'lucide-react';
+import { Plus, Edit, Trash2, Download, FileText, Calendar, Building, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,7 +62,7 @@ export default function GovernmentResolutionsAdminPage() {
 
   const fetchResolutions = async () => {
     try {
-      const response = await fetch('/api/government-resolutions');
+      const response = await fetch('/api/government-resolutions?includeInactive=true&limit=100');
       if (response.ok) {
         const data = await response.json();
         const useDemoData = !data || data.length === 0;
@@ -205,11 +205,33 @@ export default function GovernmentResolutionsAdminPage() {
           <h1 className="text-3xl font-bold text-gray-900">Government Resolutions</h1>
           <p className="text-gray-600">Manage government resolutions and circulars</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
+        <Button
+          onClick={() => {
+            setEditingResolution(null);
+            resetForm();
+            setIsModalOpen(true);
+          }}
+          className="flex items-center gap-2"
+        >
           <Plus className="h-4 w-4" />
           Add Resolution
         </Button>
       </div>
+
+      {isDemoMode && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+          <div className="p-2 bg-blue-100 rounded-full">
+            <Info className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm text-blue-900 font-medium">Demo Data Displayed</p>
+            <p className="text-sm text-blue-800">
+              No live government resolutions were found for this subdomain. Showing placeholder entries for reference.
+              Add a new resolution to replace the demo list.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Resolutions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

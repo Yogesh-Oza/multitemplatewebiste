@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
 import { logCrudActivity } from '@/lib/activity-log-helper';
@@ -18,10 +19,11 @@ export async function GET(request: NextRequest) {
     const priority = searchParams.get('priority');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
+    const includeInactive = searchParams.get('includeInactive') === 'true';
 
-    const whereClause: any = { 
+    const whereClause: Prisma.GovernmentResolutionWhereInput = { 
       subdomainId,
-      isActive: true 
+      ...(includeInactive ? {} : { isActive: true })
     };
 
     if (category && category !== 'all') {
@@ -74,7 +76,8 @@ export async function POST(request: NextRequest) {
       priorityEn,
       description,
       descriptionEn,
-      order 
+      order,
+      isActive
     } = body;
 
     const resolution = await prisma.governmentResolution.create({
@@ -92,7 +95,8 @@ export async function POST(request: NextRequest) {
         priorityEn: priorityEn || 'Medium',
         description: description || '',
         descriptionEn: descriptionEn || '',
-        order: order || 0,
+        order: typeof order === 'number' ? order : 0,
+        isActive: typeof isActive === 'boolean' ? isActive : true,
         subdomainId,
       },
     });

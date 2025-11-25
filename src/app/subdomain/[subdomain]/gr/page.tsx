@@ -4,6 +4,8 @@ import { SubdomainValidator } from '@/components/subdomain-validator';
 import { GRContent } from './gr-content';
 import { GOVERNMENT_RESOLUTION_DEMO_DATA } from '@/lib/demo-government-resolutions';
 
+export const dynamic = 'force-dynamic';
+
 const prisma = new PrismaClient();
 
 interface GRPageProps {
@@ -32,8 +34,10 @@ export default async function GRPage({ params }: GRPageProps) {
     },
     orderBy: { date: 'desc' }
   });
+  const isUsingDemoData = resolutions.length === 0;
+
   // Transform resolutions for client component, or use demo data if empty
-  const resolutionsData = resolutions.length > 0 
+  const resolutionsData = !isUsingDemoData
     ? resolutions.map(resolution => ({
         id: resolution.id,
         number: resolution.number,
@@ -48,7 +52,7 @@ export default async function GRPage({ params }: GRPageProps) {
         priorityEn: resolution.priorityEn || 'Medium',
         description: resolution.description || '',
         descriptionEn: resolution.descriptionEn || '',
-        fileUrl: resolution.fileUrl,
+        fileUrl: resolution.fileUrl || '',
         isActive: resolution.isActive
       }))
     : GOVERNMENT_RESOLUTION_DEMO_DATA;
@@ -74,7 +78,7 @@ export default async function GRPage({ params }: GRPageProps) {
         </div>
 
         {/* Client Component for Dynamic Content */}
-        <GRContent initialResolutions={resolutionsData} />
+        <GRContent initialResolutions={resolutionsData} isDemoData={isUsingDemoData} />
       </div>
     </SubdomainValidator>
   );

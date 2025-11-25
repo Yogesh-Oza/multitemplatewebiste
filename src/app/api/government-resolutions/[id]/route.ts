@@ -70,7 +70,8 @@ export async function PUT(
       priorityEn,
       description,
       descriptionEn,
-      order 
+      order,
+      isActive
     } = body;
 
     // Verify the resolution belongs to this subdomain
@@ -100,7 +101,8 @@ export async function PUT(
         priorityEn: priorityEn || 'Medium',
         description: description || '',
         descriptionEn: descriptionEn || '',
-        order: order || 0,
+        order: typeof order === 'number' ? order : existingResolution.order,
+        isActive: typeof isActive === 'boolean' ? isActive : existingResolution.isActive,
       },
     });
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Download, Calendar, Building, Search, Filter, Eye, CheckCircle } from 'lucide-react';
+import { Download, Calendar, Building, Search, Filter, Eye, CheckCircle, Info } from 'lucide-react';
 
 interface Resolution {
   id: string;
@@ -23,9 +23,10 @@ interface Resolution {
 
 interface GRContentProps {
   initialResolutions: Resolution[];
+  isDemoData?: boolean;
 }
 
-export function GRContent({ initialResolutions }: GRContentProps) {
+export function GRContent({ initialResolutions, isDemoData = false }: GRContentProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
@@ -101,6 +102,23 @@ export function GRContent({ initialResolutions }: GRContentProps) {
 
   return (
     <>
+      {isDemoData && (
+        <div className="container pt-8">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <div className="p-2 bg-amber-100 rounded-full">
+              <Info className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-900">Demo Content Preview</p>
+              <p className="text-sm text-amber-800">
+                Live government resolutions are not available yet for this village. Displaying sample data until
+                entries are added from the admin panel.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats Section */}
       <div className="container py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
