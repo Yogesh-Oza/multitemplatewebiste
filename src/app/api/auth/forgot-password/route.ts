@@ -69,8 +69,6 @@ export async function POST(request: NextRequest) {
         // Log detailed error for debugging
         console.error('Email sending error details:', {
           hasGmailConfig: !!(process.env.GMAIL_USER && process.env.GMAIL_PASS),
-          hasHostingerConfig: !!(process.env.HOSTINGER_USER && process.env.HOSTINGER_PASS),
-          smtpHost: process.env.SMTP_HOST || 'smtp.hostinger.com',
           errorMessage: emailResult.error,
         });
       } else {

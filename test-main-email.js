@@ -7,15 +7,10 @@ async function sendTestEmail() {
   
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
+      service: 'gmail',
       auth: {
-        user: process.env.HOSTINGER_USER,
-        pass: process.env.HOSTINGER_PASS
-      },
-      tls: {
-        rejectUnauthorized: false
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS
       }
     });
     
@@ -24,7 +19,7 @@ async function sendTestEmail() {
     console.log('✅ SMTP connection verified!');
     
     const mailOptions = {
-      from: process.env.HOSTINGER_USER || 'admin@mahagp.in',
+      from: process.env.GMAIL_USER || 'admin@mahagp.in',
       to: 'yogeshoza33333@gmail.com',
       subject: '🧪 Test Email - Gram Panchayat System (Main Address)',
       text: `

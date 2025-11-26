@@ -1,4 +1,4 @@
-// Email service for subdomain notifications using Hostinger SMTP
+// Email service for subdomain notifications using Gmail SMTP
 import nodemailer from 'nodemailer';
 
 interface SubdomainEmailData {
@@ -20,31 +20,19 @@ interface PasswordResetEmailData {
 // Validate email configuration
 function validateEmailConfig(): { isValid: boolean; error?: string; configType?: string } {
   const hasGmail = !!(process.env.GMAIL_USER && process.env.GMAIL_PASS);
-  const hasHostinger = !!(process.env.HOSTINGER_USER && process.env.HOSTINGER_PASS);
   
   if (hasGmail) {
     return { isValid: true, configType: 'Gmail' };
   }
   
-  if (hasHostinger) {
-    return { isValid: true, configType: 'Hostinger' };
-  }
-  
-  // Check if using default fallback (not recommended for production)
-  const hasDefaultFallback = process.env.HOSTINGER_USER || process.env.HOSTINGER_PASS;
-  if (hasDefaultFallback) {
-    console.warn('⚠️ Using default email configuration. This may not work in production.');
-    return { isValid: true, configType: 'Hostinger (default)' };
-  }
-  
   return {
     isValid: false,
-    error: 'No email service configured. Please set GMAIL_USER/GMAIL_PASS or HOSTINGER_USER/HOSTINGER_PASS environment variables.',
+    error: 'No email service configured. Please set GMAIL_USER and GMAIL_PASS environment variables.',
     configType: 'None'
   };
 }
 
-// Create transporter with multiple fallback options
+// Create transporter using Gmail SMTP
 const createTransporter = () => {
   // Validate configuration first
   const configCheck = validateEmailConfig();
@@ -53,38 +41,12 @@ const createTransporter = () => {
     throw new Error(configCheck.error || 'Email service not configured');
   }
   
-  // Try Gmail first if configured
-  if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
-    console.log('📧 Using Gmail SMTP');
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
-      }
-    });
-  }
-
-  // Fallback to Hostinger SMTP
-  console.log('📧 Using Hostinger SMTP');
-  const hostingerUser = process.env.HOSTINGER_USER || 'admin@mahagp.in';
-  const hostingerPass = process.env.HOSTINGER_PASS || 'nL8*!!*Hp>H$';
-  
-  // Log warning if using defaults
-  if (!process.env.HOSTINGER_USER || !process.env.HOSTINGER_PASS) {
-    console.warn('⚠️ Using default Hostinger credentials. Set HOSTINGER_USER and HOSTINGER_PASS for production.');
-  }
-  
+  console.log('📧 Using Gmail SMTP');
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, // true for 465, false for other ports
+    service: 'gmail',
     auth: {
-      user: hostingerUser,
-      pass: hostingerPass
-    },
-    tls: {
-      rejectUnauthorized: false
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS
     }
   });
 };
@@ -158,7 +120,7 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
 
     const htmlContent = generateEmailHTML(data);
 
-    const fromEmail = process.env.GMAIL_USER || process.env.HOSTINGER_USER || 'admin@mahagp.in';
+    const fromEmail = process.env.GMAIL_USER || 'admin@mahagp.in';
     
     const mailOptions = {
       from: fromEmail,
@@ -272,7 +234,7 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
 
     const htmlContent = generatePasswordResetEmailHTML(data, resetLink);
 
-    const fromEmail = process.env.GMAIL_USER || process.env.HOSTINGER_USER || 'admin@mahagp.in';
+    const fromEmail = process.env.GMAIL_USER || 'admin@mahagp.in';
     
     const mailOptions = {
       from: fromEmail,
