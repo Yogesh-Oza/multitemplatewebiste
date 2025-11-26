@@ -21,7 +21,8 @@ export async function middleware(request: NextRequest) {
 
   if (isSuperAdmin && !isSuperAdminLogin) {
     const token = await getToken({ req: request as any, secret });
-    if (!token || (token as any).role !== 'super_admin') {
+    const role = (token as any)?.role;
+    if (!token || (role !== 'super_admin' && role !== 'super_admin_viewer')) {
       const url = request.nextUrl.clone();
       url.pathname = '/super-admin-login';
       url.searchParams.set('callbackUrl', request.nextUrl.pathname);

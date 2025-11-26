@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { isSuperAdmin, canDelete } from '@/lib/auth-helpers';
 
 // PUT /api/super-admin/campaign-forms/[formId]/sections/[sectionId] - Update section
 export async function PUT(
@@ -7,6 +10,12 @@ export async function PUT(
   { params }: { params: Promise<{ formId: string; sectionId: string }> }
 ) {
   try {
+    // Check if user is super admin or super_admin_viewer
+    const session = await getServerSession(authOptions);
+    
+    if (!isSuperAdmin(session)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { sectionId } = await params;
     const body = await request.json();
     const {
@@ -49,6 +58,13 @@ export async function DELETE(
   { params }: { params: Promise<{ formId: string; sectionId: string }> }
 ) {
   try {
+    // Check if user can delete (only full super_admin, not super_admin_viewer)
+    const session = await getServerSession(authOptions);
+    
+    if (!canDelete(session)) {
+      return NextResponse.json({ error: 'Unauthorized: Delete operations are restricted to super admin only' }, { status: 403 });
+    }
+
     const { sectionId } = await params;
 
     // Get all items in this section

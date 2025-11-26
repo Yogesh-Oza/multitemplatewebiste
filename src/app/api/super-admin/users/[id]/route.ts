@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { isSuperAdmin, canDelete } from '@/lib/auth-helpers';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check if user is super admin
+    // Check if user is super admin or super_admin_viewer
     const session = await getServerSession(authOptions);
     
-    if (!session || (session.user as any)?.role !== 'super_admin') {
+    if (!isSuperAdmin(session)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -48,10 +49,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check if user is super admin
+    // Check if user is super admin or super_admin_viewer
     const session = await getServerSession(authOptions);
     
-    if (!session || (session.user as any)?.role !== 'super_admin') {
+    if (!isSuperAdmin(session)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -102,11 +103,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check if user is super admin
+    // Check if user can delete (only full super_admin, not super_admin_viewer)
     const session = await getServerSession(authOptions);
     
-    if (!session || (session.user as any)?.role !== 'super_admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!canDelete(session)) {
+      return NextResponse.json({ error: 'Unauthorized: Delete operations are restricted to super admin only' }, { status: 403 });
     }
 
     const { id } = await params;
@@ -120,7 +121,7 @@ export async function DELETE(
     }
 
     // Prevent deletion of super admin users
-    if (user.role === 'super_admin') {
+    if (user.role === 'super_admin' || user.role === 'super_admin_viewer') {
       return NextResponse.json(
         { error: 'Cannot delete super admin users' },
         { status: 400 }

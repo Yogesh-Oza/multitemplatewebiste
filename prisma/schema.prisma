@@ -741,7 +741,7 @@ model AdminUser {
   username                  String        @unique
   email                     String        @unique
   password                  String
-  role                      String        @default("admin") // super_admin, admin, editor
+  role                      String        @default("admin") // super_admin, super_admin_viewer, admin, editor
   isActive                  Boolean       @default(true)
   subdomainId               String?       @db.ObjectId
   subdomain                 Subdomain?    @relation(fields: [subdomainId], references: [id])

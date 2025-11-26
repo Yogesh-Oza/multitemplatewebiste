@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { isSuperAdmin } from '@/lib/auth-helpers';
 
 // GET /api/super-admin/campaign-forms - Get all campaign forms
 export async function GET(request: NextRequest) {
   try {
+    // Check if user is super admin or super_admin_viewer
+    const session = await getServerSession(authOptions);
+    
+    if (!isSuperAdmin(session)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -80,6 +89,12 @@ export async function GET(request: NextRequest) {
 // POST /api/super-admin/campaign-forms - Create new campaign form
 export async function POST(request: NextRequest) {
   try {
+    // Check if user is super admin or super_admin_viewer
+    const session = await getServerSession(authOptions);
+    
+    if (!isSuperAdmin(session)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     const {
       name,

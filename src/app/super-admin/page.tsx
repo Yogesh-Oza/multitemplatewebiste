@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,10 +62,16 @@ interface Subdomain {
 }
 
 export default function SuperAdminPage() {
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [subdomains, setSubdomains] = useState<Subdomain[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'subdomains' | 'campaign-forms'>('overview');
+  
+  // Check if current user can delete (only full super_admin)
+  const currentUserRole = (session?.user as any)?.role;
+  const canDelete = currentUserRole === 'super_admin';
   
   // Modal states
   const [userModal, setUserModal] = useState<{
@@ -190,6 +197,7 @@ export default function SuperAdminPage() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'super_admin': return 'bg-purple-500';
+      case 'super_admin_viewer': return 'bg-purple-400';
       case 'admin': return 'bg-blue-500';
       case 'editor': return 'bg-green-500';
       default: return 'bg-gray-500';
@@ -564,6 +572,7 @@ export default function SuperAdminPage() {
                   >
                     <option value="all">All Roles</option>
                     <option value="super_admin">Super Admin</option>
+                    <option value="super_admin_viewer">Super Admin Viewer</option>
                     <option value="admin">Admin</option>
                     <option value="editor">Editor</option>
                   </select>
@@ -640,16 +649,17 @@ export default function SuperAdminPage() {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="text-red-600 hover:text-red-700"
-                              onClick={() => handleDeleteUser(user)}
-                              title="Delete User"
-                              disabled={user.role === 'super_admin'}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {canDelete && user.role !== 'super_admin' && user.role !== 'super_admin_viewer' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="text-red-600 hover:text-red-700"
+                                onClick={() => handleDeleteUser(user)}
+                                title="Delete User"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -874,15 +884,17 @@ export default function SuperAdminPage() {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="text-red-600 hover:text-red-700"
-                              onClick={() => handleDeleteSubdomain(subdomain)}
-                              title="Delete Subdomain"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {canDelete && (
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="text-red-600 hover:text-red-700"
+                                onClick={() => handleDeleteSubdomain(subdomain)}
+                                title="Delete Subdomain"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>

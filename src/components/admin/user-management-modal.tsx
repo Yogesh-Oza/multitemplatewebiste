@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,6 +54,7 @@ export default function UserManagementModal({
   onUserUpdated,
   subdomains
 }: UserManagementModalProps) {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -64,6 +66,13 @@ export default function UserManagementModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  // Check if current user can delete (only full super_admin)
+  const currentUserRole = (session?.user as any)?.role;
+  const canDeleteUser = currentUserRole === 'super_admin';
+  
+  // Check if the user being edited is a restricted role
+  const isRestrictedUser = user?.role === 'super_admin' || user?.role === 'super_admin_viewer';
 
   useEffect(() => {
     if (mode === 'edit' && user) {
@@ -201,6 +210,7 @@ export default function UserManagementModal({
                   <Label className="text-sm font-medium text-gray-500">Role</Label>
                   <Badge className={`mt-1 ${
                     user.role === 'super_admin' ? 'bg-purple-500' : 
+                    user.role === 'super_admin_viewer' ? 'bg-purple-400' :
                     user.role === 'admin' ? 'bg-blue-500' : 'bg-green-500'
                   }`}>
                     {user.role.replace('_', ' ')}
@@ -279,6 +289,7 @@ export default function UserManagementModal({
                     <option value="admin">Admin</option>
                     <option value="editor">Editor</option>
                     <option value="super_admin">Super Admin</option>
+                    <option value="super_admin_viewer">Super Admin Viewer</option>
                   </select>
                 </div>
                 <div>
@@ -312,12 +323,12 @@ export default function UserManagementModal({
               </div>
 
               <div className="flex justify-end space-x-2 pt-4">
-                {mode === 'edit' && user && (
+                {mode === 'edit' && user && canDeleteUser && !isRestrictedUser && (
                   <Button
                     type="button"
                     variant="destructive"
                     onClick={handleDelete}
-                    disabled={loading || user.role === 'super_admin'}
+                    disabled={loading}
                   >
                     Delete User
                   </Button>

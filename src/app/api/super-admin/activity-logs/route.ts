@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { isSuperAdmin } from '@/lib/auth-helpers';
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication and super admin role
+    // Check if user is super admin or super_admin_viewer
     const session = await getServerSession(authOptions);
     
-    if (!session?.user || (session.user as any).role !== 'super_admin') {
+    if (!isSuperAdmin(session)) {
       return NextResponse.json(
         { error: 'Unauthorized - Super admin access required' },
         { status: 401 }

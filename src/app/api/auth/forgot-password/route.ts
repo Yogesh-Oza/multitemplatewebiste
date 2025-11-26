@@ -52,15 +52,42 @@ export async function POST(request: NextRequest) {
 
     // Send reset email
     try {
-      await sendPasswordResetEmail({
+      const emailResult = await sendPasswordResetEmail({
         to: adminUser.email,
         username: adminUser.username,
         resetToken,
         subdomain: adminUser.subdomain?.subdomain,
       });
-    } catch (emailError) {
-      console.error('Failed to send password reset email:', emailError);
-      // Don't fail the request if email fails, but log it
+
+      if (!emailResult.success) {
+        console.error('❌ Password reset email failed to send:', {
+          email: adminUser.email,
+          username: adminUser.username,
+          error: emailResult.error,
+          timestamp: new Date().toISOString(),
+        });
+        // Log detailed error for debugging
+        console.error('Email sending error details:', {
+          hasGmailConfig: !!(process.env.GMAIL_USER && process.env.GMAIL_PASS),
+          hasHostingerConfig: !!(process.env.HOSTINGER_USER && process.env.HOSTINGER_PASS),
+          smtpHost: process.env.SMTP_HOST || 'smtp.hostinger.com',
+          errorMessage: emailResult.error,
+        });
+      } else {
+        console.log('✅ Password reset email sent successfully:', {
+          email: adminUser.email,
+          messageId: emailResult.messageId,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (emailError: any) {
+      console.error('❌ Exception while sending password reset email:', {
+        email: adminUser.email,
+        username: adminUser.username,
+        error: emailError?.message || 'Unknown error',
+        stack: emailError?.stack,
+        timestamp: new Date().toISOString(),
+      });
     }
 
     return NextResponse.json({

@@ -17,11 +17,45 @@ interface PasswordResetEmailData {
   subdomain?: string;
 }
 
+// Validate email configuration
+function validateEmailConfig(): { isValid: boolean; error?: string; configType?: string } {
+  const hasGmail = !!(process.env.GMAIL_USER && process.env.GMAIL_PASS);
+  const hasHostinger = !!(process.env.HOSTINGER_USER && process.env.HOSTINGER_PASS);
+  
+  if (hasGmail) {
+    return { isValid: true, configType: 'Gmail' };
+  }
+  
+  if (hasHostinger) {
+    return { isValid: true, configType: 'Hostinger' };
+  }
+  
+  // Check if using default fallback (not recommended for production)
+  const hasDefaultFallback = process.env.HOSTINGER_USER || process.env.HOSTINGER_PASS;
+  if (hasDefaultFallback) {
+    console.warn('⚠️ Using default email configuration. This may not work in production.');
+    return { isValid: true, configType: 'Hostinger (default)' };
+  }
+  
+  return {
+    isValid: false,
+    error: 'No email service configured. Please set GMAIL_USER/GMAIL_PASS or HOSTINGER_USER/HOSTINGER_PASS environment variables.',
+    configType: 'None'
+  };
+}
+
 // Create transporter with multiple fallback options
 const createTransporter = () => {
+  // Validate configuration first
+  const configCheck = validateEmailConfig();
+  if (!configCheck.isValid) {
+    console.error('❌ Email configuration error:', configCheck.error);
+    throw new Error(configCheck.error || 'Email service not configured');
+  }
+  
   // Try Gmail first if configured
   if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
-    console.log('Using Gmail SMTP');
+    console.log('📧 Using Gmail SMTP');
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -32,14 +66,22 @@ const createTransporter = () => {
   }
 
   // Fallback to Hostinger SMTP
-  console.log('Using Hostinger SMTP');
+  console.log('📧 Using Hostinger SMTP');
+  const hostingerUser = process.env.HOSTINGER_USER || 'admin@mahagp.in';
+  const hostingerPass = process.env.HOSTINGER_PASS || 'nL8*!!*Hp>H$';
+  
+  // Log warning if using defaults
+  if (!process.env.HOSTINGER_USER || !process.env.HOSTINGER_PASS) {
+    console.warn('⚠️ Using default Hostinger credentials. Set HOSTINGER_USER and HOSTINGER_PASS for production.');
+  }
+  
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.hostinger.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false, // true for 465, false for other ports
     auth: {
-      user: process.env.HOSTINGER_USER || 'admin@mahagp.in',
-      pass: process.env.HOSTINGER_PASS || 'nL8*!!*Hp>H$'
+      user: hostingerUser,
+      pass: hostingerPass
     },
     tls: {
       rejectUnauthorized: false
@@ -49,15 +91,41 @@ const createTransporter = () => {
 
 export async function sendSubdomainEmail(data: SubdomainEmailData) {
   try {
-    console.log('Attempting to send email to:', data.to);
-    console.log('Email data:', { subdomain: data.subdomain, villageName: data.villageName });
+    console.log('📧 Attempting to send subdomain email:', {
+      to: data.to,
+      subdomain: data.subdomain,
+      villageName: data.villageName,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Validate email configuration before proceeding
+    const configCheck = validateEmailConfig();
+    if (!configCheck.isValid) {
+      const errorMsg = configCheck.error || 'Email service not configured';
+      console.error('❌ Email configuration validation failed:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+    console.log(`✅ Email configuration valid (${configCheck.configType})`);
     
     const transporter = createTransporter();
     
     // Verify connection configuration
-    console.log('Verifying SMTP connection...');
-    await transporter.verify();
-    console.log('✅ SMTP connection verified successfully');
+    console.log('🔗 Verifying SMTP connection...');
+    try {
+      await transporter.verify();
+      console.log('✅ SMTP connection verified successfully');
+    } catch (verifyError: any) {
+      console.error('❌ SMTP connection verification failed:', {
+        error: verifyError?.message,
+        code: verifyError?.code,
+        command: verifyError?.command,
+        response: verifyError?.response
+      });
+      return { 
+        success: false, 
+        error: `SMTP connection failed: ${verifyError?.message || 'Unknown error'}` 
+      };
+    }
     
     const emailContent = `
       प्रिय ${data.contactPerson},
@@ -100,37 +168,84 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
       html: htmlContent
     };
 
-    console.log('Sending email with options:', { from: mailOptions.from, to: mailOptions.to, subject: mailOptions.subject });
+    console.log('📤 Sending subdomain email with options:', { 
+      from: mailOptions.from, 
+      to: mailOptions.to, 
+      subject: mailOptions.subject 
+    });
     
     const result = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully:', result.messageId);
-    console.log('Email response:', result.response);
+    console.log('✅ Subdomain email sent successfully:', {
+      messageId: result.messageId,
+      response: result.response,
+      accepted: result.accepted,
+      rejected: result.rejected,
+      timestamp: new Date().toISOString()
+    });
     
     return { success: true, messageId: result.messageId };
   } catch (error: any) {
-    console.error('❌ Email sending failed:', error);
-    console.error('Error details:', {
-      message: error?.message || 'Unknown error',
+    console.error('❌ Subdomain email sending failed:', {
+      error: error?.message || 'Unknown error',
       code: error?.code,
       command: error?.command,
-      response: error?.response
+      response: error?.response,
+      stack: error?.stack,
+      timestamp: new Date().toISOString()
     });
     
+    // Provide more specific error messages
+    let errorMessage = 'Email sending failed';
+    if (error?.code === 'EAUTH') {
+      errorMessage = 'Email authentication failed. Please check your email credentials.';
+    } else if (error?.code === 'ECONNECTION') {
+      errorMessage = 'Could not connect to email server. Please check your SMTP configuration.';
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+    
     // Don't throw error, just log it so registration doesn't fail
-    return { success: false, error: error?.message || 'Email sending failed' };
+    return { success: false, error: errorMessage };
   }
 }
 
 export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
   try {
-    console.log('Attempting to send password reset email to:', data.to);
+    console.log('📧 Attempting to send password reset email:', {
+      to: data.to,
+      username: data.username,
+      subdomain: data.subdomain || 'main',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Validate email configuration before proceeding
+    const configCheck = validateEmailConfig();
+    if (!configCheck.isValid) {
+      const errorMsg = configCheck.error || 'Email service not configured';
+      console.error('❌ Email configuration validation failed:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+    console.log(`✅ Email configuration valid (${configCheck.configType})`);
     
     const transporter = createTransporter();
     
     // Verify connection configuration
-    console.log('Verifying SMTP connection...');
-    await transporter.verify();
-    console.log('✅ SMTP connection verified successfully');
+    console.log('🔗 Verifying SMTP connection...');
+    try {
+      await transporter.verify();
+      console.log('✅ SMTP connection verified successfully');
+    } catch (verifyError: any) {
+      console.error('❌ SMTP connection verification failed:', {
+        error: verifyError?.message,
+        code: verifyError?.code,
+        command: verifyError?.command,
+        response: verifyError?.response
+      });
+      return { 
+        success: false, 
+        error: `SMTP connection failed: ${verifyError?.message || 'Unknown error'}` 
+      };
+    }
     
     // Determine the base URL based on subdomain
     const baseUrl = data.subdomain 
@@ -167,22 +282,44 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
       html: htmlContent
     };
 
-    console.log('Sending password reset email with options:', { from: mailOptions.from, to: mailOptions.to });
+    console.log('📤 Sending password reset email with options:', { 
+      from: mailOptions.from, 
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      resetLink: resetLink.substring(0, 50) + '...' // Log partial link for debugging
+    });
     
     const result = await transporter.sendMail(mailOptions);
-    console.log('✅ Password reset email sent successfully:', result.messageId);
+    console.log('✅ Password reset email sent successfully:', {
+      messageId: result.messageId,
+      response: result.response,
+      accepted: result.accepted,
+      rejected: result.rejected,
+      timestamp: new Date().toISOString()
+    });
     
     return { success: true, messageId: result.messageId };
   } catch (error: any) {
-    console.error('❌ Password reset email sending failed:', error);
-    console.error('Error details:', {
-      message: error?.message || 'Unknown error',
+    console.error('❌ Password reset email sending failed:', {
+      error: error?.message || 'Unknown error',
       code: error?.code,
       command: error?.command,
-      response: error?.response
+      response: error?.response,
+      stack: error?.stack,
+      timestamp: new Date().toISOString()
     });
     
-    return { success: false, error: error?.message || 'Email sending failed' };
+    // Provide more specific error messages
+    let errorMessage = 'Email sending failed';
+    if (error?.code === 'EAUTH') {
+      errorMessage = 'Email authentication failed. Please check your email credentials.';
+    } else if (error?.code === 'ECONNECTION') {
+      errorMessage = 'Could not connect to email server. Please check your SMTP configuration.';
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+    
+    return { success: false, error: errorMessage };
   }
 }
 

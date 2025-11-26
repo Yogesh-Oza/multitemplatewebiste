@@ -65,70 +65,72 @@ export function AdminLoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="username">वापरकर्ता नाव</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              id="username"
-              type="text"
-              value={formData.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
-              placeholder="वापरकर्ता नाव"
-              className="pl-10"
-              required
-            />
+    <>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="username">वापरकर्ता नाव</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                id="username"
+                type="text"
+                value={formData.username}
+                onChange={(e) => handleInputChange('username', e.target.value)}
+                placeholder="वापरकर्ता नाव"
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="password">पासवर्ड</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                placeholder="पासवर्ड"
+                className="pl-10 pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
         </div>
         
-        <div>
-          <Label htmlFor="password">पासवर्ड</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              placeholder="पासवर्ड"
-              className="pl-10 pr-10"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <Button 
-        type="submit" 
-        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-        disabled={isLoading}
-      >
-        {isLoading ? 'लॉगिन करत आहे...' : 'लॉगिन करा'}
-      </Button>
-      
-      <div className="text-center mt-4">
-        <button
-          type="button"
-          onClick={() => setShowForgotPassword(true)}
-          className="text-sm text-purple-600 hover:text-purple-700 hover:underline"
+        <Button 
+          type="submit" 
+          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          disabled={isLoading}
         >
-          पासवर्ड विसरलात?
-        </button>
-      </div>
+          {isLoading ? 'लॉगिन करत आहे...' : 'लॉगिन करा'}
+        </Button>
+        
+        <div className="text-center mt-4">
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="text-sm text-purple-600 hover:text-purple-700 hover:underline"
+          >
+            पासवर्ड विसरलात?
+          </button>
+        </div>
+      </form>
       
       <ForgotPasswordModal
         isOpen={showForgotPassword}
         onClose={() => setShowForgotPassword(false)}
       />
-    </form>
+    </>
   );
 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { isSuperAdmin } from '@/lib/auth-helpers';
 
 // PATCH /api/super-admin/campaign-forms/[formId]/sections - Update multiple section orders
 export async function PATCH(
@@ -7,6 +10,12 @@ export async function PATCH(
   { params }: { params: Promise<{ formId: string }> }
 ) {
   try {
+    // Check if user is super admin or super_admin_viewer
+    const session = await getServerSession(authOptions);
+    
+    if (!isSuperAdmin(session)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { formId } = await params;
     
     // Check if request has body
@@ -72,6 +81,12 @@ export async function GET(
   { params }: { params: Promise<{ formId: string }> }
 ) {
   try {
+    // Check if user is super admin or super_admin_viewer
+    const session = await getServerSession(authOptions);
+    
+    if (!isSuperAdmin(session)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { formId } = await params;
 
     const sections = await prisma.formSection.findMany({
@@ -100,6 +115,12 @@ export async function POST(
   { params }: { params: Promise<{ formId: string }> }
 ) {
   try {
+    // Check if user is super admin or super_admin_viewer
+    const session = await getServerSession(authOptions);
+    
+    if (!isSuperAdmin(session)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { formId } = await params;
     const body = await request.json();
     const {
