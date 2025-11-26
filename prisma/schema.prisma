@@ -737,17 +737,19 @@ model EducationHealthFacility {
 }
 
 model AdminUser {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  username     String        @unique
-  email        String        @unique
-  password     String
-  role         String        @default("admin") // super_admin, admin, editor
-  isActive     Boolean       @default(true)
-  subdomainId  String?       @db.ObjectId
-  subdomain    Subdomain?    @relation(fields: [subdomainId], references: [id])
-  activityLogs ActivityLog[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id                        String        @id @default(auto()) @map("_id") @db.ObjectId
+  username                  String        @unique
+  email                     String        @unique
+  password                  String
+  role                      String        @default("admin") // super_admin, admin, editor
+  isActive                  Boolean       @default(true)
+  subdomainId               String?       @db.ObjectId
+  subdomain                 Subdomain?    @relation(fields: [subdomainId], references: [id])
+  passwordResetToken        String?
+  passwordResetTokenExpiry  DateTime?
+  activityLogs              ActivityLog[]
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
 
   @@map("admin_users")
 }

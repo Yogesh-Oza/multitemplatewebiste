@@ -10,12 +10,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { signIn } from 'next-auth/react';
+import ForgotPasswordModal from './forgot-password-modal';
 
 export function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -113,6 +115,20 @@ export function AdminLoginForm() {
         {isLoading ? 'लॉगिन करत आहे...' : 'लॉगिन करा'}
       </Button>
       
+      <div className="text-center mt-4">
+        <button
+          type="button"
+          onClick={() => setShowForgotPassword(true)}
+          className="text-sm text-purple-600 hover:text-purple-700 hover:underline"
+        >
+          पासवर्ड विसरलात?
+        </button>
+      </div>
+      
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </form>
   );
 }

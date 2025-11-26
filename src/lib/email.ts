@@ -10,6 +10,13 @@ interface SubdomainEmailData {
   contactPerson: string;
 }
 
+interface PasswordResetEmailData {
+  to: string;
+  username: string;
+  resetToken: string;
+  subdomain?: string;
+}
+
 // Create transporter with multiple fallback options
 const createTransporter = () => {
   // Try Gmail first if configured
@@ -112,6 +119,122 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
     // Don't throw error, just log it so registration doesn't fail
     return { success: false, error: error?.message || 'Email sending failed' };
   }
+}
+
+export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
+  try {
+    console.log('Attempting to send password reset email to:', data.to);
+    
+    const transporter = createTransporter();
+    
+    // Verify connection configuration
+    console.log('Verifying SMTP connection...');
+    await transporter.verify();
+    console.log('✅ SMTP connection verified successfully');
+    
+    // Determine the base URL based on subdomain
+    const baseUrl = data.subdomain 
+      ? `https://${data.subdomain}.mahagp.in`
+      : (process.env.NEXTAUTH_URL || 'https://mahagp.in');
+    
+    const resetLink = `${baseUrl}/admin-reset-password?token=${data.resetToken}`;
+    
+    const emailContent = `
+      प्रिय ${data.username},
+      
+      आपण पासवर्ड रीसेट करण्याची विनंती केली आहे.
+      
+      आपला पासवर्ड रीसेट करण्यासाठी खालील लिंकवर क्लिक करा:
+      ${resetLink}
+      
+      हा लिंक 1 तासासाठी वैध आहे.
+      
+      जर आपण ही विनंती केली नसेल, तर कृपया या ईमेलकडे दुर्लक्ष करा.
+      
+      Best regards,
+      MahaGP Team
+    `;
+
+    const htmlContent = generatePasswordResetEmailHTML(data, resetLink);
+
+    const fromEmail = process.env.GMAIL_USER || process.env.HOSTINGER_USER || 'admin@mahagp.in';
+    
+    const mailOptions = {
+      from: fromEmail,
+      to: data.to,
+      subject: 'पासवर्ड रीसेट - ग्रामपंचायत प्रशासन',
+      text: emailContent,
+      html: htmlContent
+    };
+
+    console.log('Sending password reset email with options:', { from: mailOptions.from, to: mailOptions.to });
+    
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Password reset email sent successfully:', result.messageId);
+    
+    return { success: true, messageId: result.messageId };
+  } catch (error: any) {
+    console.error('❌ Password reset email sending failed:', error);
+    console.error('Error details:', {
+      message: error?.message || 'Unknown error',
+      code: error?.code,
+      command: error?.command,
+      response: error?.response
+    });
+    
+    return { success: false, error: error?.message || 'Email sending failed' };
+  }
+}
+
+// Generate HTML email template for password reset
+function generatePasswordResetEmailHTML(data: PasswordResetEmailData, resetLink: string): string {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">🔐 पासवर्ड रीसेट</h1>
+        <p style="color: #e0e7ff; margin: 10px 0 0 0; font-size: 16px;">ग्रामपंचायत प्रशासन</p>
+      </div>
+      
+      <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">प्रिय ${data.username},</p>
+        
+        <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+          आपण आपला पासवर्ड रीसेट करण्याची विनंती केली आहे. आपला पासवर्ड रीसेट करण्यासाठी खालील बटणावर क्लिक करा:
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+            पासवर्ड रीसेट करा
+          </a>
+        </div>
+        
+        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0; font-size: 14px; color: #6b7280;">
+            <strong>किंवा</strong> खालील लिंक कॉपी करा आणि आपल्या ब्राउझरमध्ये पेस्ट करा:
+          </p>
+          <p style="margin: 10px 0 0 0; font-size: 12px; color: #9ca3af; word-break: break-all;">
+            ${resetLink}
+          </p>
+        </div>
+        
+        <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+          <h3 style="margin: 0 0 10px 0; color: #92400e; font-size: 16px;">⚠️ महत्वाच्या नोट्स</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 14px;">
+            <li style="margin-bottom: 6px;">हा लिंक 1 तासासाठी वैध आहे</li>
+            <li style="margin-bottom: 6px;">लिंक वापरल्यानंतर तो अवैध होईल</li>
+            <li style="margin-bottom: 6px;">जर आपण ही विनंती केली नसेल, तर कृपया या ईमेलकडे दुर्लक्ष करा</li>
+            <li style="margin-bottom: 6px;">आपले खाते सुरक्षित राहील</li>
+          </ul>
+        </div>
+        
+        <p style="color: #6b7280; font-size: 14px; margin-top: 30px; text-align: center;">
+          Best regards,<br>
+          <strong>MahaGP Team</strong><br>
+          <em>Empowering Digital Gram Panchayats</em>
+        </p>
+      </div>
+    </div>
+  `;
 }
 
 // Generate HTML email template

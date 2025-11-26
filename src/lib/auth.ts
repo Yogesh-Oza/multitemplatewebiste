@@ -80,6 +80,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
+        (session.user as any).id = (token as any).id;
         (session.user as any).role = (token as any).role;
         (session.user as any).subdomainId = (token as any).subdomainId;
         (session.user as any).subdomain = (token as any).subdomain;
