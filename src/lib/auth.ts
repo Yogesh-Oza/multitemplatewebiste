@@ -33,38 +33,54 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null;
+        if (!credentials?.username || !credentials?.password) {
+          console.log('❌ Missing credentials');
+          return null;
+        }
 
-        const adminUser = await prisma.adminUser.findFirst({
-          where: {
-            OR: [
-              { username: credentials.username },
-              { email: credentials.username },
-            ],
-            isActive: true,
-          },
-          include: {
-            subdomain: true
+        try {
+          const adminUser = await prisma.adminUser.findFirst({
+            where: {
+              OR: [
+                { username: credentials.username },
+                { email: credentials.username },
+              ],
+              isActive: true,
+            },
+            include: {
+              subdomain: true
+            }
+          });
+
+          if (!adminUser) {
+            console.log('❌ User not found or inactive:', credentials.username);
+            return null;
           }
-        });
 
-        if (!adminUser) return null;
+          const passwordMatches = await bcrypt.compare(
+            credentials.password,
+            adminUser.password
+          );
 
-        const passwordMatches = await bcrypt.compare(
-          credentials.password,
-          adminUser.password
-        );
+          if (!passwordMatches) {
+            console.log('❌ Password mismatch for user:', adminUser.username);
+            return null;
+          }
 
-        if (!passwordMatches) return null;
+          console.log('✅ Authentication successful for user:', adminUser.username, 'Role:', adminUser.role);
 
-        return {
-          id: adminUser.id,
-          name: adminUser.username,
-          email: adminUser.email,
-          role: adminUser.role,
-          subdomainId: adminUser.subdomainId ?? undefined,
-          subdomain: adminUser.subdomain?.subdomain ?? undefined,
-        } as any;
+          return {
+            id: adminUser.id,
+            name: adminUser.username,
+            email: adminUser.email,
+            role: adminUser.role,
+            subdomainId: adminUser.subdomainId ?? undefined,
+            subdomain: adminUser.subdomain?.subdomain ?? undefined,
+          } as any;
+        } catch (error) {
+          console.error('❌ Authentication error:', error);
+          return null;
+        }
       },
     }),
   ],

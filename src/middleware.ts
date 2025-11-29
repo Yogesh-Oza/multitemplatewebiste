@@ -6,11 +6,12 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const secret = process.env.NEXTAUTH_SECRET;
   
-  // Skip middleware for static files only
+  // Skip middleware for static files and public pages
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon.ico') ||
-    pathname === '/subdomain-register'
+    pathname === '/subdomain-register' ||
+    pathname === '/admin-reset-password'
   ) {
     return NextResponse.next();
   }
@@ -30,12 +31,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect admin routes (but allow the login page)
+  // Protect admin routes (but allow the login page and reset password page)
   const isAdminBase = pathname.startsWith('/admin');
   const isAdminLogin = pathname === '/admin/login' || pathname === '/admin-login';
+  const isAdminResetPassword = pathname === '/admin-reset-password';
   const isSubdomainAdmin = /^\/subdomain\/[^/]+\/admin(\/.*)?$/.test(pathname);
 
-  if ((isAdminBase && !isAdminLogin) || isSubdomainAdmin) {
+  if ((isAdminBase && !isAdminLogin && !isAdminResetPassword) || isSubdomainAdmin) {
     const token = await getToken({ req: request as any, secret });
     if (!token) {
       const url = request.nextUrl.clone();
