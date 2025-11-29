@@ -31,11 +31,12 @@ export default function SuperAdminLoginPage() {
       if (result?.error) {
         toast.error('Invalid credentials');
       } else if (result?.ok) {
-        // Check if user is super admin
+        // Check if user is super admin or super_admin_viewer
         const response = await fetch('/api/auth/session');
         const session = await response.json();
+        const role = session?.user?.role;
         
-        if (session?.user?.role === 'super_admin') {
+        if (role === 'super_admin' || role === 'super_admin_viewer') {
           toast.success('Login successful');
           router.push('/super-admin');
         } else {
