@@ -1,4 +1,4 @@
-// Email service for subdomain notifications using Gmail SMTP
+// Email service for subdomain notifications using Brevo SMTP
 import nodemailer from 'nodemailer';
 
 interface SubdomainEmailData {
@@ -19,7 +19,12 @@ interface PasswordResetEmailData {
 
 // Validate email configuration
 function validateEmailConfig(): { isValid: boolean; error?: string; configType?: string } {
+  const hasBrevo = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
   const hasGmail = !!(process.env.GMAIL_USER && process.env.GMAIL_PASS);
+  
+  if (hasBrevo) {
+    return { isValid: true, configType: 'Brevo' };
+  }
   
   if (hasGmail) {
     return { isValid: true, configType: 'Gmail' };
@@ -27,12 +32,12 @@ function validateEmailConfig(): { isValid: boolean; error?: string; configType?:
   
   return {
     isValid: false,
-    error: 'No email service configured. Please set GMAIL_USER and GMAIL_PASS environment variables.',
+    error: 'No email service configured. Please set SMTP_HOST, SMTP_USER, and SMTP_PASS (or GMAIL_USER and GMAIL_PASS) environment variables.',
     configType: 'None'
   };
 }
 
-// Create transporter using Gmail SMTP
+// Create transporter using Brevo or Gmail SMTP
 const createTransporter = () => {
   // Validate configuration first
   const configCheck = validateEmailConfig();
@@ -41,6 +46,21 @@ const createTransporter = () => {
     throw new Error(configCheck.error || 'Email service not configured');
   }
   
+  // Use Brevo SMTP if configured
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    console.log('📧 Using Brevo SMTP');
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+  }
+  
+  // Fallback to Gmail SMTP
   console.log('📧 Using Gmail SMTP');
   return nodemailer.createTransport({
     service: 'gmail',
@@ -120,7 +140,7 @@ export async function sendSubdomainEmail(data: SubdomainEmailData) {
 
     const htmlContent = generateEmailHTML(data);
 
-    const fromEmail = process.env.GMAIL_USER || 'admin@mahagp.in';
+    const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.GMAIL_USER || 'admin@mahagp.in';
     
     const mailOptions = {
       from: fromEmail,
@@ -234,7 +254,7 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
 
     const htmlContent = generatePasswordResetEmailHTML(data, resetLink);
 
-    const fromEmail = process.env.GMAIL_USER || 'admin@mahagp.in';
+    const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.GMAIL_USER || 'admin@mahagp.in';
     
     const mailOptions = {
       from: fromEmail,
