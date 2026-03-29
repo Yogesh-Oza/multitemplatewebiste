@@ -180,7 +180,63 @@ export async function GET(request: NextRequest) {
           url: '/feedback',
           description: 'नागरिक फीडबॅक',
           descriptionEn: 'Citizen Feedback'
-        }
+        },
+        notices: {
+          title: 'नोटिस',
+          titleEn: 'Notices',
+          url: '/notices',
+          description: 'नोटिस',
+          descriptionEn: 'Notices',
+        },
+        circularsPage: {
+          title: 'परिपत्रके',
+          titleEn: 'Circulars',
+          url: '/circulars',
+          description: 'परिपत्रके',
+          descriptionEn: 'Circulars',
+        },
+        downloadsPage: {
+          title: 'डाउनलोड्स',
+          titleEn: 'Downloads',
+          url: '/downloads',
+          description: 'कागदपत्रे',
+          descriptionEn: 'Downloads',
+        },
+        villageStatistics: {
+          title: 'ग्राम सांख्यिकी',
+          titleEn: 'Village statistics',
+          url: '/village-statistics',
+          description: 'वर्षनिहाय सांख्यिकी',
+          descriptionEn: 'Year-wise statistics',
+        },
+        gramSabha: {
+          title: 'ग्राम सभा',
+          titleEn: 'Gram Sabha',
+          url: '/gram-sabha',
+          description: 'ग्राम सभा नोंदी',
+          descriptionEn: 'Gram Sabha records',
+        },
+        schemeTracking: {
+          title: 'योजना ट्रॅकिंग',
+          titleEn: 'Scheme tracking',
+          url: '/scheme-tracking',
+          description: 'प्रगती',
+          descriptionEn: 'Progress tracking',
+        },
+        rti: {
+          title: 'RTI',
+          titleEn: 'RTI',
+          url: '/rti',
+          description: 'माहितीचा अधिकार',
+          descriptionEn: 'Right to Information',
+        },
+        transparency: {
+          title: 'पारदर्शकता केंद्र',
+          titleEn: 'Transparency hub',
+          url: '/transparency',
+          description: 'सारांश डॅशबोर्ड',
+          descriptionEn: 'Summary dashboard',
+        },
       },
       content: {
         announcements: announcements.map(item => ({

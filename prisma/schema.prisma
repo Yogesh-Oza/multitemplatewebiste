@@ -413,6 +413,7 @@ model GovernmentScheme {
   isActive             Boolean    @default(true)
   subdomainId          String?    @db.ObjectId
   subdomain            Subdomain? @relation(fields: [subdomainId], references: [id])
+  linkedProjects       Project[]  @relation("ProjectLinkedScheme")
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
@@ -862,6 +863,13 @@ model Subdomain {
   importantDeadlines        ImportantDeadline[]
   downloadableFiles         DownloadableFile[]
   calendarEvents            CalendarEvent[]
+  communicationPosts      CommunicationPost[]
+  rtiOfficeProfile          RtiOfficeProfile?
+  rtiMandatoryDisclosureItems RtiMandatoryDisclosureItem[]
+  rtiFormLinks              RtiFormLink[]
+  gramSabhaMeetings         GramSabhaMeeting[]
+  villageStatisticsRows     VillageStatistics[]
+  citizenServices           CitizenService[]
 
   @@map("subdomains")
 }
@@ -1024,6 +1032,13 @@ model Project {
   endDate       DateTime?
   status        String     @default("upcoming") // upcoming, ongoing, completed
   budget        Float?
+  physicalProgress  Float?   // 0–100
+  financialProgress Float?   // 0–100
+  amountSpent       Float?
+  delayReason       String?
+  delayReasonEn     String?
+  linkedGovernmentSchemeId String? @db.ObjectId
+  linkedGovernmentScheme     GovernmentScheme? @relation("ProjectLinkedScheme", fields: [linkedGovernmentSchemeId], references: [id])
   photosBefore  String[] // Array of image URLs
   photosAfter   String[] // Array of image URLs
   impactMetrics Json // Array of metrics: [{label: "Families Benefited", value: 150}]
@@ -2211,6 +2226,198 @@ model CalendarEvent {
   updatedAt    DateTime   @updatedAt
 
   @@map("calendar_events")
+}
+
+// ===== GOVERNANCE: COMMUNICATIONS (unified) =====
+
+enum CommunicationKind {
+  announcement
+  notice
+  circular
+}
+
+enum CommunicationPriority {
+  low
+  medium
+  high
+}
+
+model CommunicationPost {
+  id            String                @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId   String                @db.ObjectId
+  subdomain     Subdomain             @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  kind          CommunicationKind
+  category      String?
+  priority      CommunicationPriority @default(medium)
+  publishAt     DateTime?
+  expireAt      DateTime?
+  title         String
+  titleEn       String
+  content       String
+  contentEn     String                @default("")
+  image         String?
+  fullDescription String?
+  legacyDate    String?
+  status        String?
+  circularType  String?
+  department    String?
+  departmentEn  String?
+  referenceNumber String?
+  issuedBy      String?
+  issuedByEn    String?
+  attachments   Json?
+  lastUpdated   String?
+  isActive      Boolean               @default(true)
+  order         Int                   @default(0)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([subdomainId, kind])
+  @@map("communication_posts")
+}
+
+// ===== RTI =====
+
+enum RtiComplianceStatus {
+  pending
+  completed
+}
+
+model RtiOfficeProfile {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId      String   @unique @db.ObjectId
+  subdomain        Subdomain @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  pioName          String   @default("")
+  pioNameEn        String   @default("")
+  pioDesignation   String   @default("")
+  pioDesignationEn String   @default("")
+  apioName         String   @default("")
+  apioNameEn       String   @default("")
+  feesMr           String   @default("")
+  feesEn           String   @default("")
+  hoursMr          String   @default("")
+  hoursEn          String   @default("")
+  contactPhone     String   @default("")
+  contactEmail     String   @default("")
+  addressMr        String   @default("")
+  addressEn        String   @default("")
+  firstAppealMr    String   @default("")
+  firstAppealEn    String   @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("rti_office_profiles")
+}
+
+model RtiMandatoryDisclosureItem {
+  id                 String               @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId        String               @db.ObjectId
+  subdomain          Subdomain            @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  clauseKey          String
+  titleMr            String
+  titleEn            String
+  contentMr          String               @default("")
+  contentEn          String               @default("")
+  documentUrl        String?
+  isMandatory        Boolean              @default(true)
+  complianceStatus   RtiComplianceStatus  @default(pending)
+  lastVerifiedAt     DateTime?
+  order              Int                  @default(0)
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@unique([subdomainId, clauseKey])
+  @@index([subdomainId, complianceStatus])
+  @@map("rti_mandatory_disclosure_items")
+}
+
+model RtiFormLink {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId String    @db.ObjectId
+  subdomain   Subdomain @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  kind        String // application | first_appeal | second_appeal
+  labelMr     String
+  labelEn     String
+  url         String
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("rti_form_links")
+}
+
+// ===== GRAM SABHA (official record) =====
+
+model GramSabhaMeeting {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId     String    @db.ObjectId
+  subdomain       Subdomain @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  date            DateTime
+  agenda          String
+  agendaEn        String
+  attendanceCount Int
+  quorumMet       Boolean
+  resolutions     Json
+  documents       Json
+  isActive        Boolean   @default(true)
+  order           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([subdomainId, date])
+  @@map("gram_sabha_meetings")
+}
+
+// ===== VILLAGE STATISTICS (year rows) =====
+
+model VillageStatistics {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId  String    @db.ObjectId
+  subdomain    Subdomain @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  year         Int
+  population   Int
+  voters       Int
+  wards        Int
+  schools      Int?
+  anganwadis   Int?
+  sourceMr     String?
+  sourceEn     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([subdomainId, year])
+  @@map("village_statistics")
+}
+
+// ===== CITIZEN SERVICES (DB-backed) =====
+
+model CitizenService {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId        String    @db.ObjectId
+  subdomain          Subdomain @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  titleMr            String
+  titleEn            String
+  descriptionMr      String
+  descriptionEn      String
+  category           String    @default("other") // birth, death, rts, other
+  status             String    @default("available") // available, coming_soon, maintenance
+  processingTimeMr   String    @default("")
+  processingTimeEn   String    @default("")
+  fees               Float     @default(0)
+  requiredDocuments  Json      @default("[]")
+  formUrl            String?
+  applicationUrl     String?
+  iconName           String    @default("FileText")
+  colorClass         String    @default("bg-blue-500")
+  onlineAvailable    Boolean   @default(true)
+  order              Int       @default(0)
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("citizen_services")
 }
 
 // ===== ACTIVITY LOGGING SYSTEM =====

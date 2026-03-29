@@ -4,8 +4,10 @@ import CircularsSection from '@/components/sections/circulars-section';
 import ImportantDeadlinesSection from '@/components/sections/important-deadlines-section';
 import DownloadSection from '@/components/sections/download-section';
 import InteractiveCalendarSection from '@/components/sections/interactive-calendar-section';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, CommunicationKind } from '@prisma/client';
 import { redirect } from 'next/navigation';
+import { publicCommsFilter } from '@/lib/services/communications';
+import { communicationPostToAnnouncementShape } from '@/lib/communication-mappers';
 
 const prisma = new PrismaClient();
 
@@ -34,6 +36,36 @@ export default async function SubdomainAnnouncementsPage({ params }: Announcemen
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
     redirect(baseUrl);
   }
+
+  const now = new Date();
+  const commAnnouncements = await prisma.communicationPost.findMany({
+    where: publicCommsFilter(subdomainData.id, CommunicationKind.announcement, now),
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  });
+
+  const legacyAnnouncements =
+    commAnnouncements.length === 0
+      ? await prisma.announcement.findMany({
+          where: { subdomainId: subdomainData.id, isActive: true },
+          orderBy: { createdAt: 'desc' },
+          take: 100,
+        })
+      : [];
+
+  const announcementsList =
+    commAnnouncements.length > 0
+      ? commAnnouncements.map(communicationPostToAnnouncementShape)
+      : legacyAnnouncements.map((a) => ({
+          id: a.id,
+          title: a.title,
+          description: a.description,
+          date: a.date,
+          imageUrl: a.image,
+          priority: a.priority,
+          status: a.status,
+          category: a.category,
+        }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -124,7 +156,7 @@ export default async function SubdomainAnnouncementsPage({ params }: Announcemen
       {/* Basic Announcements Section */}
       <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="container mx-auto px-4">
-          <AnnouncementsSection announcements={subdomainData.announcements} />
+          <AnnouncementsSection announcements={announcementsList} />
         </div>
       </section>
 

@@ -24,12 +24,17 @@ const MENU_GROUPS = [
     label: 'विकास व प्रशासन',
     items: [
       { href: '/projects', label: 'प्रमुख प्रकल्प आणि उपक्रम' },
+      { href: '/scheme-tracking', label: 'योजना ट्रॅकिंग' },
       { href: '/gr', label: 'शासकीय ठराव' },
       { href: '/programs', label: 'कार्यक्रम' },
       { href: '/departments', label: 'विभाग' },
       { href: '/amenities', label: 'ग्राम पायाभूत सुविधा आणि सुविधा' },
       { href: '/gov-programs', label: 'योजना आणि लाभार्थी माहिती' },
-      { href: '/jama-kharch', label: 'अर्थसंकल्प आणि पारदर्शकता' }
+      { href: '/jama-kharch', label: 'अर्थसंकल्प आणि पारदर्शकता' },
+      { href: '/transparency', label: 'पारदर्शकता केंद्र' },
+      { href: '/village-statistics', label: 'ग्राम सांख्यिकी' },
+      { href: '/gram-sabha', label: 'ग्राम सभा' },
+      { href: '/rti', label: 'RTI माहिती' }
     ]
   },
   {
@@ -46,7 +51,10 @@ const MENU_GROUPS = [
   {
     label: 'माध्यम व अद्यतने',
     items: [
-      { href: '/announcements', label: 'घोषणा आणि परिपत्रके' },
+      { href: '/announcements', label: 'घोषणा' },
+      { href: '/notices', label: 'नोटिस' },
+      { href: '/circulars', label: 'परिपत्रके' },
+      { href: '/downloads', label: 'डाउनलोड्स' },
       { href: '/gallery', label: 'गॅलरी आणि मीडिया' }
     ]
   },

@@ -18,6 +18,8 @@ interface SearchResult {
   category?: string;
   status?: string;
   number?: string;
+  /** Deep link override for governance modules */
+  navPath?: string;
 }
 
 interface SearchModalProps {
@@ -100,12 +102,23 @@ export function SearchModal({ isOpen, onClose, subdomain }: SearchModalProps) {
         return <Building className="h-4 w-4 text-gray-600" />;
       case 'government-scheme':
         return <FileText className="h-4 w-4 text-teal-600" />;
+      case 'communication-post':
+        return <FileText className="h-4 w-4 text-cyan-600" />;
+      case 'gram-sabha':
+        return <Users className="h-4 w-4 text-amber-600" />;
+      case 'rti-disclosure':
+        return <FileText className="h-4 w-4 text-slate-700" />;
+      case 'village-statistics':
+        return <MapPin className="h-4 w-4 text-emerald-600" />;
+      case 'citizen-service':
+        return <FileText className="h-4 w-4 text-green-700" />;
       default:
         return <FileText className="h-4 w-4 text-gray-600" />;
     }
   };
 
   const getResultUrl = (result: SearchResult) => {
+    if (result.navPath) return result.navPath;
     switch (result.type) {
       case 'announcement':
         return '/announcements';

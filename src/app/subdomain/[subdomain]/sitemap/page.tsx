@@ -135,7 +135,7 @@ export default async function SitemapPage({ params }: SitemapPageProps) {
     {
       title: 'नागरिक सेवा',
       titleEn: 'Citizen Services',
-      url: '/contact',
+      url: '/citizen-services',
       icon: Phone,
       description: 'नागरिक सेवा आणि फॉर्म्स',
       descriptionEn: 'Citizen Services and Forms'
@@ -201,6 +201,70 @@ export default async function SitemapPage({ params }: SitemapPageProps) {
       icon: Leaf,
       description: 'पर्यावरण आणि शाश्वत विकास',
       descriptionEn: 'Environment and Sustainable Development'
+    },
+    {
+      title: 'नोटिस',
+      titleEn: 'Notices',
+      url: '/notices',
+      icon: Megaphone,
+      description: 'नोटिस',
+      descriptionEn: 'Notices',
+    },
+    {
+      title: 'परिपत्रके',
+      titleEn: 'Circulars',
+      url: '/circulars',
+      icon: FileText,
+      description: 'परिपत्रके',
+      descriptionEn: 'Circulars',
+    },
+    {
+      title: 'डाउनलोड्स',
+      titleEn: 'Downloads',
+      url: '/downloads',
+      icon: FileText,
+      description: 'कागदपत्रे',
+      descriptionEn: 'Downloads',
+    },
+    {
+      title: 'ग्राम सांख्यिकी',
+      titleEn: 'Village statistics',
+      url: '/village-statistics',
+      icon: MapPin,
+      description: 'वर्षनिहाय सांख्यिकी',
+      descriptionEn: 'Year-wise statistics',
+    },
+    {
+      title: 'ग्राम सभा',
+      titleEn: 'Gram Sabha',
+      url: '/gram-sabha',
+      icon: Calendar,
+      description: 'ग्राम सभा नोंदी',
+      descriptionEn: 'Gram Sabha records',
+    },
+    {
+      title: 'योजना ट्रॅकिंग',
+      titleEn: 'Scheme tracking',
+      url: '/scheme-tracking',
+      icon: Building,
+      description: 'भौतिक व आर्थिक प्रगती',
+      descriptionEn: 'Physical and financial progress',
+    },
+    {
+      title: 'RTI',
+      titleEn: 'RTI',
+      url: '/rti',
+      icon: FileText,
+      description: 'माहितीचा अधिकार',
+      descriptionEn: 'Right to Information',
+    },
+    {
+      title: 'पारदर्शकता केंद्र',
+      titleEn: 'Transparency hub',
+      url: '/transparency',
+      icon: DollarSign,
+      description: 'सारांश डॅशबोर्ड',
+      descriptionEn: 'Transparency dashboard',
     }
   ];
 

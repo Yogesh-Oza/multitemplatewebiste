@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     const searchTerm = query.trim().toLowerCase();
+    const now = new Date();
 
     // Search across multiple content types
     const [
@@ -37,7 +38,12 @@ export async function GET(request: NextRequest) {
       programs,
       facilities,
       departments,
-      governmentSchemes
+      governmentSchemes,
+      communicationPosts,
+      gramSabhaMeetings,
+      rtiItems,
+      villageStatsRows,
+      citizenSvc,
     ] = await Promise.all([
       // Search announcements
       prisma.announcement.findMany({
@@ -228,11 +234,154 @@ export async function GET(request: NextRequest) {
           createdAt: true
         },
         take: 5
-      })
+      }),
+
+      prisma.communicationPost.findMany({
+        where: {
+          subdomainId: subdomain.id,
+          isActive: true,
+          AND: [
+            { OR: [{ publishAt: null }, { publishAt: { lte: now } }] },
+            { OR: [{ expireAt: null }, { expireAt: { gt: now } }] },
+          ],
+          OR: [
+            { title: { contains: searchTerm, mode: 'insensitive' } },
+            { titleEn: { contains: searchTerm, mode: 'insensitive' } },
+            { content: { contains: searchTerm, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+      }),
+
+      prisma.gramSabhaMeeting.findMany({
+        where: {
+          subdomainId: subdomain.id,
+          isActive: true,
+          OR: [
+            { agenda: { contains: searchTerm, mode: 'insensitive' } },
+            { agendaEn: { contains: searchTerm, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+      }),
+
+      prisma.rtiMandatoryDisclosureItem.findMany({
+        where: {
+          subdomainId: subdomain.id,
+          isActive: true,
+          OR: [
+            { titleMr: { contains: searchTerm, mode: 'insensitive' } },
+            { titleEn: { contains: searchTerm, mode: 'insensitive' } },
+            { contentMr: { contains: searchTerm, mode: 'insensitive' } },
+            { contentEn: { contains: searchTerm, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+      }),
+
+      prisma.villageStatistics.findMany({
+        where: {
+          subdomainId: subdomain.id,
+          OR: [
+            { sourceMr: { contains: searchTerm, mode: 'insensitive' } },
+            { sourceEn: { contains: searchTerm, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+      }),
+
+      prisma.citizenService.findMany({
+        where: {
+          subdomainId: subdomain.id,
+          isActive: true,
+          OR: [
+            { titleMr: { contains: searchTerm, mode: 'insensitive' } },
+            { titleEn: { contains: searchTerm, mode: 'insensitive' } },
+            { descriptionMr: { contains: searchTerm, mode: 'insensitive' } },
+            { descriptionEn: { contains: searchTerm, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+      }),
     ]);
+
+    const commLabel = (kind: string) => {
+      if (kind === 'circular') return { mr: 'परिपत्रक', en: 'Circular' };
+      if (kind === 'notice') return { mr: 'नोटिस', en: 'Notice' };
+      return { mr: 'घोषणा', en: 'Announcement' };
+    };
+    const commNav = (kind: string) => {
+      if (kind === 'circular') return '/circulars';
+      if (kind === 'notice') return '/notices';
+      return '/announcements';
+    };
 
     // Format results with type information
     const results = [
+      ...communicationPosts.map((item) => {
+        const L = commLabel(item.kind);
+        return {
+          id: item.id,
+          title: item.title,
+          titleEn: item.titleEn,
+          description: item.content,
+          createdAt: item.createdAt.toISOString(),
+          type: 'communication-post',
+          typeLabel: L.mr,
+          typeLabelEn: L.en,
+          navPath: commNav(item.kind),
+          category: item.kind,
+        };
+      }),
+      ...gramSabhaMeetings.map((item) => ({
+        id: item.id,
+        title: item.agenda.slice(0, 120),
+        titleEn: item.agendaEn.slice(0, 120),
+        description: item.agenda,
+        descriptionEn: item.agendaEn,
+        createdAt: item.date.toISOString(),
+        type: 'gram-sabha',
+        typeLabel: 'ग्राम सभा',
+        typeLabelEn: 'Gram Sabha',
+        navPath: '/gram-sabha',
+      })),
+      ...rtiItems.map((item) => ({
+        id: item.id,
+        title: item.titleMr,
+        titleEn: item.titleEn,
+        description: item.contentMr,
+        descriptionEn: item.contentEn,
+        createdAt: item.updatedAt.toISOString(),
+        type: 'rti-disclosure',
+        typeLabel: 'RTI माहिती',
+        typeLabelEn: 'RTI disclosure',
+        navPath: '/rti',
+        status: item.complianceStatus,
+      })),
+      ...villageStatsRows.map((item) => ({
+        id: item.id,
+        title: `ग्राम सांख्यिकी ${item.year}`,
+        titleEn: `Village statistics ${item.year}`,
+        description: item.sourceMr || `${item.population} लोकसंख्या`,
+        descriptionEn: item.sourceEn || `Population ${item.population}`,
+        createdAt: item.updatedAt.toISOString(),
+        type: 'village-statistics',
+        typeLabel: 'सांख्यिकी',
+        typeLabelEn: 'Statistics',
+        navPath: '/village-statistics',
+      })),
+      ...citizenSvc.map((item) => ({
+        id: item.id,
+        title: item.titleMr,
+        titleEn: item.titleEn,
+        description: item.descriptionMr,
+        descriptionEn: item.descriptionEn,
+        createdAt: item.updatedAt.toISOString(),
+        type: 'citizen-service',
+        typeLabel: 'नागरिक सेवा',
+        typeLabelEn: 'Citizen service',
+        navPath: '/citizen-services',
+      })),
       ...announcements.map(item => ({ ...item, type: 'announcement', typeLabel: 'घोषणा', typeLabelEn: 'Announcement' })),
       ...projects.map(item => ({ ...item, type: 'project', typeLabel: 'प्रकल्प', typeLabelEn: 'Project' })),
       ...governmentResolutions.map(item => ({ ...item, type: 'government-resolution', typeLabel: 'शासकीय ठराव', typeLabelEn: 'Government Resolution' })),

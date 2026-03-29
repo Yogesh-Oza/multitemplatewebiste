@@ -14,6 +14,7 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "db:deploy": "prisma db push && prisma generate",
+    "migrate:communications": "node scripts/migrate-communications.cjs",
     "preview": "next build && next start",
     "clean": "rm -rf .next && rm -rf node_modules/.cache",
     "postinstall": "prisma generate"

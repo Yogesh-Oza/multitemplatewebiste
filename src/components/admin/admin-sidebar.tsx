@@ -74,6 +74,36 @@ const adminNavItems = [
     description: 'बैठकीच्या सूचना, परिपत्रके, महत्त्वाच्या मुदती आणि डाउनलोड विभाग'
   },
   {
+    href: '/admin/communications',
+    label: 'संप्रेषण (नोटिस/प्रकार)',
+    icon: FileText,
+    description: 'CommunicationPost — नोटिस, प्रकाशन तारखा'
+  },
+  {
+    href: '/admin/rti',
+    label: 'RTI',
+    icon: Shield,
+    description: 'अनिवार्य प्रकटीकरण व पूर्णता'
+  },
+  {
+    href: '/admin/gram-sabha',
+    label: 'ग्राम सभा',
+    icon: Calendar,
+    description: 'सभा नोंदी व ठराव'
+  },
+  {
+    href: '/admin/village-statistics',
+    label: 'ग्राम सांख्यिकी',
+    icon: Map,
+    description: 'वर्षनिहाय आकडेवारी'
+  },
+  {
+    href: '/admin/citizen-services',
+    label: 'नागरिक सेवा',
+    icon: Users,
+    description: 'प्रमाणपत्र व सेवा यादी'
+  },
+  {
     href: '/admin/income-expense',
     label: 'जमा-खर्च',
     icon: DollarSign,

@@ -43,108 +43,66 @@ interface CertificateService {
   applicationUrl?: string;
 }
 
-const demoCertificateServices: CertificateService[] = [
-  {
-    id: 'birth-certificate',
-    name: 'जन्म प्रमाणपत्र',
-    nameEn: 'Birth Certificate',
-    description: 'नवजात मुलाचे जन्म प्रमाणपत्र ऑनलाइन मिळवा. हे प्रमाणपत्र शाळा प्रवेश, पासपोर्ट, आधार कार्ड इत्यादीसाठी आवश्यक आहे.',
-    descriptionEn: 'Get birth certificate for newborn child online. This certificate is required for school admission, passport, Aadhaar card etc.',
-    category: 'birth',
-    status: 'available',
-    processingTime: '७ दिवस',
-    fees: 50,
-    requiredDocuments: ['जन्म नोंदणी पत्र', 'आई-वडिलांचे पहचान पत्र', 'आरोग्य केंद्राचे प्रमाणपत्र'],
-    icon: User,
-    color: 'bg-blue-500',
-    onlineAvailable: true,
-    downloadUrl: '/certificates/birth-certificate.pdf',
-    applicationUrl: '/apply/birth-certificate'
-  },
-  {
-    id: 'death-certificate',
-    name: 'मृत्यू प्रमाणपत्र',
-    nameEn: 'Death Certificate',
-    description: 'मृत व्यक्तीचे मृत्यू प्रमाणपत्र ऑनलाइन मिळवा. हे प्रमाणपत्र वारसा, बीमा, पेन्शन इत्यादीसाठी आवश्यक आहे.',
-    descriptionEn: 'Get death certificate for deceased person online. This certificate is required for inheritance, insurance, pension etc.',
-    category: 'death',
-    status: 'available',
-    processingTime: '५ दिवस',
-    fees: 50,
-    requiredDocuments: ['मृत्यू नोंदणी पत्र', 'आरोग्य केंद्राचे प्रमाणपत्र', 'पहचान पत्र'],
-    icon: Heart,
-    color: 'bg-red-500',
-    onlineAvailable: true,
-    downloadUrl: '/certificates/death-certificate.pdf',
-    applicationUrl: '/apply/death-certificate'
-  },
-  {
-    id: 'rts-certificate',
-    name: 'RTS प्रमाणपत्र',
-    nameEn: 'RTS Certificate',
-    description: 'राइट टू सर्विस (RTS) प्रमाणपत्र मिळवा. हे प्रमाणपत्र सरकारी सेवा मिळविण्यासाठी आवश्यक आहे.',
-    descriptionEn: 'Get Right to Service (RTS) certificate. This certificate is required to avail government services.',
-    category: 'rts',
-    status: 'available',
-    processingTime: '३ दिवस',
-    fees: 25,
-    requiredDocuments: ['अर्ज पत्र', 'पहचान पत्र', 'पत्ता प्रमाणपत्र'],
-    icon: Shield,
-    color: 'bg-green-500',
-    onlineAvailable: true,
-    downloadUrl: '/certificates/rts-certificate.pdf',
-    applicationUrl: '/apply/rts-certificate'
-  },
-  {
-    id: 'income-certificate',
-    name: 'उत्पन्न प्रमाणपत्र',
-    nameEn: 'Income Certificate',
-    description: 'कुटुंबाचे उत्पन्न प्रमाणपत्र मिळवा. हे प्रमाणपत्र विविध योजनांसाठी आवश्यक आहे.',
-    descriptionEn: 'Get family income certificate. This certificate is required for various schemes.',
-    category: 'other',
-    status: 'available',
-    processingTime: '१० दिवस',
-    fees: 100,
-    requiredDocuments: ['अर्ज पत्र', 'पहचान पत्र', 'उत्पन्न प्रमाण', 'पत्ता प्रमाणपत्र'],
-    icon: FileText,
-    color: 'bg-purple-500',
-    onlineAvailable: true,
-    downloadUrl: '/certificates/income-certificate.pdf',
-    applicationUrl: '/apply/income-certificate'
-  },
-  {
-    id: 'caste-certificate',
-    name: 'जात प्रमाणपत्र',
-    nameEn: 'Caste Certificate',
-    description: 'जात प्रमाणपत्र मिळवा. हे प्रमाणपत्र आरक्षण योजनांसाठी आवश्यक आहे.',
-    descriptionEn: 'Get caste certificate. This certificate is required for reservation schemes.',
-    category: 'other',
-    status: 'available',
-    processingTime: '१५ दिवस',
-    fees: 100,
-    requiredDocuments: ['अर्ज पत्र', 'पहचान पत्र', 'जात प्रमाण', 'पत्ता प्रमाणपत्र'],
-    icon: Building,
-    color: 'bg-orange-500',
-    onlineAvailable: true,
-    downloadUrl: '/certificates/caste-certificate.pdf',
-    applicationUrl: '/apply/caste-certificate'
-  },
-  {
-    id: 'domicile-certificate',
-    name: 'मूळ निवास प्रमाणपत्र',
-    nameEn: 'Domicile Certificate',
-    description: 'मूळ निवास प्रमाणपत्र मिळवा. हे प्रमाणपत्र शैक्षणिक आणि नोकरीसाठी आवश्यक आहे.',
-    descriptionEn: 'Get domicile certificate. This certificate is required for education and employment.',
-    category: 'other',
-    status: 'coming_soon',
-    processingTime: '१२ दिवस',
-    fees: 75,
-    requiredDocuments: ['अर्ज पत्र', 'पहचान पत्र', 'पत्ता प्रमाणपत्र', 'जन्म प्रमाणपत्र'],
-    icon: Home,
-    color: 'bg-cyan-500',
-    onlineAvailable: false
-  }
-];
+type CitizenServiceRow = {
+  id: string;
+  titleMr: string;
+  titleEn: string;
+  descriptionMr: string;
+  descriptionEn: string;
+  category: string;
+  status: string;
+  processingTimeMr: string;
+  processingTimeEn: string;
+  fees: number;
+  requiredDocuments: unknown;
+  formUrl?: string | null;
+  applicationUrl?: string | null;
+  iconName: string;
+  colorClass: string;
+  onlineAvailable: boolean;
+};
+
+function serviceIcon(name: string) {
+  const map: Record<string, typeof FileText> = {
+    User,
+    Heart,
+    Shield,
+    Building,
+    Home,
+    FileText,
+    GraduationCap,
+  };
+  return map[name] || FileText;
+}
+
+function mapCitizenService(row: CitizenServiceRow): CertificateService {
+  const docs = Array.isArray(row.requiredDocuments)
+    ? (row.requiredDocuments as string[])
+    : [];
+  const cat = (['birth', 'death', 'rts', 'other'].includes(row.category)
+    ? row.category
+    : 'other') as CertificateService['category'];
+  const st = (['available', 'coming_soon', 'maintenance'].includes(row.status)
+    ? row.status
+    : 'available') as CertificateService['status'];
+  return {
+    id: row.id,
+    name: row.titleMr,
+    nameEn: row.titleEn,
+    description: row.descriptionMr,
+    descriptionEn: row.descriptionEn,
+    category: cat,
+    status: st,
+    processingTime: row.processingTimeMr || row.processingTimeEn,
+    fees: row.fees,
+    requiredDocuments: docs,
+    icon: serviceIcon(row.iconName),
+    color: row.colorClass,
+    onlineAvailable: row.onlineAvailable,
+    downloadUrl: row.formUrl || undefined,
+    applicationUrl: row.applicationUrl || undefined,
+  };
+}
 
 export function CertificateServicesSection() {
   const [certificateServices, setCertificateServices] = useState<CertificateService[]>([]);
@@ -153,14 +111,25 @@ export function CertificateServicesSection() {
   const [selectedService, setSelectedService] = useState<CertificateService | null>(null);
 
   useEffect(() => {
-    const fetchCertificateServices = async () => {
+    let cancelled = false;
+    (async () => {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setCertificateServices(demoCertificateServices);
-      setLoading(false);
+      try {
+        const response = await fetch('/api/citizen-services');
+        if (!response.ok) throw new Error('fetch failed');
+        const data: CitizenServiceRow[] = await response.json();
+        if (!cancelled) {
+          setCertificateServices(data.map(mapCitizenService));
+        }
+      } catch {
+        if (!cancelled) setCertificateServices([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
     };
-
-    fetchCertificateServices();
   }, []);
 
   const formatAmount = (amount: number) => {
@@ -212,6 +181,20 @@ export function CertificateServicesSection() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">प्रमाणपत्र सेवा लोड होत आहे...</p>
           </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (certificateServices.length === 0) {
+    return (
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="container mx-auto px-4 text-center text-gray-600 max-w-xl mx-auto">
+          <FileText className="h-12 w-12 mx-auto mb-4 text-blue-400" />
+          <p className="text-lg font-medium text-gray-800">सध्या कोणतीही सेवा नोंदणी केलेली नाही.</p>
+          <p className="text-sm mt-2">
+            प्रशासन `npm run db:seed` किंवा नागरिक सेवा व्यवस्थापनाद्वारे सेवा जोडू शकते.
+          </p>
         </div>
       </section>
     );
