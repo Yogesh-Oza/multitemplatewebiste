@@ -10,8 +10,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid or inactive subdomain' }, { status: 404 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const includeInactive = searchParams.get('all') === '1';
+
     const list = await prisma.rtiFormLink.findMany({
-      where: { subdomainId, isActive: true },
+      where: { subdomainId, ...(includeInactive ? {} : { isActive: true }) },
       orderBy: { order: 'asc' },
     });
     return NextResponse.json(list);

@@ -1,9 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
-const {
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import {
   seedGovernanceForSubdomain,
   seedGovernanceDemoForSubdomain,
-} = require('../scripts/governance-default-seed.cjs');
+} from '../src/lib/governance-default-seed';
 
 const prisma = new PrismaClient();
 
@@ -50,7 +50,6 @@ async function main() {
 
   console.log('Seeded AdminUser:', { id: user.id, username: user.username, email: user.email });
 
-  // Create test subdomains
   const testSubdomains = [
     {
       subdomain: 'pune',
@@ -64,7 +63,7 @@ async function main() {
       adminUsername: 'pune_admin',
       adminPassword: 'pune123',
       status: 'active',
-      isActive: true
+      isActive: true,
     },
     {
       subdomain: 'nagpur',
@@ -78,21 +77,20 @@ async function main() {
       adminUsername: 'nagpur_admin',
       adminPassword: 'nagpur123',
       status: 'active',
-      isActive: true
-    }
+      isActive: true,
+    },
   ];
 
   for (const subdomainData of testSubdomains) {
     const existingSubdomain = await prisma.subdomain.findUnique({
-      where: { subdomain: subdomainData.subdomain }
+      where: { subdomain: subdomainData.subdomain },
     });
 
     if (!existingSubdomain) {
       const subdomain = await prisma.subdomain.create({
-        data: subdomainData
+        data: subdomainData,
       });
 
-      // Create admin user for this subdomain
       const adminHashed = await bcrypt.hash(subdomainData.adminPassword, 10);
       await prisma.adminUser.create({
         data: {
@@ -101,11 +99,13 @@ async function main() {
           password: adminHashed,
           role: 'admin',
           subdomainId: subdomain.id,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
 
-      console.log(`Created subdomain: ${subdomainData.subdomain} with admin: ${subdomainData.adminUsername}`);
+      console.log(
+        `Created subdomain: ${subdomainData.subdomain} with admin: ${subdomainData.adminUsername}`
+      );
     } else {
       console.log(`Subdomain ${subdomainData.subdomain} already exists`);
     }
@@ -115,20 +115,18 @@ async function main() {
   await seedGovernanceDemoContent(prisma);
 }
 
-/** Same default “template” copy per village; village admins edit via admin panel. */
-async function seedGovernance(prisma) {
-  const subs = await prisma.subdomain.findMany();
+async function seedGovernance(client: PrismaClient) {
+  const subs = await client.subdomain.findMany();
   for (const s of subs) {
-    await seedGovernanceForSubdomain(prisma, s);
+    await seedGovernanceForSubdomain(client, s);
   }
   console.log('Governance seed: RTI clauses + citizen services (if empty) for all subdomains.');
 }
 
-/** Demo rows per subdomain (idempotent); skipped where data already exists. */
-async function seedGovernanceDemoContent(prisma) {
-  const subs = await prisma.subdomain.findMany();
+async function seedGovernanceDemoContent(client: PrismaClient) {
+  const subs = await client.subdomain.findMany();
   for (const s of subs) {
-    await seedGovernanceDemoForSubdomain(prisma, s);
+    await seedGovernanceDemoForSubdomain(client, s);
   }
   console.log('Demo content seed finished (governance pages).');
 }

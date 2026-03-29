@@ -28,3 +28,15 @@ export async function uploadImage(imageFile: File): Promise<string> {
 
   return uploadFile(imageFile);
 }
+
+export async function uploadPdf(pdfFile: File): Promise<string> {
+  const ok =
+    pdfFile.type === 'application/pdf' || pdfFile.name.toLowerCase().endsWith('.pdf');
+  if (!ok) {
+    throw new Error('File must be a PDF');
+  }
+  if (pdfFile.size > 15 * 1024 * 1024) {
+    throw new Error('File size must be less than 15MB');
+  }
+  return uploadFile(pdfFile);
+}

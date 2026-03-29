@@ -16,6 +16,16 @@ export const metadata = {
   description: 'Right to Information disclosures',
 };
 
+function pdfFileNameFromUrl(url: string): string {
+  try {
+    const pathOnly = url.startsWith('http') ? new URL(url).pathname : url;
+    const seg = pathOnly.split('/').filter(Boolean).pop();
+    return seg && seg.endsWith('.pdf') ? seg : 'document.pdf';
+  } catch {
+    return 'document.pdf';
+  }
+}
+
 export default async function RtiPage({ params }: { params: Promise<{ subdomain: string }> }) {
   const { subdomain } = await params;
   const sd = await prisma.subdomain.findUnique({ where: { subdomain } });
@@ -57,7 +67,7 @@ export default async function RtiPage({ params }: { params: Promise<{ subdomain:
           <p className="text-lg mt-2 opacity-90">Right to Information</p>
           {mandatory > 0 && (
             <p className="mt-4 text-sm opacity-90">
-              Mandatory completion: {completed}/{mandatory} ({pct}%)
+              अनिवार्य पूर्णता: {completed}/{mandatory} ({pct}%) · Mandatory completion: {completed}/{mandatory} ({pct}%)
             </p>
           )}
         </div>
@@ -66,7 +76,7 @@ export default async function RtiPage({ params }: { params: Promise<{ subdomain:
       <section className="py-10 container mx-auto px-4 max-w-4xl space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>कार्यालय / PIO</CardTitle>
+            <CardTitle>कार्यालय / PIO · Office / PIO</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-gray-800 space-y-2">
             {profile ? (
@@ -78,13 +88,13 @@ export default async function RtiPage({ params }: { params: Promise<{ subdomain:
                   <strong>APIO:</strong> {profile.apioName}
                 </p>
                 <p>
-                  <strong>Fees:</strong> {profile.feesMr || profile.feesEn}
+                  <strong>शुल्क / Fees:</strong> {profile.feesMr || profile.feesEn}
                 </p>
                 <p>
-                  <strong>Hours:</strong> {profile.hoursMr || profile.hoursEn}
+                  <strong>वेळ / Hours:</strong> {profile.hoursMr || profile.hoursEn}
                 </p>
                 <p>
-                  <strong>Contact:</strong> {profile.contactPhone} {profile.contactEmail}
+                  <strong>संपर्क / Contact:</strong> {profile.contactPhone} {profile.contactEmail}
                 </p>
                 <p className="whitespace-pre-wrap">{profile.addressMr}</p>
                 {profile.firstAppealMr ? (
@@ -92,34 +102,80 @@ export default async function RtiPage({ params }: { params: Promise<{ subdomain:
                 ) : null}
               </>
             ) : (
-              <p className="text-gray-600">Office profile pending admin entry.</p>
+              <p className="text-gray-600">
+                कार्यालय प्रोफाइल अद्याप भरलेले नाही. · Office profile pending admin entry.
+              </p>
             )}
           </CardContent>
         </Card>
 
-        {forms.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Form links</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-3">
-              {forms.map((f) => (
-                <a
-                  key={f.id}
-                  href={f.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-white text-sm hover:bg-blue-700"
-                >
-                  {f.labelMr}
-                </a>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-5 text-center border-b border-slate-200">
+            <h2 className="text-2xl md:text-3xl font-bold text-[rgb(0,8,169)]">अर्ज नमुने</h2>
+            <p className="text-xs text-slate-600 mt-1">Application form samples (PDF only)</p>
+          </div>
+          <div className="p-4 overflow-x-auto">
+            {forms.length === 0 ? (
+              <p className="text-center text-gray-600 py-8 text-sm">
+                अर्ज नमुने अद्याप जोडलेले नाहीत. ग्रामपंचायत प्रशासक RTI प्रशासनातून PDF जोडू शकतात.
+                <br />
+                <span className="text-gray-500">No sample forms yet. Village admin can add PDFs from Admin → RTI.</span>
+              </p>
+            ) : (
+              <table className="w-full text-sm border-collapse border border-slate-300">
+                <thead>
+                  <tr className="bg-slate-800 text-white">
+                    <th className="border border-slate-300 px-3 py-3 text-left font-semibold text-base">
+                      शीर्षक · Title
+                    </th>
+                    <th className="border border-slate-300 px-3 py-3 text-left font-semibold text-base w-[280px]">
+                      नमुना · Sample (PDF)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {forms.map((f) => {
+                    const fileName = pdfFileNameFromUrl(f.url);
+                    return (
+                      <tr key={f.id} className="odd:bg-slate-50 even:bg-white align-middle">
+                        <td className="border border-slate-300 px-3 py-3 text-gray-900">
+                          <span className="font-medium text-gray-900">{f.labelMr}</span>
+                          {f.labelEn ? (
+                            <p className="text-gray-600 text-xs mt-1 leading-snug">{f.labelEn}</p>
+                          ) : null}
+                        </td>
+                        <td className="border border-slate-300 px-3 py-3">
+                          <div className="flex flex-wrap gap-2">
+                            <a
+                              href={f.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center justify-center rounded-md border border-blue-600 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50"
+                            >
+                              PDF पहा · View PDF
+                            </a>
+                            <a
+                              href={f.url}
+                              download={fileName}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center justify-center rounded-md border border-emerald-600 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-50"
+                            >
+                              डाउनलोड · Download
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
 
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Mandatory disclosure</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">अनिवार्य प्रकटीकरण · Mandatory disclosure</h2>
           {disclosures.length === 0 ? (
             <p className="text-gray-600">No disclosure rows yet. Admin can seed defaults via API.</p>
           ) : (
