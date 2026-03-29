@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { applyDefaultGovernanceTemplateToSubdomain } from '@/lib/apply-default-governance-template';
 import { sendSubdomainEmail } from '@/lib/email';
 import { generatePassword } from '@/lib/utils';
 import bcrypt from 'bcryptjs';
@@ -180,6 +181,18 @@ export async function POST(request: NextRequest) {
 
       return { newSubdomain, adminUser };
     });
+
+    try {
+      await applyDefaultGovernanceTemplateToSubdomain(prisma, {
+        id: result.newSubdomain.id,
+        subdomain: result.newSubdomain.subdomain,
+        phone: result.newSubdomain.phone,
+        email: result.newSubdomain.email,
+        address: result.newSubdomain.address,
+      });
+    } catch (seedErr) {
+      console.error('Default governance template for new subdomain failed:', seedErr);
+    }
 
     // Send email with credentials
     let emailSent = false;

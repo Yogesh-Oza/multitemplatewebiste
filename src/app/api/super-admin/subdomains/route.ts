@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { sendSubdomainEmail } from '@/lib/email';
 import { generatePassword } from '@/lib/utils';
 import { isSuperAdmin } from '@/lib/auth-helpers';
+import { applyDefaultGovernanceTemplateToSubdomain } from '@/lib/apply-default-governance-template';
 
 export async function GET(request: NextRequest) {
   try {
@@ -110,6 +111,18 @@ export async function POST(request: NextRequest) {
 
       return { newSubdomain, adminUser };
     });
+
+    try {
+      await applyDefaultGovernanceTemplateToSubdomain(prisma, {
+        id: result.newSubdomain.id,
+        subdomain: result.newSubdomain.subdomain,
+        phone: result.newSubdomain.phone,
+        email: result.newSubdomain.email,
+        address: result.newSubdomain.address,
+      });
+    } catch (seedErr) {
+      console.error('Default governance template for new subdomain failed:', seedErr);
+    }
 
     // Send email with credentials if requested
     if (sendEmail) {
