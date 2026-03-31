@@ -1,0 +1,698 @@
+{
+  "startedAt": "2026-03-31T13:30:47.098Z",
+  "finishedAt": "2026-03-31T13:30:52.433Z",
+  "mode": "dry-run",
+  "mappingFile": "C:\\Users\\oyoge\\Desktop\\New folder (10)\\dynamic template sites\\gram-panchayat-website\\outputs\\runtime\\s3-migration\\s3-simple-url-map.json",
+  "host": "mahagp-app.s3.ap-south-1.amazonaws.com",
+  "scannedModels": 44,
+  "scannedRecords": 23408,
+  "updatedRecords": 0,
+  "copiedLegacyUrlCount": 0,
+  "rewrittenLegacyUrlCount": 0,
+  "existingMappingCount": 1925,
+  "failures": [],
+  "models": [
+    {
+      "model": "VillageInfo",
+      "delegate": "villageInfo",
+      "recordsScanned": 391,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "villageLogo",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "satyamevJayateLogoUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "digitalIndiaLogoUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "TimelineItem",
+      "delegate": "timelineItem",
+      "recordsScanned": 87,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Announcement",
+      "delegate": "announcement",
+      "recordsScanned": 30,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "image",
+          "recordsWithLegacyUrls": 1,
+          "legacyUrlCount": 1,
+          "uniqueLegacyUrlCount": 1
+        }
+      ]
+    },
+    {
+      "model": "CulturalHeritage",
+      "delegate": "culturalHeritage",
+      "recordsScanned": 62,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "image",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "HeroImage",
+      "delegate": "heroImage",
+      "recordsScanned": 666,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Program",
+      "delegate": "program",
+      "recordsScanned": 182,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Gallery",
+      "delegate": "gallery",
+      "recordsScanned": 425,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "mediaUrl",
+          "recordsWithLegacyUrls": 1,
+          "legacyUrlCount": 1,
+          "uniqueLegacyUrlCount": 1
+        }
+      ]
+    },
+    {
+      "model": "Facility",
+      "delegate": "facility",
+      "recordsScanned": 38,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "TeamMember",
+      "delegate": "teamMember",
+      "recordsScanned": 324,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Leader",
+      "delegate": "leader",
+      "recordsScanned": 2755,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "IncomeExpense",
+      "delegate": "incomeExpense",
+      "recordsScanned": 639,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "receiptUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Department",
+      "delegate": "department",
+      "recordsScanned": 54,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "GovernmentScheme",
+      "delegate": "governmentScheme",
+      "recordsScanned": 503,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "website",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "ApplicationProcessConfig",
+      "delegate": "applicationProcessConfig",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationFormUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "sampleFormUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "BeneficiaryStory",
+      "delegate": "beneficiaryStory",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "beforeImage",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "afterImage",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "FooterContent",
+      "delegate": "footerContent",
+      "recordsScanned": 29,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "footerSatyamevJayateLogoUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "footerDigitalIndiaLogoUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "GovernmentResolution",
+      "delegate": "governmentResolution",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "fileUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Project",
+      "delegate": "project",
+      "recordsScanned": 905,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "photosBefore",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "photosAfter",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Complaint",
+      "delegate": "complaint",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "attachments",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "JobOpportunity",
+      "delegate": "jobOpportunity",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Tender",
+      "delegate": "tender",
+      "recordsScanned": 6,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "tenderUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "TrainingProgram",
+      "delegate": "trainingProgram",
+      "recordsScanned": 7,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "registrationUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "FPOGroup",
+      "delegate": "fPOGroup",
+      "recordsScanned": 14,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "joinUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "School",
+      "delegate": "school",
+      "recordsScanned": 52,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "ScholarshipScheme",
+      "delegate": "scholarshipScheme",
+      "recordsScanned": 4,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "StudentAchievement",
+      "delegate": "studentAchievement",
+      "recordsScanned": 7,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CareerGuidance",
+      "delegate": "careerGuidance",
+      "recordsScanned": 1,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "registrationUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "YouthSuccessStory",
+      "delegate": "youthSuccessStory",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "AdoptedTree",
+      "delegate": "adoptedTree",
+      "recordsScanned": 3,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "EducationItem",
+      "delegate": "educationItem",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "links",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "images",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "EnvironmentInitiative",
+      "delegate": "environmentInitiative",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "images",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "SocialFeed",
+      "delegate": "socialFeed",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "NewsItem",
+      "delegate": "newsItem",
+      "recordsScanned": 1398,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "BeforeAfterGallery",
+      "delegate": "beforeAfterGallery",
+      "recordsScanned": 13,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "beforeImage",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "afterImage",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "MeetingNotification",
+      "delegate": "meetingNotification",
+      "recordsScanned": 31,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Circular",
+      "delegate": "circular",
+      "recordsScanned": 12,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "attachments",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "ImportantDeadline",
+      "delegate": "importantDeadline",
+      "recordsScanned": 4,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "DownloadableFile",
+      "delegate": "downloadableFile",
+      "recordsScanned": 1362,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CalendarEvent",
+      "delegate": "calendarEvent",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CommunicationPost",
+      "delegate": "communicationPost",
+      "recordsScanned": 2724,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "image",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "attachments",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "RtiMandatoryDisclosureItem",
+      "delegate": "rtiMandatoryDisclosureItem",
+      "recordsScanned": 6220,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documentUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "RtiFormLink",
+      "delegate": "rtiFormLink",
+      "recordsScanned": 910,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "GramSabhaMeeting",
+      "delegate": "gramSabhaMeeting",
+      "recordsScanned": 914,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CitizenService",
+      "delegate": "citizenService",
+      "recordsScanned": 2621,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "formUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        },
+        {
+          "field": "applicationUrl",
+          "recordsWithLegacyUrls": 0,
+          "legacyUrlCount": 0,
+          "uniqueLegacyUrlCount": 0
+        }
+      ]
+    }
+  ]
+}

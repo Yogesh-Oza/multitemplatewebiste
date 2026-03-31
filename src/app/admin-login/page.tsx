@@ -4,6 +4,8 @@ import { LoginRedirect } from '@/components/admin/login-redirect';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { getSubdomainFromHostname } from '@/lib/subdomain-auth';
 
 export const metadata: Metadata = {
   title: 'प्रशासक लॉगिन - ग्रामपंचायत',
@@ -17,11 +19,18 @@ export const metadata: Metadata = {
 export default async function AdminLoginPage() {
   // Check if user is already authenticated
   const session = await getServerSession(authOptions);
-  
+
   if (session) {
     // User is already logged in, redirect to admin dashboard
     redirect('/admin');
   }
+
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const subdomain = getSubdomainFromHostname(host) || null;
+  const hostname = host.split(':')[0];
+  const fullDomain =
+    subdomain && !hostname.startsWith(subdomain) ? `${subdomain}.${hostname}` : hostname;
 
   return (
     <>
@@ -35,6 +44,19 @@ export default async function AdminLoginPage() {
               </div>
               <h1 className="text-2xl font-bold text-gray-900">प्रशासक लॉगिन</h1>
               <p className="text-gray-600 mt-2">ग्रामपंचायत प्रशासन पैनल</p>
+              {fullDomain && (
+                <div className="mt-3 text-sm text-gray-500">
+                  <p>
+                    <span className="font-semibold">डोमेन:</span> {fullDomain}
+                  </p>
+                  {subdomain && (
+                    <p>
+                      <span className="font-semibold">गावाचे नाव:</span> {subdomain}
+                      {/* Here subdomain is the village identifier, e.g. mymanjari */}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
             
             <AdminLoginForm />

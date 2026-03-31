@@ -14,6 +14,9 @@ interface HomepageSettings {
     url: string;
     title: string;
     description: string;
+    isActive?: boolean;
+    type?: 'youtube' | 'upload';
+    uploadedFile?: string;
   };
 }
 
@@ -22,12 +25,18 @@ interface WelcomeVideoSectionProps {
 }
 
 export function WelcomeVideoSection({ homepageSettings }: WelcomeVideoSectionProps) {
+  const welcomeVideo = homepageSettings?.welcomeVideo;
+  const resolvedUrl =
+    welcomeVideo?.type === 'upload'
+      ? welcomeVideo.uploadedFile
+      : welcomeVideo?.url;
+
   // Extract video data from settings or use fallback
-  const videoData: WelcomeVideoData = homepageSettings?.welcomeVideo && homepageSettings.welcomeVideo.url ? {
-    videoUrl: homepageSettings.welcomeVideo.url,
-    title: homepageSettings.welcomeVideo.title || 'गावाचे स्वागत व्हिडिओ',
-    description: homepageSettings.welcomeVideo.description || 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
-    isActive: true
+  const videoData: WelcomeVideoData = welcomeVideo && resolvedUrl ? {
+    videoUrl: resolvedUrl,
+    title: welcomeVideo.title || 'गावाचे स्वागत व्हिडिओ',
+    description: welcomeVideo.description || 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
+    isActive: welcomeVideo.isActive ?? true
   } : {
     videoUrl: 'https://www.youtube.com/watch?v=9W5Vw34xayM',
     title: 'गावाचे स्वागत व्हिडिओ',
@@ -55,6 +64,11 @@ export function WelcomeVideoSection({ homepageSettings }: WelcomeVideoSectionPro
     return url;
   };
 
+  const isEmbeddedVideo =
+    videoData.videoUrl.includes('youtube.com/watch') ||
+    videoData.videoUrl.includes('youtu.be/') ||
+    videoData.videoUrl.includes('vimeo.com/');
+
   return (
     <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container">
@@ -69,13 +83,22 @@ export function WelcomeVideoSection({ homepageSettings }: WelcomeVideoSectionPro
 
         <div className="max-w-4xl mx-auto">
           <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
-            <iframe
-              src={getVideoEmbedUrl(videoData.videoUrl)}
-              title={videoData.title}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {isEmbeddedVideo ? (
+              <iframe
+                src={getVideoEmbedUrl(videoData.videoUrl)}
+                title={videoData.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={videoData.videoUrl}
+                className="w-full h-full"
+                controls
+                preload="metadata"
+              />
+            )}
           </div>
           
           <div className="mt-6 text-center">

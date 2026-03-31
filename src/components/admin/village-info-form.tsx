@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, Plus, Trash2, Users, Home, MapPin, TrendingUp, RefreshCw, Video, Play, Upload, FileVideo, Link } from 'lucide-react';
+import { Save, Plus, Trash2, Users, Home, MapPin, TrendingUp, RefreshCw, Video, Play, Upload, FileVideo, Link, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Stat {
@@ -55,6 +55,11 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [villageData, setVillageData] = useState<VillageInfo | null>(initialData || null);
   const [isLoadingData, setIsLoadingData] = useState(!initialData);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingVillageLogo, setIsUploadingVillageLogo] = useState(false);
+  const [isUploadingGovLogo, setIsUploadingGovLogo] = useState<
+    Partial<Record<'satyamevJayateLogoUrl' | 'digitalIndiaLogoUrl', boolean>>
+  >({});
 
   // Fetch village data from API
   useEffect(() => {
@@ -198,6 +203,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
   };
 
   const handleVideoUpload = async (file: File) => {
+    setIsUploadingVideo(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -214,6 +220,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
           welcomeVideo: {
             ...prev.welcomeVideo!,
             uploadedFile: data.url,
+            url: '',
             type: 'upload'
           }
         }));
@@ -224,10 +231,13 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('व्हिडिओ अपलोड करताना त्रुटी आली');
+    } finally {
+      setIsUploadingVideo(false);
     }
   };
 
   const handleLogoUpload = async (file: File) => {
+    setIsUploadingVillageLogo(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -253,10 +263,13 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       }
     } catch (error) {
       toast.error('लोगो अपलोड करताना त्रुटी आली');
+    } finally {
+      setIsUploadingVillageLogo(false);
     }
   };
 
   const handleGovLogoUpload = async (file: File, field: 'satyamevJayateLogoUrl' | 'digitalIndiaLogoUrl') => {
+    setIsUploadingGovLogo((prev) => ({ ...prev, [field]: true }));
     try {
       const formDataFd = new FormData();
       formDataFd.append('file', file);
@@ -274,6 +287,8 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       }
     } catch (error) {
       toast.error('लोगो अपलोड करताना त्रुटी आली');
+    } finally {
+      setIsUploadingGovLogo((prev) => ({ ...prev, [field]: false }));
     }
   };
 
@@ -362,12 +377,19 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
             <Label htmlFor="villageLogo">गावाचे लोगो</Label>
             <div className="mt-2">
               <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                <Upload className="h-5 w-5 mr-2" />
-                <span className="text-sm font-medium">लोगो अपलोड करा</span>
+                {isUploadingVillageLogo ? (
+                  <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="h-5 w-5 mr-2" />
+                )}
+                <span className="text-sm font-medium">
+                  {isUploadingVillageLogo ? 'अपलोड सुरू आहे...' : 'लोगो अपलोड करा'}
+                </span>
                 <input
                   type="file"
                   accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                   className="hidden"
+                  disabled={isUploadingVillageLogo}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
@@ -412,12 +434,19 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                 <Label>Satyamev Jayate लोगो</Label>
                 <div className="mt-2">
                   <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <Upload className="h-5 w-5 mr-2" />
-                    <span className="text-sm font-medium">फाइल निवडा</span>
+                    {isUploadingGovLogo.satyamevJayateLogoUrl ? (
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-5 w-5 mr-2" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {isUploadingGovLogo.satyamevJayateLogoUrl ? 'अपलोड सुरू आहे...' : 'फाइल निवडा'}
+                    </span>
                     <input
                       type="file"
                       accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                       className="hidden"
+                      disabled={!!isUploadingGovLogo.satyamevJayateLogoUrl}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleGovLogoUpload(file, 'satyamevJayateLogoUrl');
@@ -436,12 +465,19 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                 <Label>Digital India लोगो</Label>
                 <div className="mt-2">
                   <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <Upload className="h-5 w-5 mr-2" />
-                    <span className="text-sm font-medium">फाइल निवडा</span>
+                    {isUploadingGovLogo.digitalIndiaLogoUrl ? (
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-5 w-5 mr-2" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {isUploadingGovLogo.digitalIndiaLogoUrl ? 'अपलोड सुरू आहे...' : 'फाइल निवडा'}
+                    </span>
                     <input
                       type="file"
                       accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                       className="hidden"
+                      disabled={!!isUploadingGovLogo.digitalIndiaLogoUrl}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleGovLogoUpload(file, 'digitalIndiaLogoUrl');
@@ -560,9 +596,15 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       {/* Welcome Video */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Video className="h-5 w-5 mr-2" />
-            गावाचे स्वागत व्हिडिओ
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Video className="h-5 w-5 mr-2" />
+              गावाचे स्वागत व्हिडिओ
+            </div>
+            <Button type="submit" size="sm" disabled={isLoading}>
+              <Save className="h-4 w-4 mr-2" />
+              {isLoading ? 'सेव्ह करत आहे...' : 'सेव्ह करा'}
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -637,12 +679,19 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
               <Label>व्हिडिओ फाइल अपलोड</Label>
               <div className="mt-2">
                 <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <Upload className="h-5 w-5 mr-2" />
-                  <span className="text-sm font-medium">व्हिडिओ अपलोड करा</span>
+                  {isUploadingVideo ? (
+                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="h-5 w-5 mr-2" />
+                  )}
+                  <span className="text-sm font-medium">
+                    {isUploadingVideo ? 'व्हिडिओ अपलोड सुरू आहे...' : 'व्हिडिओ अपलोड करा'}
+                  </span>
                   <input
                     type="file"
                     accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                     className="hidden"
+                    disabled={isUploadingVideo}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -651,6 +700,9 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                     }}
                   />
                 </label>
+                {isUploadingVideo && (
+                  <p className="text-xs text-blue-600 mt-2">कृपया थांबा, व्हिडिओ अपलोड होत आहे...</p>
+                )}
                 <p className="text-xs text-gray-500 mt-1">MP4, MOV, AVI, कमाल 100MB</p>
                 
                 {formData.welcomeVideo?.uploadedFile && (
@@ -724,15 +776,45 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
           {(formData.welcomeVideo?.url || formData.welcomeVideo?.uploadedFile) && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <h4 className="font-medium mb-2">व्हिडिओ प्रीव्ह्यू</h4>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Play className="h-4 w-4" />
-                <span>
-                  {formData.welcomeVideo?.type === 'youtube' 
-                    ? `YouTube URL: ${formData.welcomeVideo.url}`
-                    : `अपलोड केलेला व्हिडिओ: ${formData.welcomeVideo?.uploadedFile?.split('/').pop()}`
-                  }
-                </span>
-              </div>
+              {formData.welcomeVideo?.type === 'youtube' && formData.welcomeVideo.url ? (
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Play className="h-4 w-4" />
+                    <span>{`YouTube URL: ${formData.welcomeVideo.url}`}</span>
+                  </div>
+                  <a
+                    href={formData.welcomeVideo.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    पूर्ण व्हिडिओ पहा
+                  </a>
+                </div>
+              ) : formData.welcomeVideo?.uploadedFile ? (
+                <div className="space-y-3">
+                  <video
+                    src={formData.welcomeVideo.uploadedFile}
+                    className="w-full max-w-2xl rounded-lg border bg-black"
+                    controls
+                    preload="metadata"
+                  />
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Play className="h-4 w-4" />
+                    <span>{`अपलोड केलेला व्हिडिओ: ${formData.welcomeVideo.uploadedFile.split('/').pop()}`}</span>
+                  </div>
+                  <a
+                    href={formData.welcomeVideo.uploadedFile}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    पूर्ण व्हिडिओ पहा
+                  </a>
+                </div>
+              ) : null}
             </div>
           )}
         </CardContent>

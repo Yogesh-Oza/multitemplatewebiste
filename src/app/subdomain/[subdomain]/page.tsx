@@ -105,10 +105,10 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
       
       <WaterSanitationSection />
       
-      <WelcomeVideoSection homepageSettings={homepageSettings && homepageSettings.mainHeading ? {
+      <WelcomeVideoSection homepageSettings={subdomainData.villageInfo?.[0]?.welcomeVideo ? {
+        welcomeVideo: subdomainData.villageInfo[0].welcomeVideo as any
+      } : homepageSettings && homepageSettings.mainHeading ? {
         welcomeVideo: {
-          // If you later add a real URL in HomepageSettings, pass it here.
-          // Leaving url undefined triggers the component's fallback video.
           title: homepageSettings.mainHeading,
           description: homepageSettings.subtitle
         } as any
