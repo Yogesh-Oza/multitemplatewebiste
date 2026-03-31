@@ -3,6 +3,15 @@ import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
 import { logCrudActivity } from '@/lib/activity-log-helper';
 
+const DEFAULT_WELCOME_VIDEO = {
+  url: '',
+  title: 'गावाचे स्वागत व्हिडिओ',
+  description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
+  isActive: false,
+  type: 'youtube' as const,
+  uploadedFile: ''
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { isValid, subdomainId } = await validateSubdomain(request);
@@ -10,7 +19,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid or inactive subdomain' }, { status: 404 });
     }
     const villageInfo = await prisma.villageInfo.findFirst({ where: { subdomainId } });
-    return NextResponse.json(villageInfo ?? {});
+    return NextResponse.json({
+      ...(villageInfo ?? {}),
+      welcomeVideo: villageInfo?.welcomeVideo ?? DEFAULT_WELCOME_VIDEO,
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch village info' }, { status: 500 });
   }
@@ -25,6 +37,14 @@ export async function PUT(request: NextRequest) {
 
     const data = await request.json();
     const statsData = Array.isArray(data.stats) ? data.stats : [];
+    const welcomeVideo =
+      data.welcomeVideo && typeof data.welcomeVideo === 'object'
+        ? {
+            ...DEFAULT_WELCOME_VIDEO,
+            ...data.welcomeVideo,
+            type: data.welcomeVideo.type === 'upload' ? 'upload' : 'youtube',
+          }
+        : DEFAULT_WELCOME_VIDEO;
 
     // Ensure a single record per subdomain: delete then create
     await prisma.villageInfo.deleteMany({ where: { subdomainId } });
@@ -47,6 +67,7 @@ export async function PUT(request: NextRequest) {
       sectionTwoBody: data.sectionTwoBody ?? '',
       sectionThreeTitle: data.sectionThreeTitle ?? '',
       sectionThreeBody: data.sectionThreeBody ?? '',
+      welcomeVideo,
       stats: statsData,
       subdomainId,
     };

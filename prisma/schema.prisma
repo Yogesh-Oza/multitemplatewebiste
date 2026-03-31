@@ -33,6 +33,7 @@ model VillageInfo {
   sectionTwoBody        String     @default("")
   sectionThreeTitle     String     @default("")
   sectionThreeBody      String     @default("")
+  welcomeVideo          Json?
   stats                 Json // Array of statistics
   subdomainId           String?    @db.ObjectId
   subdomain             Subdomain? @relation(fields: [subdomainId], references: [id])

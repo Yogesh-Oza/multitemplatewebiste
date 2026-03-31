@@ -3,6 +3,24 @@ import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
 import { logCrudActivity } from '@/lib/activity-log-helper';
 
+type WelcomeVideoData = {
+  url: string;
+  title: string;
+  description: string;
+  isActive: boolean;
+  type: 'youtube' | 'upload';
+  uploadedFile: string;
+};
+
+const DEFAULT_WELCOME_VIDEO: WelcomeVideoData = {
+  url: '',
+  title: 'गावाचे स्वागत व्हिडिओ',
+  description: 'सरपंच किंवा युवकांकडून गावाच्या यशाबद्दल छोटा व्हिडिओ क्लिप',
+  isActive: false,
+  type: 'youtube',
+  uploadedFile: ''
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { isValid, subdomainId } = await validateSubdomain(request);
@@ -51,7 +69,14 @@ export async function GET(request: NextRequest) {
             { value: '654.455', label: 'क्षेत्रफळ (हेक्टर)', labelEn: 'Area (Hectares)', icon: '🌾' }
           ],
           subdomainId: subdomainId
-        }
+        } as any
+      });
+
+      villageInfo = await prisma.villageInfo.update({
+        where: { id: villageInfo.id },
+        data: {
+          welcomeVideo: DEFAULT_WELCOME_VIDEO
+        } as any
       });
     }
 
@@ -89,10 +114,18 @@ export async function POST(request: NextRequest) {
       sectionTwoTitle, sectionTwoBody,
       sectionThreeTitle, sectionThreeBody,
       villageLogo, villageName, villageNameEn,
-      satyamevJayateLogoUrl, digitalIndiaLogoUrl, govDeptText, officialSiteText } = body;
+      satyamevJayateLogoUrl, digitalIndiaLogoUrl, govDeptText, officialSiteText,
+      welcomeVideo } = body;
 
     // Store stats as array directly
     const statsData = stats && Array.isArray(stats) ? stats : [];
+    const welcomeVideoData: WelcomeVideoData = welcomeVideo && typeof welcomeVideo === 'object'
+      ? {
+          ...DEFAULT_WELCOME_VIDEO,
+          ...welcomeVideo,
+          type: welcomeVideo.type === 'upload' ? 'upload' : 'youtube'
+        }
+      : DEFAULT_WELCOME_VIDEO;
 
     // First, try to find existing village info for this subdomain
     const existingVillageInfo = await prisma.villageInfo.findFirst({
@@ -123,7 +156,13 @@ export async function POST(request: NextRequest) {
           govDeptText: govDeptText ?? undefined,
           officialSiteText: officialSiteText ?? undefined,
           stats: statsData,
-        },
+        } as any,
+      });
+      villageInfo = await prisma.villageInfo.update({
+        where: { id: existingVillageInfo.id },
+        data: {
+          welcomeVideo: welcomeVideoData
+        } as any
       });
     } else {
       // Create new record
@@ -148,7 +187,13 @@ export async function POST(request: NextRequest) {
           officialSiteText: officialSiteText ?? undefined,
           stats: statsData,
           subdomainId,
-        },
+        } as any,
+      });
+      villageInfo = await prisma.villageInfo.update({
+        where: { id: villageInfo.id },
+        data: {
+          welcomeVideo: welcomeVideoData
+        } as any
       });
     }
 
