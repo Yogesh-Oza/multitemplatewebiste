@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { UploadError, uploadImage } from '@/lib/upload';
+import { UploadError, uploadFile } from '@/lib/upload';
 
 export const runtime = 'nodejs';
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const imageUrl = await uploadImage(file);
+    const imageUrl = await uploadFile(file);
     
     return NextResponse.json({ 
       success: true, 

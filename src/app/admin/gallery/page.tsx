@@ -486,7 +486,7 @@ export default function GalleryPage() {
                       <span className="text-sm font-medium">फाइल अपलोड</span>
                       <input
                         type="file"
-                        accept={editingItem.type === 'photo' ? 'image/*' : 'video/*'}
+                        accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                         className="hidden"
                         onChange={handleImageUpload}
                       />

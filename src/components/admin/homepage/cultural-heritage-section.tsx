@@ -276,7 +276,7 @@ export function CulturalHeritageSection() {
                         <input
                           type="file"
                           id="heritageImage"
-                          accept="image/*"
+                          accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;

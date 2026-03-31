@@ -366,7 +366,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                 <span className="text-sm font-medium">लोगो अपलोड करा</span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -416,7 +416,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                     <span className="text-sm font-medium">फाइल निवडा</span>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                       className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -440,7 +440,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                     <span className="text-sm font-medium">फाइल निवडा</span>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                       className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -641,7 +641,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
                   <span className="text-sm font-medium">व्हिडिओ अपलोड करा</span>
                   <input
                     type="file"
-                    accept="video/*"
+                    accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];

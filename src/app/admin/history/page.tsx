@@ -671,7 +671,7 @@ export default function HistoryAdminPage() {
                         )}
                         <Input
                           type="file"
-                          accept="image/*"
+                          accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                           onChange={handleImageUpload}
                           disabled={isUploadingImage}
                         />

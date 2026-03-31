@@ -158,7 +158,7 @@ export function AnnouncementForm({ initialData, isEdit = false }: AnnouncementFo
                 <span className="text-sm font-medium">फाइल अपलोड</span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                   className="hidden"
                   onChange={async (e) => {
                     const file = e.target.files?.[0];

@@ -442,7 +442,7 @@ export default function BeneficiaryStoriesAdminPage() {
                       )}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                         onChange={(e) => handleImageUpload(e, 'before')}
                         className="hidden"
                         id="before-image"
@@ -471,7 +471,7 @@ export default function BeneficiaryStoriesAdminPage() {
                       )}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                         onChange={(e) => handleImageUpload(e, 'after')}
                         className="hidden"
                         id="after-image"

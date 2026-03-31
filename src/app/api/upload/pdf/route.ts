@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { UploadError, uploadPdf } from '@/lib/upload';
+import { UploadError, uploadFile } from '@/lib/upload';
 
 export const runtime = 'nodejs';
 
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (!(file instanceof File)) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
-    const url = await uploadPdf(file);
+    const url = await uploadFile(file);
     return NextResponse.json({ success: true, url });
   } catch (error) {
     console.error('PDF upload error:', error);

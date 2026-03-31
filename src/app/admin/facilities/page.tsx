@@ -580,7 +580,7 @@ export default function FacilitiesPage() {
                   <input
                     type="file"
                     id="image"
-                    accept="image/*"
+                    accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                     onChange={handleImageUpload}
                     className="hidden"
                   />

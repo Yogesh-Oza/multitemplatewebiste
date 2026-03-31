@@ -1368,7 +1368,7 @@ export default function ImpactDashboardAdminPage() {
                       )}
                       <Input
                         type="file"
-                        accept="image/*"
+                        accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                         onChange={(e) => handleImageUpload(e, 'before')}
                         disabled={isUploadingBefore}
                       />
@@ -1392,7 +1392,7 @@ export default function ImpactDashboardAdminPage() {
                       )}
                       <Input
                         type="file"
-                        accept="image/*"
+                        accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                         onChange={(e) => handleImageUpload(e, 'after')}
                         disabled={isUploadingAfter}
                       />

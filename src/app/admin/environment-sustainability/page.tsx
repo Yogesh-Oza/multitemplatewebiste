@@ -1844,7 +1844,7 @@ export default function EnvironmentSustainabilityAdminPage() {
                   <div className="mt-2">
                     <input
                       type="file"
-                      accept="image/*"
+                      accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleTreeImageUpload(file);

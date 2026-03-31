@@ -360,7 +360,7 @@ export function FooterContentSection() {
                           </span>
                           <input
                             type="file"
-                            accept="image/*"
+                            accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                             className="hidden"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
@@ -414,7 +414,7 @@ export function FooterContentSection() {
                           </span>
                           <input
                             type="file"
-                            accept="image/*"
+                            accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                             className="hidden"
                             onChange={(e) => {
                               const file = e.target.files?.[0];

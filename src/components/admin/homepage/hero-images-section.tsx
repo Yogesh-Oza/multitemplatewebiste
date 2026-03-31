@@ -227,7 +227,7 @@ export function HeroImagesSection() {
                   <input
                     type="file"
                     id="image-upload"
-                    accept="image/*"
+                    accept={process.env.NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES || 'image/*'}
                     onChange={handleUpload}
                     className="hidden"
                     disabled={isUploading}

@@ -2,8 +2,13 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Paperclip } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  UPLOAD_ACCEPT_ATTR,
+  UPLOAD_MAX_FILE_SIZE_MB,
+  validateUploadFile,
+} from '@/lib/upload-policy';
 
 interface FileUploadProps {
   onUpload: (url: string) => void;
@@ -16,8 +21,8 @@ interface FileUploadProps {
 export function FileUpload({ 
   onUpload, 
   currentImage, 
-  accept = 'image/*',
-  maxSize = 10,
+  accept = UPLOAD_ACCEPT_ATTR,
+  maxSize = UPLOAD_MAX_FILE_SIZE_MB,
   className = ''
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
@@ -28,26 +33,21 @@ export function FileUpload({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('कृपया प्रतिमा फाइल निवडा');
-      return;
-    }
-
-    // Validate file size
-    if (file.size > maxSize * 1024 * 1024) {
-      toast.error(`फाइलचा आकार ${maxSize}MB पेक्षा कमी असावा`);
+    const validationError = validateUploadFile(file);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // Create preview
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
+      if (file.type.startsWith('image/')) {
+        setPreview(URL.createObjectURL(file));
+      } else {
+        setPreview(null);
+      }
 
-      // Upload file
       const formData = new FormData();
       formData.append('file', file);
 
@@ -58,14 +58,15 @@ export function FileUpload({
 
       if (response.ok) {
         const data = await response.json();
-        onUpload(data.imageUrl);
-        toast.success('प्रतिमा यशस्वीरित्या अपलोड केली');
+        onUpload(data.url || data.imageUrl);
+        toast.success('फाइल यशस्वीरित्या अपलोड केली');
       } else {
-        throw new Error('Upload failed');
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || 'Upload failed');
       }
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('प्रतिमा अपलोड करताना त्रुटी आली');
+      toast.error(error instanceof Error ? error.message : 'फाइल अपलोड करताना त्रुटी आली');
       setPreview(null);
     } finally {
       setIsUploading(false);
@@ -126,10 +127,10 @@ export function FileUpload({
             )}
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {isUploading ? 'अपलोड होत आहे...' : 'प्रतिमा अपलोड करा'}
+                {isUploading ? 'अपलोड होत आहे...' : 'फाइल अपलोड करा'}
               </p>
               <p className="text-xs text-gray-500">
-                PNG, JPG, WebP (कमाल {maxSize}MB)
+                Supported by upload policy (max {maxSize}MB)
               </p>
             </div>
           </div>
@@ -144,8 +145,8 @@ export function FileUpload({
           disabled={isUploading}
           className="w-full"
         >
-          <ImageIcon className="h-4 w-4 mr-2" />
-          {isUploading ? 'अपलोड होत आहे...' : 'प्रतिमा निवडा'}
+          <Paperclip className="h-4 w-4 mr-2" />
+          {isUploading ? 'अपलोड होत आहे...' : 'फाइल निवडा'}
         </Button>
       )}
     </div>
