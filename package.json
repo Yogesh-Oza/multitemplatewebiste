@@ -15,6 +15,10 @@
     "db:reset": "prisma migrate reset",
     "db:deploy": "prisma db push && prisma generate",
     "migrate:communications": "node scripts/migrate-communications.cjs",
+    "migrate:s3:inventory": "tsx scripts/migrate-blob-to-s3.ts --mode=dry-run",
+    "migrate:s3:copy": "tsx scripts/migrate-blob-to-s3.ts --mode=copy-only",
+    "migrate:s3:rewrite": "tsx scripts/migrate-blob-to-s3.ts --mode=rewrite-only",
+    "migrate:s3:full": "tsx scripts/migrate-blob-to-s3.ts --mode=full",
     "preview": "next build && next start",
     "clean": "rm -rf .next && rm -rf node_modules/.cache",
     "postinstall": "prisma generate"
@@ -23,6 +27,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1020.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -34,7 +39,6 @@
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-select": "^2.2.6",
     "@types/nodemailer": "^7.0.2",
-    "@vercel/blob": "^2.0.0",
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.0",

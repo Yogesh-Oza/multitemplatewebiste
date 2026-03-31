@@ -161,7 +161,7 @@ export default function AdminRtiPage() {
       toast.success('PDF अपलोड केले — URL फील्डमध्ये भरले');
     } catch (err) {
       console.error(err);
-      toast.error('PDF अपलोड अयशस्वी (URL हाताने टाका किंवा BLOB टोकन तपासा)');
+      toast.error('PDF अपलोड अयशस्वी (URL हाताने टाका किंवा storage configuration तपासा)');
     } finally {
       setUploadingPdf(false);
       (e.target as HTMLInputElement).value = '';

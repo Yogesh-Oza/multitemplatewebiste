@@ -1,14 +1,8 @@
-import { put } from '@vercel/blob';
+import { uploadFileToS3 } from '@/lib/s3-storage';
 
 export async function uploadFile(file: File): Promise<string> {
   try {
-    const blob = await put(file.name, file, {
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      addRandomSuffix: true, // Generate unique filename to avoid conflicts
-    });
-    
-    return blob.url;
+    return await uploadFileToS3(file);
   } catch (error) {
     console.error('Error uploading file:', error);
     throw new Error('Failed to upload file');

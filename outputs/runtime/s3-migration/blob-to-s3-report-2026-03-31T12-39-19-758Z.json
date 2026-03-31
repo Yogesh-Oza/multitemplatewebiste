@@ -1,0 +1,697 @@
+{
+  "startedAt": "2026-03-31T12:39:16.436Z",
+  "finishedAt": "2026-03-31T12:39:19.758Z",
+  "mode": "dry-run",
+  "mappingFile": "C:\\Users\\oyoge\\Desktop\\New folder (10)\\dynamic template sites\\gram-panchayat-website\\outputs\\runtime\\s3-migration\\blob-to-s3-url-map.json",
+  "scannedModels": 44,
+  "scannedRecords": 23403,
+  "updatedRecords": 0,
+  "copiedBlobUrlCount": 0,
+  "rewrittenBlobUrlCount": 0,
+  "existingMappingCount": 0,
+  "failures": [],
+  "models": [
+    {
+      "model": "VillageInfo",
+      "delegate": "villageInfo",
+      "recordsScanned": 391,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "villageLogo",
+          "recordsWithBlobUrls": 46,
+          "blobUrlCount": 46,
+          "uniqueBlobUrlCount": 46
+        },
+        {
+          "field": "satyamevJayateLogoUrl",
+          "recordsWithBlobUrls": 42,
+          "blobUrlCount": 42,
+          "uniqueBlobUrlCount": 42
+        },
+        {
+          "field": "digitalIndiaLogoUrl",
+          "recordsWithBlobUrls": 42,
+          "blobUrlCount": 42,
+          "uniqueBlobUrlCount": 42
+        }
+      ]
+    },
+    {
+      "model": "TimelineItem",
+      "delegate": "timelineItem",
+      "recordsScanned": 87,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 31,
+          "blobUrlCount": 31,
+          "uniqueBlobUrlCount": 31
+        }
+      ]
+    },
+    {
+      "model": "Announcement",
+      "delegate": "announcement",
+      "recordsScanned": 30,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "image",
+          "recordsWithBlobUrls": 22,
+          "blobUrlCount": 22,
+          "uniqueBlobUrlCount": 22
+        }
+      ]
+    },
+    {
+      "model": "CulturalHeritage",
+      "delegate": "culturalHeritage",
+      "recordsScanned": 62,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "image",
+          "recordsWithBlobUrls": 47,
+          "blobUrlCount": 47,
+          "uniqueBlobUrlCount": 47
+        }
+      ]
+    },
+    {
+      "model": "HeroImage",
+      "delegate": "heroImage",
+      "recordsScanned": 665,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 660,
+          "blobUrlCount": 660,
+          "uniqueBlobUrlCount": 660
+        }
+      ]
+    },
+    {
+      "model": "Program",
+      "delegate": "program",
+      "recordsScanned": 182,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 168,
+          "blobUrlCount": 168,
+          "uniqueBlobUrlCount": 168
+        }
+      ]
+    },
+    {
+      "model": "Gallery",
+      "delegate": "gallery",
+      "recordsScanned": 425,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "mediaUrl",
+          "recordsWithBlobUrls": 340,
+          "blobUrlCount": 340,
+          "uniqueBlobUrlCount": 340
+        }
+      ]
+    },
+    {
+      "model": "Facility",
+      "delegate": "facility",
+      "recordsScanned": 38,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 25,
+          "blobUrlCount": 25,
+          "uniqueBlobUrlCount": 25
+        }
+      ]
+    },
+    {
+      "model": "TeamMember",
+      "delegate": "teamMember",
+      "recordsScanned": 324,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 231,
+          "blobUrlCount": 231,
+          "uniqueBlobUrlCount": 231
+        }
+      ]
+    },
+    {
+      "model": "Leader",
+      "delegate": "leader",
+      "recordsScanned": 2755,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 74,
+          "blobUrlCount": 74,
+          "uniqueBlobUrlCount": 74
+        }
+      ]
+    },
+    {
+      "model": "IncomeExpense",
+      "delegate": "incomeExpense",
+      "recordsScanned": 639,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "receiptUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Department",
+      "delegate": "department",
+      "recordsScanned": 54,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 38,
+          "blobUrlCount": 38,
+          "uniqueBlobUrlCount": 38
+        }
+      ]
+    },
+    {
+      "model": "GovernmentScheme",
+      "delegate": "governmentScheme",
+      "recordsScanned": 503,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "website",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        },
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 41,
+          "blobUrlCount": 41,
+          "uniqueBlobUrlCount": 41
+        }
+      ]
+    },
+    {
+      "model": "ApplicationProcessConfig",
+      "delegate": "applicationProcessConfig",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationFormUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        },
+        {
+          "field": "sampleFormUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "BeneficiaryStory",
+      "delegate": "beneficiaryStory",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "beforeImage",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        },
+        {
+          "field": "afterImage",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "FooterContent",
+      "delegate": "footerContent",
+      "recordsScanned": 29,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "footerSatyamevJayateLogoUrl",
+          "recordsWithBlobUrls": 10,
+          "blobUrlCount": 10,
+          "uniqueBlobUrlCount": 10
+        },
+        {
+          "field": "footerDigitalIndiaLogoUrl",
+          "recordsWithBlobUrls": 9,
+          "blobUrlCount": 9,
+          "uniqueBlobUrlCount": 9
+        }
+      ]
+    },
+    {
+      "model": "GovernmentResolution",
+      "delegate": "governmentResolution",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "fileUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Project",
+      "delegate": "project",
+      "recordsScanned": 905,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "photosBefore",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        },
+        {
+          "field": "photosAfter",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Complaint",
+      "delegate": "complaint",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "attachments",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "JobOpportunity",
+      "delegate": "jobOpportunity",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Tender",
+      "delegate": "tender",
+      "recordsScanned": 6,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "tenderUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "TrainingProgram",
+      "delegate": "trainingProgram",
+      "recordsScanned": 6,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "registrationUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "FPOGroup",
+      "delegate": "fPOGroup",
+      "recordsScanned": 14,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "joinUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "School",
+      "delegate": "school",
+      "recordsScanned": 52,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "ScholarshipScheme",
+      "delegate": "scholarshipScheme",
+      "recordsScanned": 4,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "StudentAchievement",
+      "delegate": "studentAchievement",
+      "recordsScanned": 7,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CareerGuidance",
+      "delegate": "careerGuidance",
+      "recordsScanned": 1,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "registrationUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "YouthSuccessStory",
+      "delegate": "youthSuccessStory",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "AdoptedTree",
+      "delegate": "adoptedTree",
+      "recordsScanned": 3,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "EducationItem",
+      "delegate": "educationItem",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "links",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        },
+        {
+          "field": "images",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "EnvironmentInitiative",
+      "delegate": "environmentInitiative",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "images",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "SocialFeed",
+      "delegate": "socialFeed",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "NewsItem",
+      "delegate": "newsItem",
+      "recordsScanned": 1398,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "recordsWithBlobUrls": 79,
+          "blobUrlCount": 79,
+          "uniqueBlobUrlCount": 79
+        }
+      ]
+    },
+    {
+      "model": "BeforeAfterGallery",
+      "delegate": "beforeAfterGallery",
+      "recordsScanned": 13,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "beforeImage",
+          "recordsWithBlobUrls": 13,
+          "blobUrlCount": 13,
+          "uniqueBlobUrlCount": 13
+        },
+        {
+          "field": "afterImage",
+          "recordsWithBlobUrls": 13,
+          "blobUrlCount": 13,
+          "uniqueBlobUrlCount": 13
+        }
+      ]
+    },
+    {
+      "model": "MeetingNotification",
+      "delegate": "meetingNotification",
+      "recordsScanned": 31,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "Circular",
+      "delegate": "circular",
+      "recordsScanned": 12,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "attachments",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "ImportantDeadline",
+      "delegate": "importantDeadline",
+      "recordsScanned": 4,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "DownloadableFile",
+      "delegate": "downloadableFile",
+      "recordsScanned": 1362,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CalendarEvent",
+      "delegate": "calendarEvent",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CommunicationPost",
+      "delegate": "communicationPost",
+      "recordsScanned": 2724,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "image",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        },
+        {
+          "field": "attachments",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "RtiMandatoryDisclosureItem",
+      "delegate": "rtiMandatoryDisclosureItem",
+      "recordsScanned": 6220,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documentUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "RtiFormLink",
+      "delegate": "rtiFormLink",
+      "recordsScanned": 910,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "recordsWithBlobUrls": 1,
+          "blobUrlCount": 1,
+          "uniqueBlobUrlCount": 1
+        }
+      ]
+    },
+    {
+      "model": "GramSabhaMeeting",
+      "delegate": "gramSabhaMeeting",
+      "recordsScanned": 914,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    },
+    {
+      "model": "CitizenService",
+      "delegate": "citizenService",
+      "recordsScanned": 2618,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "formUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        },
+        {
+          "field": "applicationUrl",
+          "recordsWithBlobUrls": 0,
+          "blobUrlCount": 0,
+          "uniqueBlobUrlCount": 0
+        }
+      ]
+    }
+  ]
+}
