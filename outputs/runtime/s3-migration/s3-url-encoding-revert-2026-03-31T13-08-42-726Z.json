@@ -1,0 +1,639 @@
+{
+  "startedAt": "2026-03-31T13:08:40.185Z",
+  "finishedAt": "2026-03-31T13:08:42.725Z",
+  "mode": "dry-run",
+  "s3Host": "mahagp-app.s3.ap-south-1.amazonaws.com",
+  "scannedModels": 44,
+  "scannedRecords": 23404,
+  "updatedRecords": 1271,
+  "revertedValues": 1321,
+  "models": [
+    {
+      "model": "VillageInfo",
+      "delegate": "villageInfo",
+      "recordsScanned": 391,
+      "recordsUpdated": 48,
+      "fields": [
+        {
+          "field": "villageLogo",
+          "revertedValues": 33,
+          "scannedRecords": 391
+        },
+        {
+          "field": "satyamevJayateLogoUrl",
+          "revertedValues": 28,
+          "scannedRecords": 391
+        },
+        {
+          "field": "digitalIndiaLogoUrl",
+          "revertedValues": 23,
+          "scannedRecords": 391
+        }
+      ]
+    },
+    {
+      "model": "TimelineItem",
+      "delegate": "timelineItem",
+      "recordsScanned": 87,
+      "recordsUpdated": 25,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 25,
+          "scannedRecords": 87
+        }
+      ]
+    },
+    {
+      "model": "Announcement",
+      "delegate": "announcement",
+      "recordsScanned": 30,
+      "recordsUpdated": 17,
+      "fields": [
+        {
+          "field": "image",
+          "revertedValues": 17,
+          "scannedRecords": 30
+        }
+      ]
+    },
+    {
+      "model": "CulturalHeritage",
+      "delegate": "culturalHeritage",
+      "recordsScanned": 62,
+      "recordsUpdated": 32,
+      "fields": [
+        {
+          "field": "image",
+          "revertedValues": 32,
+          "scannedRecords": 62
+        }
+      ]
+    },
+    {
+      "model": "HeroImage",
+      "delegate": "heroImage",
+      "recordsScanned": 666,
+      "recordsUpdated": 440,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 440,
+          "scannedRecords": 666
+        }
+      ]
+    },
+    {
+      "model": "Program",
+      "delegate": "program",
+      "recordsScanned": 182,
+      "recordsUpdated": 148,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 148,
+          "scannedRecords": 182
+        }
+      ]
+    },
+    {
+      "model": "Gallery",
+      "delegate": "gallery",
+      "recordsScanned": 425,
+      "recordsUpdated": 236,
+      "fields": [
+        {
+          "field": "mediaUrl",
+          "revertedValues": 236,
+          "scannedRecords": 425
+        }
+      ]
+    },
+    {
+      "model": "Facility",
+      "delegate": "facility",
+      "recordsScanned": 38,
+      "recordsUpdated": 19,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 19,
+          "scannedRecords": 38
+        }
+      ]
+    },
+    {
+      "model": "TeamMember",
+      "delegate": "teamMember",
+      "recordsScanned": 324,
+      "recordsUpdated": 113,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 113,
+          "scannedRecords": 324
+        }
+      ]
+    },
+    {
+      "model": "Leader",
+      "delegate": "leader",
+      "recordsScanned": 2755,
+      "recordsUpdated": 52,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 52,
+          "scannedRecords": 2755
+        }
+      ]
+    },
+    {
+      "model": "IncomeExpense",
+      "delegate": "incomeExpense",
+      "recordsScanned": 639,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "receiptUrl",
+          "revertedValues": 0,
+          "scannedRecords": 639
+        }
+      ]
+    },
+    {
+      "model": "Department",
+      "delegate": "department",
+      "recordsScanned": 54,
+      "recordsUpdated": 34,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 34,
+          "scannedRecords": 54
+        }
+      ]
+    },
+    {
+      "model": "GovernmentScheme",
+      "delegate": "governmentScheme",
+      "recordsScanned": 503,
+      "recordsUpdated": 29,
+      "fields": [
+        {
+          "field": "website",
+          "revertedValues": 0,
+          "scannedRecords": 503
+        },
+        {
+          "field": "imageUrl",
+          "revertedValues": 29,
+          "scannedRecords": 503
+        }
+      ]
+    },
+    {
+      "model": "ApplicationProcessConfig",
+      "delegate": "applicationProcessConfig",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationFormUrl",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        },
+        {
+          "field": "sampleFormUrl",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        }
+      ]
+    },
+    {
+      "model": "BeneficiaryStory",
+      "delegate": "beneficiaryStory",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "beforeImage",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        },
+        {
+          "field": "afterImage",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        }
+      ]
+    },
+    {
+      "model": "FooterContent",
+      "delegate": "footerContent",
+      "recordsScanned": 29,
+      "recordsUpdated": 5,
+      "fields": [
+        {
+          "field": "footerSatyamevJayateLogoUrl",
+          "revertedValues": 4,
+          "scannedRecords": 29
+        },
+        {
+          "field": "footerDigitalIndiaLogoUrl",
+          "revertedValues": 5,
+          "scannedRecords": 29
+        }
+      ]
+    },
+    {
+      "model": "GovernmentResolution",
+      "delegate": "governmentResolution",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "fileUrl",
+          "revertedValues": 0,
+          "scannedRecords": 5
+        }
+      ]
+    },
+    {
+      "model": "Project",
+      "delegate": "project",
+      "recordsScanned": 905,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "photosBefore",
+          "revertedValues": 0,
+          "scannedRecords": 905
+        },
+        {
+          "field": "photosAfter",
+          "revertedValues": 0,
+          "scannedRecords": 905
+        }
+      ]
+    },
+    {
+      "model": "Complaint",
+      "delegate": "complaint",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "attachments",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        }
+      ]
+    },
+    {
+      "model": "JobOpportunity",
+      "delegate": "jobOpportunity",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationUrl",
+          "revertedValues": 0,
+          "scannedRecords": 5
+        }
+      ]
+    },
+    {
+      "model": "Tender",
+      "delegate": "tender",
+      "recordsScanned": 6,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "tenderUrl",
+          "revertedValues": 0,
+          "scannedRecords": 6
+        }
+      ]
+    },
+    {
+      "model": "TrainingProgram",
+      "delegate": "trainingProgram",
+      "recordsScanned": 6,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "registrationUrl",
+          "revertedValues": 0,
+          "scannedRecords": 6
+        }
+      ]
+    },
+    {
+      "model": "FPOGroup",
+      "delegate": "fPOGroup",
+      "recordsScanned": 14,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "joinUrl",
+          "revertedValues": 0,
+          "scannedRecords": 14
+        }
+      ]
+    },
+    {
+      "model": "School",
+      "delegate": "school",
+      "recordsScanned": 52,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 0,
+          "scannedRecords": 52
+        }
+      ]
+    },
+    {
+      "model": "ScholarshipScheme",
+      "delegate": "scholarshipScheme",
+      "recordsScanned": 4,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "applicationUrl",
+          "revertedValues": 0,
+          "scannedRecords": 4
+        }
+      ]
+    },
+    {
+      "model": "StudentAchievement",
+      "delegate": "studentAchievement",
+      "recordsScanned": 7,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 0,
+          "scannedRecords": 7
+        }
+      ]
+    },
+    {
+      "model": "CareerGuidance",
+      "delegate": "careerGuidance",
+      "recordsScanned": 1,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "registrationUrl",
+          "revertedValues": 0,
+          "scannedRecords": 1
+        }
+      ]
+    },
+    {
+      "model": "YouthSuccessStory",
+      "delegate": "youthSuccessStory",
+      "recordsScanned": 5,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 0,
+          "scannedRecords": 5
+        }
+      ]
+    },
+    {
+      "model": "AdoptedTree",
+      "delegate": "adoptedTree",
+      "recordsScanned": 3,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 0,
+          "scannedRecords": 3
+        }
+      ]
+    },
+    {
+      "model": "EducationItem",
+      "delegate": "educationItem",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "links",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        },
+        {
+          "field": "images",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        }
+      ]
+    },
+    {
+      "model": "EnvironmentInitiative",
+      "delegate": "environmentInitiative",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "images",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        }
+      ]
+    },
+    {
+      "model": "SocialFeed",
+      "delegate": "socialFeed",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        }
+      ]
+    },
+    {
+      "model": "NewsItem",
+      "delegate": "newsItem",
+      "recordsScanned": 1398,
+      "recordsUpdated": 61,
+      "fields": [
+        {
+          "field": "imageUrl",
+          "revertedValues": 61,
+          "scannedRecords": 1398
+        }
+      ]
+    },
+    {
+      "model": "BeforeAfterGallery",
+      "delegate": "beforeAfterGallery",
+      "recordsScanned": 13,
+      "recordsUpdated": 11,
+      "fields": [
+        {
+          "field": "beforeImage",
+          "revertedValues": 11,
+          "scannedRecords": 13
+        },
+        {
+          "field": "afterImage",
+          "revertedValues": 10,
+          "scannedRecords": 13
+        }
+      ]
+    },
+    {
+      "model": "MeetingNotification",
+      "delegate": "meetingNotification",
+      "recordsScanned": 31,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "revertedValues": 0,
+          "scannedRecords": 31
+        }
+      ]
+    },
+    {
+      "model": "Circular",
+      "delegate": "circular",
+      "recordsScanned": 12,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "attachments",
+          "revertedValues": 0,
+          "scannedRecords": 12
+        }
+      ]
+    },
+    {
+      "model": "ImportantDeadline",
+      "delegate": "importantDeadline",
+      "recordsScanned": 4,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "revertedValues": 0,
+          "scannedRecords": 4
+        }
+      ]
+    },
+    {
+      "model": "DownloadableFile",
+      "delegate": "downloadableFile",
+      "recordsScanned": 1362,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "url",
+          "revertedValues": 0,
+          "scannedRecords": 1362
+        }
+      ]
+    },
+    {
+      "model": "CalendarEvent",
+      "delegate": "calendarEvent",
+      "recordsScanned": 0,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "revertedValues": 0,
+          "scannedRecords": 0
+        }
+      ]
+    },
+    {
+      "model": "CommunicationPost",
+      "delegate": "communicationPost",
+      "recordsScanned": 2724,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "image",
+          "revertedValues": 0,
+          "scannedRecords": 2724
+        },
+        {
+          "field": "attachments",
+          "revertedValues": 0,
+          "scannedRecords": 2724
+        }
+      ]
+    },
+    {
+      "model": "RtiMandatoryDisclosureItem",
+      "delegate": "rtiMandatoryDisclosureItem",
+      "recordsScanned": 6220,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documentUrl",
+          "revertedValues": 0,
+          "scannedRecords": 6220
+        }
+      ]
+    },
+    {
+      "model": "RtiFormLink",
+      "delegate": "rtiFormLink",
+      "recordsScanned": 910,
+      "recordsUpdated": 1,
+      "fields": [
+        {
+          "field": "url",
+          "revertedValues": 1,
+          "scannedRecords": 910
+        }
+      ]
+    },
+    {
+      "model": "GramSabhaMeeting",
+      "delegate": "gramSabhaMeeting",
+      "recordsScanned": 914,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "documents",
+          "revertedValues": 0,
+          "scannedRecords": 914
+        }
+      ]
+    },
+    {
+      "model": "CitizenService",
+      "delegate": "citizenService",
+      "recordsScanned": 2618,
+      "recordsUpdated": 0,
+      "fields": [
+        {
+          "field": "formUrl",
+          "revertedValues": 0,
+          "scannedRecords": 2618
+        },
+        {
+          "field": "applicationUrl",
+          "revertedValues": 0,
+          "scannedRecords": 2618
+        }
+      ]
+    }
+  ]
+}

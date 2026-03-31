@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ConditionalLayout } from '../components/conditional-layout';
+import { UploadFetchShim } from '@/components/upload-fetch-shim';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -89,6 +90,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased font-sans`}>
         <ThemeProvider>
+          <UploadFetchShim />
           <ConditionalLayout>
             {children}
           </ConditionalLayout>

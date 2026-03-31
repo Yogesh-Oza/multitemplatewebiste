@@ -1,7 +1,6 @@
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-
-const MAX_FILE_NAME_LENGTH = 120;
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export function requireStorageEnv(name: string): string {
   const value = process.env[name];
@@ -30,38 +29,27 @@ export function getS3Client(): S3Client {
   });
 }
 
-function sanitizePathSegment(value: string): string {
-  return value
-    .normalize('NFKD')
-    .replace(/[^\w.-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase();
-}
-
-function splitFileName(fileName: string): { baseName: string; extension: string } {
+function splitFileName(fileName: string): { extension: string } {
   const trimmed = fileName.trim();
   const lastDot = trimmed.lastIndexOf('.');
 
   if (lastDot <= 0 || lastDot === trimmed.length - 1) {
-    return { baseName: trimmed || 'upload', extension: '' };
+    return { extension: '' };
   }
 
   return {
-    baseName: trimmed.slice(0, lastDot),
     extension: trimmed.slice(lastDot).toLowerCase(),
   };
 }
 
-function buildObjectKey(fileName: string): string {
-  const { baseName, extension } = splitFileName(fileName);
-  const safeBaseName = sanitizePathSegment(baseName).slice(0, MAX_FILE_NAME_LENGTH) || 'upload';
+export function buildObjectKey(fileName: string): string {
+  const { extension } = splitFileName(fileName);
   const prefix = process.env.AWS_S3_UPLOAD_PREFIX?.replace(/^\/+|\/+$/g, '') || 'uploads';
   const now = new Date();
   const year = now.getUTCFullYear();
   const month = String(now.getUTCMonth() + 1).padStart(2, '0');
 
-  return `${prefix}/${year}/${month}/${safeBaseName}-${randomUUID()}${extension}`;
+  return `${prefix}/${year}/${month}/${randomUUID()}${extension}`;
 }
 
 export function buildPublicS3Url(key: string): string {
@@ -86,8 +74,31 @@ export function buildMigrationObjectKey(sourceUrl: string): string {
   const url = new URL(sourceUrl);
   const pathname = url.pathname.replace(/^\/+/, '');
   const prefix = process.env.AWS_S3_MIGRATION_PREFIX?.replace(/^\/+|\/+$/g, '') || 'migrated/vercel-blob';
-  const host = sanitizePathSegment(url.hostname) || 'blob';
+  const host = url.hostname
+    .normalize('NFKD')
+    .replace(/[^\w.-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase() || 'blob';
   return `${prefix}/${host}/${pathname}`;
+}
+
+export function buildSimpleRemigrationObjectKey(sourceUrl: string, contentType?: string): string {
+  const source = new URL(sourceUrl);
+  const legacyPath = source.pathname.replace(/^\/+/, '');
+  const prefix = process.env.AWS_S3_REMIGRATION_PREFIX?.replace(/^\/+|\/+$/g, '') || 'migrated/simple';
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const digest = createHash('sha1').update(legacyPath).digest('hex').slice(0, 16);
+
+  const pathname = source.pathname;
+  const lastDot = pathname.lastIndexOf('.');
+  const extFromPath = lastDot > -1 ? pathname.slice(lastDot).toLowerCase() : '';
+  const extFromType = contentType?.includes('/') ? `.${contentType.split('/')[1].split(';')[0].toLowerCase()}` : '';
+  const extension = extFromPath || extFromType || '.bin';
+
+  return `${prefix}/${year}/${month}/${digest}-${randomUUID()}${extension}`;
 }
 
 export async function uploadFileToS3(file: File): Promise<string> {
@@ -107,4 +118,29 @@ export async function uploadFileToS3(file: File): Promise<string> {
   );
 
   return buildPublicS3Url(key);
+}
+
+export async function createPresignedUpload(fileName: string, contentType?: string) {
+  const bucket = requireStorageEnv('AWS_S3_BUCKET');
+  const key = buildObjectKey(fileName);
+  const client = getS3Client();
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    ContentType: contentType || 'application/octet-stream',
+    CacheControl: 'public, max-age=31536000, immutable',
+  });
+
+  const uploadUrl = await getSignedUrl(client, command, { expiresIn: 900 });
+
+  return {
+    key,
+    uploadUrl,
+    publicUrl: buildPublicS3Url(key),
+    headers: {
+      'Content-Type': contentType || 'application/octet-stream',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  };
 }

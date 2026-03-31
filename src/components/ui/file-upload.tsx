@@ -9,6 +9,7 @@ import {
   UPLOAD_MAX_FILE_SIZE_MB,
   validateUploadFile,
 } from '@/lib/upload-policy';
+import { uploadFileFromBrowser } from '@/lib/browser-upload';
 
 interface FileUploadProps {
   onUpload: (url: string) => void;
@@ -48,22 +49,9 @@ export function FileUpload({
         setPreview(null);
       }
 
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        onUpload(data.url || data.imageUrl);
-        toast.success('फाइल यशस्वीरित्या अपलोड केली');
-      } else {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.error || 'Upload failed');
-      }
+      const data = await uploadFileFromBrowser(file);
+      onUpload(data.url || data.imageUrl);
+      toast.success('फाइल यशस्वीरित्या अपलोड केली');
     } catch (error) {
       console.error('Upload error:', error);
       toast.error(error instanceof Error ? error.message : 'फाइल अपलोड करताना त्रुटी आली');
