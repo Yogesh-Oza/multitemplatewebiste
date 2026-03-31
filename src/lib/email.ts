@@ -53,6 +53,9 @@ const createTransporter = () => {
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: false, // true for 465, false for other ports
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 8000,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
@@ -64,6 +67,9 @@ const createTransporter = () => {
   console.log('📧 Using Gmail SMTP');
   return nodemailer.createTransport({
     service: 'gmail',
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 8000,
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASS

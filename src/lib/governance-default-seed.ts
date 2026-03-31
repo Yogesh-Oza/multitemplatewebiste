@@ -648,8 +648,11 @@ export async function seedGovernanceDemoForSubdomain(
 
 export async function applyDefaultGovernanceTemplateToSubdomain(
   prisma: PrismaClient,
-  s: SubdomainSeedShape
+  s: SubdomainSeedShape,
+  options?: { includeDemo?: boolean }
 ): Promise<void> {
   await seedGovernanceForSubdomain(prisma, s);
-  await seedGovernanceDemoForSubdomain(prisma, s);
+  if (options?.includeDemo !== false) {
+    await seedGovernanceDemoForSubdomain(prisma, s);
+  }
 }
