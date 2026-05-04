@@ -64,7 +64,10 @@ export function resolvePublicQuickLinksForDisplay(
 
   const byId = new Map<PublicQuickLinkId, { label: string; enabled: boolean }>();
   for (const row of defaults.items) {
-    byId.set(row.id, { label: row.label, enabled: row.enabled !== false });
+    byId.set(row.id, {
+      label: row.label?.trim() ? row.label.trim() : DEFAULT_LABEL_BY_ID[row.id],
+      enabled: row.enabled !== false,
+    });
   }
 
   if (Array.isArray(stored?.items)) {
