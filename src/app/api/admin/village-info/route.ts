@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
 import { logCrudActivity } from '@/lib/activity-log-helper';
+import {
+  getDefaultPublicQuickLinksStored,
+  normalizePublicQuickLinksForSave,
+} from '@/lib/public-quick-links';
 
 const DEFAULT_WELCOME_VIDEO = {
   url: '',
@@ -22,6 +26,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       ...(villageInfo ?? {}),
       welcomeVideo: villageInfo?.welcomeVideo ?? DEFAULT_WELCOME_VIDEO,
+      publicQuickLinks: villageInfo?.publicQuickLinks
+        ? normalizePublicQuickLinksForSave(villageInfo.publicQuickLinks)
+        : getDefaultPublicQuickLinksStored(),
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch village info' }, { status: 500 });
@@ -46,6 +53,8 @@ export async function PUT(request: NextRequest) {
           }
         : DEFAULT_WELCOME_VIDEO;
 
+    const publicQuickLinks = normalizePublicQuickLinksForSave(data.publicQuickLinks);
+
     // Ensure a single record per subdomain: delete then create
     await prisma.villageInfo.deleteMany({ where: { subdomainId } });
 
@@ -68,6 +77,7 @@ export async function PUT(request: NextRequest) {
       sectionThreeTitle: data.sectionThreeTitle ?? '',
       sectionThreeBody: data.sectionThreeBody ?? '',
       welcomeVideo,
+      publicQuickLinks,
       stats: statsData,
       subdomainId,
     };

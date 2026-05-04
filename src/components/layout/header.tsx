@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SearchModal } from '@/components/search/search-modal';
 import { NAVIGATION_ITEMS } from '@/lib/constants';
+import { PublicQuickLinksTicker } from '@/components/layout/public-quick-links-ticker';
+import { resolvePublicQuickLinksForDisplay } from '@/lib/public-quick-links';
 
 // Grouped navigation for desktop dropdowns
 const MENU_GROUPS = [
@@ -75,6 +77,8 @@ interface VillageData {
   digitalIndiaLogoUrl?: string;
   govDeptText?: string;
   officialSiteText?: string;
+  /** Stored JSON from VillageInfo.publicQuickLinks */
+  publicQuickLinks?: unknown;
 }
 
 interface HeaderProps {
@@ -474,6 +478,10 @@ export function Header({ villageName, villageNameEn, villageData }: HeaderProps)
           subdomain={villageName || 'default'}
         />
       </div>
+
+      <PublicQuickLinksTicker
+        links={resolvePublicQuickLinksForDisplay(villageData?.publicQuickLinks)}
+      />
     </header>
   );
 }

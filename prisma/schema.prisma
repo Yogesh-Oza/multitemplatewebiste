@@ -34,6 +34,8 @@ model VillageInfo {
   sectionThreeTitle     String     @default("")
   sectionThreeBody      String     @default("")
   welcomeVideo          Json?
+  /// Default govt quick links strip (labels editable per village; URLs fixed in app)
+  publicQuickLinks      Json?
   stats                 Json // Array of statistics
   subdomainId           String?    @db.ObjectId
   subdomain             Subdomain? @relation(fields: [subdomainId], references: [id])

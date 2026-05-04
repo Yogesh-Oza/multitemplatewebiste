@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateSubdomain } from '@/lib/subdomain';
 import { logCrudActivity } from '@/lib/activity-log-helper';
+import {
+  getDefaultPublicQuickLinksStored,
+  normalizePublicQuickLinksForSave,
+} from '@/lib/public-quick-links';
 
 type WelcomeVideoData = {
   url: string;
@@ -75,13 +79,19 @@ export async function GET(request: NextRequest) {
       villageInfo = await prisma.villageInfo.update({
         where: { id: villageInfo.id },
         data: {
-          welcomeVideo: DEFAULT_WELCOME_VIDEO
+          welcomeVideo: DEFAULT_WELCOME_VIDEO,
+          publicQuickLinks: getDefaultPublicQuickLinksStored(),
         } as any
       });
     }
 
-    // Return the data as-is since we're now using the stats array format
-    const response = NextResponse.json(villageInfo);
+    const response = NextResponse.json({
+      ...villageInfo,
+      welcomeVideo: villageInfo.welcomeVideo ?? DEFAULT_WELCOME_VIDEO,
+      publicQuickLinks: villageInfo.publicQuickLinks
+        ? normalizePublicQuickLinksForSave(villageInfo.publicQuickLinks)
+        : getDefaultPublicQuickLinksStored(),
+    });
     
     // Add cache-busting headers
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -115,7 +125,7 @@ export async function POST(request: NextRequest) {
       sectionThreeTitle, sectionThreeBody,
       villageLogo, villageName, villageNameEn,
       satyamevJayateLogoUrl, digitalIndiaLogoUrl, govDeptText, officialSiteText,
-      welcomeVideo } = body;
+      welcomeVideo, publicQuickLinks } = body;
 
     // Store stats as array directly
     const statsData = stats && Array.isArray(stats) ? stats : [];
@@ -126,6 +136,8 @@ export async function POST(request: NextRequest) {
           type: welcomeVideo.type === 'upload' ? 'upload' : 'youtube'
         }
       : DEFAULT_WELCOME_VIDEO;
+
+    const publicQuickLinksData = normalizePublicQuickLinksForSave(publicQuickLinks);
 
     // First, try to find existing village info for this subdomain
     const existingVillageInfo = await prisma.villageInfo.findFirst({
@@ -161,7 +173,8 @@ export async function POST(request: NextRequest) {
       villageInfo = await prisma.villageInfo.update({
         where: { id: existingVillageInfo.id },
         data: {
-          welcomeVideo: welcomeVideoData
+          welcomeVideo: welcomeVideoData,
+          publicQuickLinks: publicQuickLinksData,
         } as any
       });
     } else {
@@ -192,7 +205,8 @@ export async function POST(request: NextRequest) {
       villageInfo = await prisma.villageInfo.update({
         where: { id: villageInfo.id },
         data: {
-          welcomeVideo: welcomeVideoData
+          welcomeVideo: welcomeVideoData,
+          publicQuickLinks: publicQuickLinksData,
         } as any
       });
     }

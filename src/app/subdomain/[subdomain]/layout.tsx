@@ -51,6 +51,7 @@ export default async function SubdomainLayout({
           digitalIndiaLogoUrl: subdomainData.villageInfo?.[0]?.digitalIndiaLogoUrl || undefined,
           govDeptText: subdomainData.villageInfo?.[0]?.govDeptText || undefined,
           officialSiteText: subdomainData.villageInfo?.[0]?.officialSiteText || undefined,
+          publicQuickLinks: subdomainData.villageInfo?.[0]?.publicQuickLinks ?? undefined,
         }}
       />
       <main className="flex-1">

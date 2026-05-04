@@ -420,3 +420,17 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* Header: government quick links marquee (below main navbar row) */
+@keyframes public-quick-links-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-public-quick-links-marquee {
+  animation: public-quick-links-marquee 50s linear infinite;
+}

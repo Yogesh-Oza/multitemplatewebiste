@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, Plus, Trash2, Users, Home, MapPin, TrendingUp, RefreshCw, Video, Play, Upload, FileVideo, Link, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import type { PublicQuickLinkId, PublicQuickLinksStored } from '@/lib/public-quick-links';
+import { normalizePublicQuickLinksForSave, QUICK_LINK_URLS } from '@/lib/public-quick-links';
 
 interface Stat {
   value: string;
@@ -44,6 +46,7 @@ interface VillageInfo {
     type: 'youtube' | 'upload';
     uploadedFile?: string;
   };
+  publicQuickLinks?: PublicQuickLinksStored;
 }
 
 interface VillageInfoFormProps {
@@ -141,6 +144,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
       type: 'youtube',
       uploadedFile: ''
     },
+    publicQuickLinks: normalizePublicQuickLinksForSave(villageData?.publicQuickLinks),
   });
 
   // Update form data when villageData changes
@@ -171,6 +175,7 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
           type: 'youtube',
           uploadedFile: ''
         },
+        publicQuickLinks: normalizePublicQuickLinksForSave(villageData.publicQuickLinks),
       });
     }
   }, [villageData]);
@@ -290,6 +295,42 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
     } finally {
       setIsUploadingGovLogo((prev) => ({ ...prev, [field]: false }));
     }
+  };
+
+  const setQuickStripEnabled = (enabled: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      publicQuickLinks: {
+        ...normalizePublicQuickLinksForSave(prev.publicQuickLinks),
+        stripEnabled: enabled,
+      },
+    }));
+  };
+
+  const setQuickLinkLabel = (id: PublicQuickLinkId, label: string) => {
+    setFormData((prev) => {
+      const base = normalizePublicQuickLinksForSave(prev.publicQuickLinks);
+      return {
+        ...prev,
+        publicQuickLinks: {
+          ...base,
+          items: base.items.map((row) => (row.id === id ? { ...row, label } : row)),
+        },
+      };
+    });
+  };
+
+  const setQuickLinkRowEnabled = (id: PublicQuickLinkId, enabled: boolean) => {
+    setFormData((prev) => {
+      const base = normalizePublicQuickLinksForSave(prev.publicQuickLinks);
+      return {
+        ...prev,
+        publicQuickLinks: {
+          ...base,
+          items: base.items.map((row) => (row.id === id ? { ...row, enabled } : row)),
+        },
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -817,6 +858,65 @@ export function VillageInfoForm({ initialData }: VillageInfoFormProps) {
               ) : null}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Link className="h-5 w-5 mr-2" />
+            झळकती शासकीय दुवे
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600">
+            हे दुवे सर्व गावांसाठी दृश्यमान असतात. दुवे निश्चित आहेत; फक्त दिसणारे नाव बदलता येते. क्लिक केल्यावर नवीन टॅबमध्ये उघडतील.
+          </p>
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input
+              type="checkbox"
+              checked={normalizePublicQuickLinksForSave(formData.publicQuickLinks).stripEnabled}
+              onChange={(e) => setQuickStripEnabled(e.target.checked)}
+            />
+            हेडरखालील स्लाइडिंग पट्टी दाखवा
+          </label>
+          <div className="space-y-4">
+            {normalizePublicQuickLinksForSave(formData.publicQuickLinks).items.map((row) => {
+              const titles: Record<PublicQuickLinkId, string> = {
+                rti: 'माहिती अधिकार (RTI)',
+                rts: 'महाराष्ट्र राज्य लोकसेवा हक्क',
+                library: 'वाचनालय संगणकीकृत',
+              };
+              return (
+                <div key={row.id} className="rounded-lg border border-gray-200 bg-gray-50/60 p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="font-medium text-gray-900">{titles[row.id]}</div>
+                    <label className="flex items-center gap-2 text-xs text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={row.enabled !== false}
+                        onChange={(e) => setQuickLinkRowEnabled(row.id, e.target.checked)}
+                      />
+                      या दुव्यास पट्टीत दाखवा
+                    </label>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">दुवा (फक्त वाचन)</Label>
+                    <p className="text-xs break-all text-gray-600 mt-1">{QUICK_LINK_URLS[row.id]}</p>
+                  </div>
+                  <div>
+                    <Label htmlFor={`ql-${row.id}`}>दिसणारे नाव</Label>
+                    <Input
+                      id={`ql-${row.id}`}
+                      value={row.label}
+                      onChange={(e) => setQuickLinkLabel(row.id, e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 
