@@ -432,5 +432,14 @@ html {
 }
 
 .animate-public-quick-links-marquee {
-  animation: public-quick-links-marquee 50s linear infinite;
+  /* Must win over `prefers-reduced-motion` * { animation-duration: ... !important }` or the strip appears “stuck” */
+  animation: public-quick-links-marquee 45s linear infinite !important;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-public-quick-links-marquee {
+    animation-duration: 90s !important;
+    animation-iteration-count: infinite !important;
+  }
 }

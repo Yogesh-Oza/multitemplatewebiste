@@ -37,8 +37,11 @@ export function HeroSection({ heroImages, homepageSettings }: HeroSectionProps) 
     }
   }, [heroImages.length]);
 
+  /* Sticky site header (gov strip + main row + quick-links ticker) is ~9.5–10rem; keep hero in one viewport slice */
+  const heroMinH = 'min-h-[calc(100svh-10rem)]';
+
   return (
-    <section className="relative h-screen overflow-hidden">
+    <section className={`relative overflow-hidden ${heroMinH}`}>
       {/* Background Images */}
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">
@@ -48,22 +51,28 @@ export function HeroSection({ heroImages, homepageSettings }: HeroSectionProps) 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-gradient-to-br from-blue-600 to-purple-700"
-            style={{
-              backgroundImage: heroImages.length > 0 ? `url(${heroImages[currentSlide]?.imageUrl})` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
+            className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700"
+          >
+            {heroImages.length > 0 && heroImages[currentSlide]?.imageUrl ? (
+              <Image
+                src={heroImages[currentSlide].imageUrl}
+                alt={heroImages[currentSlide].altText || ''}
+                fill
+                priority={currentSlide === 0}
+                sizes="100vw"
+                className="object-cover object-[center_22%] sm:object-[center_28%]"
+                unoptimized={heroImages[currentSlide].imageUrl.startsWith('http')}
+              />
+            ) : null}
+          </motion.div>
         </AnimatePresence>
         
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/20" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 flex h-full items-center">
+      {/* Content — vertically centered inside visible hero height */}
+      <div className={`relative z-10 flex ${heroMinH} items-center py-8 md:py-12`}>
         <div className="container">
           <div className="max-w-4xl">
             <motion.h1

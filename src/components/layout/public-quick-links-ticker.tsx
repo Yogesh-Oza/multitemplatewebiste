@@ -26,9 +26,9 @@ export function PublicQuickLinksTicker({ links }: Props) {
       <div className="relative overflow-hidden py-2">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-slate-900 to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-slate-900 to-transparent" />
-        <div className="animate-public-quick-links-marquee flex w-max gap-8 whitespace-nowrap pr-8">
-          <div className="flex items-center gap-8">{segments}</div>
-          <div className="flex items-center gap-8" aria-hidden>
+        <div className="animate-public-quick-links-marquee flex w-max flex-nowrap whitespace-nowrap">
+          <div className="flex shrink-0 items-center gap-8 pr-8">{segments}</div>
+          <div className="flex shrink-0 items-center gap-8 pr-8" aria-hidden>
             {segments}
           </div>
         </div>
