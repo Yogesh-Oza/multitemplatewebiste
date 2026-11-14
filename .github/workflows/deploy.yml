@@ -1,0 +1,133 @@
+# Deploy MahaGP (Next.js) to DigitalOcean: build on GitHub Actions, ship tarball, install prod deps + PM2 on server.
+#
+# --- GitHub repository secrets (Settings → Secrets and variables → Actions) ---
+#   EC2_HOST      159.89.161.19
+#   EC2_USER      root
+#   EC2_PASSWORD  SSH password (same as scripts_for_server/remote/remote.config)
+#
+# --- Server (already done for mahagp) ---
+#   App dir: /var/www/mahagp
+#   PM2 name: mahagp  (PORT=3008)
+#   Keep /var/www/mahagp/.env on the server — this workflow never overwrites it.
+#
+name: Deploy MahaGP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Placeholder server secrets for CI build only. Runtime uses /var/www/mahagp/.env on the server.
+      # NEXT_PUBLIC_* are baked into the client bundle at build time — keep in sync with production.
+      - name: Build
+        env:
+          DATABASE_URL: mongodb://127.0.0.1:27017/ci-build
+          NEXTAUTH_SECRET: github-actions-ci-build-placeholder-secret-min-32-chars
+          NEXTAUTH_URL: https://mahagp.in
+          MAIN_DOMAIN: mahagp.in
+          NEXT_PUBLIC_BASE_URL: https://mahagp.in
+          NEXT_PUBLIC_UPLOAD_MAX_FILE_SIZE_MB: "200"
+          NEXT_PUBLIC_UPLOAD_ALLOWED_FILE_TYPES: "image/*,video/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.csv,.json,.rtf"
+          NEXT_PUBLIC_UPLOAD_BLOCKED_EXTENSIONS: ".exe,.bat,.cmd,.msi,.sh,.ps1,.scr,.com,.jar,.vb,.vbs,.jse,.wsf,.wsh,.cpl"
+        run: npm run build
+
+      - name: Create release archive
+        run: |
+          tar -czf release.tar.gz \
+            .next \
+            public \
+            prisma \
+            package.json \
+            package-lock.json \
+            next.config.ts \
+            tsconfig.json \
+            src
+
+      - name: Upload archive to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          port: 22
+          source: release.tar.gz
+          target: /tmp/
+
+      - name: Extract, install prod deps, restart PM2
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+            if [ -s "$HOME/.nvm/nvm.sh" ]; then
+              . "$HOME/.nvm/nvm.sh"
+            fi
+
+            APP_DIR=/var/www/mahagp
+            PORT=3008
+            PM2_NAME=mahagp
+
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
+
+            # Preserve production secrets
+            if [ -f .env ]; then
+              cp .env /tmp/mahagp.env.bak
+            fi
+
+            tar -xzf /tmp/release.tar.gz
+            rm -f /tmp/release.tar.gz
+
+            if [ -f /tmp/mahagp.env.bak ]; then
+              mv /tmp/mahagp.env.bak .env
+            fi
+
+            if [ ! -f .env ]; then
+              echo "ERROR: missing $APP_DIR/.env — create it once on the server before deploying"
+              exit 1
+            fi
+
+            npm ci --omit=dev
+            export NODE_ENV=production
+            export PORT=$PORT
+
+            if pm2 describe "$PM2_NAME" >/dev/null 2>&1; then
+              pm2 delete "$PM2_NAME" || true
+            fi
+            PORT=$PORT NODE_ENV=production pm2 start npm --name "$PM2_NAME" -- start
+            pm2 save
+
+            if [ -f /etc/nginx/sites-available/mahagp ]; then
+              nginx -t && systemctl reload nginx || true
+            fi
+
+            sleep 3
+            code=$(curl -sf -o /dev/null -w "%{http_code}" -H "Host: mahagp.in" "http://127.0.0.1:$PORT/" || echo fail)
+            echo "Health check: $code"
+            pm2 status "$PM2_NAME"
+            test "$code" = "200"

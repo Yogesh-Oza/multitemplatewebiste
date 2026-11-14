@@ -1,0 +1,4 @@
+HOST=159.89.161.19
+USER=root
+PASSWORD=your-password-here
+PORT=22
