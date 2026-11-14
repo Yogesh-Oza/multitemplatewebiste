@@ -74,7 +74,7 @@ jobs:
           source: release.tar.gz
           target: /tmp/
 
-      - name: Extract, install prod deps, restart PM2
+      - name: Extract, conditional npm install, restart PM2
         uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -91,9 +91,16 @@ jobs:
             APP_DIR=/var/www/mahagp
             PORT=3008
             PM2_NAME=mahagp
+            LOCK_HASH_FILE=.deploy-deps-hash
 
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
+
+            # Hash of package.json + package-lock.json before extract (empty on first deploy)
+            OLD_DEPS_HASH=""
+            if [ -f package.json ] && [ -f package-lock.json ]; then
+              OLD_DEPS_HASH=$(cat package.json package-lock.json | sha256sum | awk '{print $1}')
+            fi
 
             # Preserve production secrets
             if [ -f .env ]; then
@@ -112,7 +119,29 @@ jobs:
               exit 1
             fi
 
-            npm ci --omit=dev
+            NEW_DEPS_HASH=$(cat package.json package-lock.json | sha256sum | awk '{print $1}')
+            NEED_INSTALL=0
+            if [ ! -d node_modules ] || [ ! -f node_modules/.package-lock.json ]; then
+              echo "node_modules missing — will install prod deps"
+              NEED_INSTALL=1
+            elif [ "$NEW_DEPS_HASH" != "$OLD_DEPS_HASH" ]; then
+              echo "package.json / package-lock.json changed — will install prod deps"
+              NEED_INSTALL=1
+            elif [ ! -f "$LOCK_HASH_FILE" ] || [ "$(cat "$LOCK_HASH_FILE")" != "$NEW_DEPS_HASH" ]; then
+              echo "deps hash file missing/outdated — will install prod deps"
+              NEED_INSTALL=1
+            else
+              echo "package.json / package-lock.json unchanged — skipping npm install"
+            fi
+
+            if [ "$NEED_INSTALL" = "1" ]; then
+              npm ci --omit=dev
+              echo "$NEW_DEPS_HASH" > "$LOCK_HASH_FILE"
+            else
+              # Schema-only deploys still need a fresh Prisma client
+              npx prisma generate
+            fi
+
             export NODE_ENV=production
             export PORT=$PORT
 
