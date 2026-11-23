@@ -34,6 +34,12 @@ export interface GrSubsection {
   defaultRefreshDays: number;
   /** Info-only: no editable form */
   infoOnly?: boolean;
+  /** Full paper-style line for public sitemap (after ▶) */
+  sitemapLine?: string;
+  /** Optional group heading on sitemap (e.g. नवोन्मेषी कल्पना) */
+  groupMr?: string;
+  /** Nested paper-style bullets under this item (display only) */
+  sitemapNested?: string[];
 }
 
 export interface GrSection {
@@ -61,6 +67,8 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'हिरो बॅनर',
         titleEn: 'Hero Banner',
         helpMr: 'गावाचा फोटो, लोगो आणि घोषवाक्य अपलोड करा.',
+        sitemapLine:
+          'हिरो बॅनर: गावाचा फोटो + लोगो + घोषवाक्य ("Smart Village, Empowered People")',
         editor: 'hero-banner',
         publicPath: '/',
         anchor: 'hero',
@@ -72,6 +80,8 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'त्वरित माहिती',
         titleEn: 'Quick Info',
         helpMr: 'लोकसंख्या, घरसंख्या, साक्षरता दर, प्रभाग, क्षेत्रफळ आणि पाण्याचे स्रोत भरा.',
+        sitemapLine:
+          'त्वरित माहिती: लोकसंख्या | घरसंख्या | साक्षरता दर | प्रभाग | एकूण क्षेत्रफळ | पाण्याचे स्रोत',
         editor: 'quick-info',
         publicPath: '/',
         anchor: 'quick-info',
@@ -83,6 +93,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'ताज्या बातम्या व अद्यतन',
         titleEn: 'Latest News & Updates',
         helpMr: 'गावातील ताज्या बातम्या आणि अद्यतने जोडा.',
+        sitemapLine: 'ताज्या बातम्या व अद्यतन',
         editor: 'news-updates',
         publicPath: '/',
         anchor: 'news-updates',
@@ -94,6 +105,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'लाइव्ह हवामान विजेट',
         titleEn: 'Live Weather Widget',
         helpMr: 'हवामान API किंवा Google हवामान लिंक जोडा.',
+        sitemapLine: 'लाइव्ह हवामान विजेट (Google लिंक / API)',
         editor: 'weather-widget',
         publicPath: '/',
         anchor: 'weather',
@@ -105,6 +117,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'आजचा सुविचार / पंचायत संदेश',
         titleEn: 'Quote of the Day / Panchayat Message',
         helpMr: 'आजचा सुविचार किंवा पंचायत संदेश लिहा.',
+        sitemapLine: 'आजचा सुविचार / पंचायत संदेश',
         editor: 'daily-message',
         publicPath: '/',
         anchor: 'daily-message',
@@ -116,6 +129,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'भाषा बदल',
         titleEn: 'Language Switcher',
         helpMr: 'मराठी, हिंदी आणि इंग्रजी भाषांतर स्वयंचलित आहे. येथे फॉर्म भरण्याची गरज नाही.',
+        sitemapLine: 'भाषा बदल (मराठी / हिंदी / इंग्रजी)',
         editor: 'language-switch',
         publicPath: '/',
         anchor: 'language-switch',
@@ -128,6 +142,9 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'वेलकम व्हिडिओ',
         titleEn: 'Welcome Video',
         helpMr: 'सरपंच किंवा युवकांचा छोटा स्वागत व्हिडिओ अपलोड करा.',
+        sitemapLine:
+          'वेलकम व्हिडिओ – सरपंच / युवकांचा छोटा क्लिप गावाच्या यशाबद्दल बोलताना',
+        groupMr: 'नवोन्मेषी कल्पना',
         editor: 'welcome-video',
         publicPath: '/',
         anchor: 'welcome-video',
@@ -139,6 +156,9 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'प्रगती मीटर',
         titleEn: 'Progress Meter',
         helpMr: 'समृद्ध पंचायत, स्वच्छता टक्केवारी, नळजोडणी इत्यादी प्रगती आकडे भरा.',
+        sitemapLine:
+          'प्रगती मीटर – अॅनिमेटेड इन्फोग्राफिक (समृद्ध पंचायत, स्वच्छता %, नळजोडणी %)',
+        groupMr: 'नवोन्मेषी कल्पना',
         editor: 'progress-meter',
         publicPath: '/',
         anchor: 'progress-meter',
@@ -150,7 +170,7 @@ export const GR_SECTIONS: GrSection[] = [
   {
     id: 'about',
     number: 2,
-    titleMr: 'ग्रामपंचायतीबद्दल',
+    titleMr: 'ग्रामपंचायतीबद्दल (About the Gram Panchayat)',
     titleEn: 'About the Gram Panchayat',
     icon: 'Info',
     subsections: [
@@ -159,6 +179,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'गावाचा इतिहास',
         titleEn: 'Village History',
         helpMr: 'गावाचा ऐतिहासिक आढावा आणि टाइमलाइन भरा.',
+        sitemapLine: 'गावाचा इतिहास',
         editor: 'village-history',
         publicPath: '/',
         anchor: 'village-history',
@@ -170,6 +191,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'पंचायत संरचना',
         titleEn: 'Panchayat Structure',
         helpMr: 'सरपंच, उपसरपंच आणि सदस्यांची नावे व तपशील भरा.',
+        sitemapLine: 'पंचायत संरचना (सरपंच, उपसरपंच, सदस्य)',
         editor: 'panchayat-structure',
         publicPath: '/about',
         anchor: 'panchayat-structure',
@@ -181,6 +203,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'कार्यालय पत्ता, वेळ आणि संपर्क',
         titleEn: 'Office Details',
         helpMr: 'पंचायत कार्यालयाचा पत्ता, कार्यालयीन वेळ आणि संपर्क माहिती भरा.',
+        sitemapLine: 'कार्यालय पत्ता, वेळ आणि संपर्क',
         editor: 'office-details',
         publicPath: '/about',
         anchor: 'office-details',
@@ -192,6 +215,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'भूमिका व जबाबदाऱ्या',
         titleEn: 'Roles & Responsibilities',
         helpMr: 'कोण काय करतो ते स्पष्ट करा.',
+        sitemapLine: 'भूमिका व जबाबदाऱ्या (कोण काय करतो)',
         editor: 'roles-responsibilities',
         publicPath: '/about',
         anchor: 'roles-responsibilities',
@@ -203,6 +227,16 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'मुख्य संपर्क / आपत्कालीन क्रमांक',
         titleEn: 'Key / Emergency Contacts',
         helpMr: 'आरोग्य केंद्र, पोलीस, रुग्णवाहिका, रक्तपेढी, अग्निशमन इत्यादी क्रमांक जोडा.',
+        sitemapLine: 'मुख्य संपर्क क्रमांक / आपत्कालीन संपर्क:',
+        sitemapNested: [
+          'आरोग्य केंद्र',
+          'पोलीस',
+          'रुग्णवाहिका',
+          'रक्तपेढी',
+          'अग्निशमन',
+          'आपत्ती व्यवस्थापन',
+          'FPO गट, MSEB, वन विभाग इ.',
+        ],
         editor: 'emergency-contacts',
         publicPath: '/about',
         anchor: 'emergency-contacts',
@@ -214,6 +248,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'दृष्टीकोन, ध्येय आणि मूल्ये',
         titleEn: 'Vision, Mission & Core Values',
         helpMr: 'दृष्टीकोन, ध्येय आणि मूलभूत मूल्ये लिहा.',
+        sitemapLine: 'दृष्टीकोन, ध्येय आणि मूलभूत मूल्ये',
         editor: 'vision-mission',
         publicPath: '/about',
         anchor: 'vision-mission',
@@ -225,6 +260,7 @@ export const GR_SECTIONS: GrSection[] = [
         titleMr: 'आपले नेते ओळखा',
         titleEn: 'Know Your Leaders',
         helpMr: 'प्रत्येक नेत्याची ओळख आणि संक्षिप्त माहिती जोडा.',
+        sitemapLine: '“आपले नेते ओळखा” – प्रत्येक सदस्याची ओळख',
         editor: 'know-leaders',
         publicPath: '/',
         anchor: 'know-leaders',

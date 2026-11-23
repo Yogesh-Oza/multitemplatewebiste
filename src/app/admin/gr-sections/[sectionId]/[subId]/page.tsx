@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshStatusBadge } from '@/components/admin/gr-sections/status-badge';
@@ -28,7 +28,6 @@ export default function GrSubsectionFormPage() {
 
   const [status, setStatus] = useState<RefreshStatus>('never');
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
-  const [refreshDays, setRefreshDays] = useState(30);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
   const [lastUpdatedBy, setLastUpdatedBy] = useState<string | null>(null);
   const [activities, setActivities] = useState<ActivityRow[]>([]);
@@ -50,7 +49,6 @@ export default function GrSubsectionFormPage() {
         if (sub) {
           setStatus(sub.status);
           setDaysLeft(sub.daysLeft);
-          setRefreshDays(sub.refreshDays);
           setLastUpdatedAt(sub.lastUpdatedAt);
           setLastUpdatedBy(sub.lastUpdatedBy);
         }
@@ -96,7 +94,6 @@ export default function GrSubsectionFormPage() {
     return (
       <div className="space-y-4">
         <Link href="/admin/gr-sections" className="inline-flex items-center text-sm text-blue-700">
-          <ArrowLeft className="h-4 w-4 mr-1" />
           मागे
         </Link>
         <p>उप-विभाग सापडला नाही</p>
@@ -108,44 +105,59 @@ export default function GrSubsectionFormPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-3">
-          <Link href="/admin/gr-sections" className="text-blue-700 hover:underline">
-            विभाग
-          </Link>
-          <span>/</span>
-          <Link href={`/admin/gr-sections/${sectionId}`} className="text-blue-700 hover:underline">
-            {section.titleMr}
-          </Link>
-          <span>/</span>
-          <span className="text-gray-800">{subsection.titleMr}</span>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-3">
+            <Link href="/admin/gr-sections" className="text-blue-700 hover:underline">
+              विभाग
+            </Link>
+            <span>/</span>
+            <Link href={`/admin/gr-sections/${sectionId}`} className="text-blue-700 hover:underline">
+              {section.titleMr}
+            </Link>
+            <span>/</span>
+            <span className="text-gray-800">{subsection.titleMr}</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">{subsection.titleMr}</h1>
+          <p className="text-sm text-gray-500">{subsection.titleEn}</p>
+          <p className="text-sm text-gray-600 mt-2">{subsection.helpMr}</p>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">{subsection.titleMr}</h1>
-        <p className="text-sm text-gray-500">{subsection.titleEn}</p>
-        <p className="text-sm text-gray-600 mt-2">{subsection.helpMr}</p>
+
+        {!subsection.infoOnly && (
+          <Button
+            variant="outline"
+            className="shrink-0 self-start"
+            onClick={markReviewed}
+            disabled={isReviewing}
+          >
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            {isReviewing ? 'नोंदवत आहे...' : 'माहिती तपासली, बदल नाही'}
+          </Button>
+        )}
       </div>
 
       <Card className="border-blue-100 bg-blue-50/40">
-        <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-3">
             <RefreshStatusBadge status={status} daysLeft={daysLeft} />
-            <span className="inline-flex items-center gap-1 text-sm text-gray-700">
-              <Clock className="h-4 w-4" />
-              कालावधी: {refreshDays} दिवस
-            </span>
-            {lastUpdatedAt && (
-              <span className="text-sm text-gray-600">
-                शेवटचे अद्यतन: {new Date(lastUpdatedAt).toLocaleString('mr-IN')}
+            {lastUpdatedAt ? (
+              <span className="text-sm text-gray-700">
+                शेवटचे अद्यतन:{' '}
+                {new Date(lastUpdatedAt).toLocaleString('mr-IN', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: true,
+                })}
                 {lastUpdatedBy ? ` · ${lastUpdatedBy}` : ''}
               </span>
+            ) : (
+              <span className="text-sm text-gray-500">शेवटचे अद्यतन: अद्याप नाही</span>
             )}
           </div>
-          {!subsection.infoOnly && (
-            <Button variant="outline" onClick={markReviewed} disabled={isReviewing}>
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              {isReviewing ? 'नोंदवत आहे...' : 'माहिती तपासली, बदल नाही'}
-            </Button>
-          )}
         </CardContent>
       </Card>
 
