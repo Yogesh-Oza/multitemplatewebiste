@@ -84,49 +84,71 @@ export default async function SubdomainPage({ params }: SubdomainPageProps) {
 
   return (
     <>
-      <HeroSection 
-        heroImages={subdomainData.heroImages} 
-        homepageSettings={homepageSettings} 
-      />
+      <div id="hero">
+        <HeroSection 
+          heroImages={subdomainData.heroImages} 
+          homepageSettings={homepageSettings} 
+        />
+      </div>
       
-      <WeatherSection />
+      <div id="weather">
+        <WeatherSection />
+      </div>
+
+      <div id="language-switch" className="sr-only" aria-hidden="true">
+        भाषा बदल
+      </div>
       
-      <AboutSection villageInfo={subdomainData.villageInfo?.[0] ? {
-        ...subdomainData.villageInfo[0],
-        stats: Array.isArray(subdomainData.villageInfo[0].stats) 
-          ? subdomainData.villageInfo[0].stats as any[]
-          : []
-      } : null} />
+      <div id="quick-info">
+        <AboutSection villageInfo={subdomainData.villageInfo?.[0] ? {
+          ...subdomainData.villageInfo[0],
+          stats: Array.isArray(subdomainData.villageInfo[0].stats) 
+            ? subdomainData.villageInfo[0].stats as any[]
+            : []
+        } : null} />
+      </div>
       
       {/* Leaders and hierarchy section (CM, DCMs, Ministers, Officials) */}
-      <LeadersHierarchySection />
+      <div id="know-leaders">
+        <LeadersHierarchySection />
+      </div>
       
-      <PragatiMeterSection />
+      <div id="progress-meter">
+        <PragatiMeterSection />
+      </div>
       
       <WaterSanitationSection />
       
-      <WelcomeVideoSection homepageSettings={subdomainData.villageInfo?.[0]?.welcomeVideo ? {
-        welcomeVideo: subdomainData.villageInfo[0].welcomeVideo as any
-      } : homepageSettings && homepageSettings.mainHeading ? {
-        welcomeVideo: {
-          title: homepageSettings.mainHeading,
-          description: homepageSettings.subtitle
-        } as any
-      } : null} />
+      <div id="welcome-video">
+        <WelcomeVideoSection homepageSettings={subdomainData.villageInfo?.[0]?.welcomeVideo ? {
+          welcomeVideo: subdomainData.villageInfo[0].welcomeVideo as any
+        } : homepageSettings && homepageSettings.mainHeading ? {
+          welcomeVideo: {
+            title: homepageSettings.mainHeading,
+            description: homepageSettings.subtitle
+          } as any
+        } : null} />
+      </div>
 
       {/* Demo QR Tax Payment Section */}
       <QRTaxPaymentSection />
       
-      <NewsUpdatesSection />
+      <div id="news-updates">
+        <NewsUpdatesSection />
+      </div>
       
-      <DailyMessageSection />
+      <div id="daily-message">
+        <DailyMessageSection />
+      </div>
       
       <AnnouncementsSection announcements={subdomainData.announcements} />
       
-      <HistorySection 
-        historyCards={subdomainData.historyCards} 
-        timelineItems={timelineItems} 
-      />
+      <div id="village-history">
+        <HistorySection 
+          historyCards={subdomainData.historyCards} 
+          timelineItems={timelineItems} 
+        />
+      </div>
       
       <CulturalHeritageSection culturalHeritage={subdomainData.culturalHeritage.map(item => ({
         ...item,

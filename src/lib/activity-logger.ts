@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { validateSubdomain } from '@/lib/subdomain';
+import { getSubsectionsForModel, getSubsection } from '@/lib/gr-sections';
 
 export type ActionType = 'CREATE' | 'UPDATE' | 'DELETE';
 
@@ -127,6 +128,36 @@ export async function logActivity({
           ipAddress: ipAddress || undefined,
         },
       });
+
+      // Keep GR section refresh trackers in sync with content updates
+      if (model !== 'SectionUpdateTracker') {
+        const matches = getSubsectionsForModel(model);
+        for (const match of matches) {
+          const sub = getSubsection(match.sectionId, match.subSectionId);
+          if (!sub || sub.subsection.infoOnly) continue;
+          await prisma.sectionUpdateTracker.upsert({
+            where: {
+              subdomainId_sectionId_subSectionId: {
+                subdomainId,
+                sectionId: match.sectionId,
+                subSectionId: match.subSectionId,
+              },
+            },
+            create: {
+              subdomainId,
+              sectionId: match.sectionId,
+              subSectionId: match.subSectionId,
+              refreshDays: sub.subsection.defaultRefreshDays,
+              lastUpdatedAt: new Date(),
+              lastUpdatedBy: userName || userEmail || 'Unknown',
+            },
+            update: {
+              lastUpdatedAt: new Date(),
+              lastUpdatedBy: userName || userEmail || 'Unknown',
+            },
+          });
+        }
+      }
     } catch (error) {
       // Log error but don't throw - we don't want to break the API call
       console.error('Error logging activity:', error);

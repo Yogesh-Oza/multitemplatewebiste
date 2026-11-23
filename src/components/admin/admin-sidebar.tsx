@@ -26,11 +26,18 @@ import {
   GraduationCap,
   Leaf,
   Info,
-  History
+  History,
+  ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const adminNavItems = [
+  {
+    href: '/admin/gr-sections',
+    label: 'माहिती भरा (शासन निर्णयानुसार)',
+    icon: ClipboardList,
+    description: 'विभाग → उप-विभाग → फॉर्म. अद्ययावत कालावधी आणि क्रियाकलाप नोंदी'
+  },
   {
     href: '/admin/village-info',
     label: 'Homepage',
@@ -216,7 +223,9 @@ export function AdminSidebar({ subdomain }: AdminSidebarProps) {
         <nav className="space-y-3">
           {adminNavItems.map((item) => {
             const href = subdomain ? `/subdomain/${subdomain}/admin${item.href.replace('/admin', '')}` : item.href;
-            const isActive = pathname === href;
+            const isActive =
+              pathname === href ||
+              (item.href !== '/admin' && pathname.startsWith(href + '/'));
             return (
               <Link
                 key={item.href}

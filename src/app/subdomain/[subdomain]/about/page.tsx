@@ -88,13 +88,24 @@ export default async function SubdomainAboutPage({ params }: AboutPageProps) {
 
   return (
     <div className="min-h-screen">
-      <AboutSection villageInfo={villageInfo} />
+      <div id="village-history">
+        <AboutSection villageInfo={villageInfo} />
+      </div>
+
+      <div id="panchayat-structure" className="scroll-mt-28" />
+      <div id="vision-mission" className="scroll-mt-28" />
       
-      <OfficeInformationSection officeDetails={officeDetails} />
+      <div id="office-details" className="scroll-mt-28">
+        <OfficeInformationSection officeDetails={officeDetails} />
+      </div>
       
-      <RolesResponsibilitiesSection roles={roles} />
+      <div id="roles-responsibilities" className="scroll-mt-28">
+        <RolesResponsibilitiesSection roles={roles} />
+      </div>
       
-      <CompleteEmergencyContactsSection emergencyContacts={emergencyContacts} />
+      <div id="emergency-contacts" className="scroll-mt-28">
+        <CompleteEmergencyContactsSection emergencyContacts={emergencyContacts} />
+      </div>
     </div>
   );
 }

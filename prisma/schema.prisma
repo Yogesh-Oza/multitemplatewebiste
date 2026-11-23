@@ -873,6 +873,8 @@ model Subdomain {
   gramSabhaMeetings         GramSabhaMeeting[]
   villageStatisticsRows     VillageStatistics[]
   citizenServices           CitizenService[]
+  sectionUpdateTrackers     SectionUpdateTracker[]
+  sectionContents           SectionContent[]
 
   @@map("subdomains")
 }
@@ -2421,6 +2423,41 @@ model CitizenService {
   updatedAt          DateTime  @updatedAt
 
   @@map("citizen_services")
+}
+
+// ===== GR SECTION UPDATE TRACKING =====
+
+model SectionUpdateTracker {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId    String     @db.ObjectId
+  subdomain      Subdomain  @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  sectionId      String
+  subSectionId   String
+  refreshDays    Int        @default(30)
+  lastUpdatedAt  DateTime?
+  lastUpdatedBy  String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([subdomainId, sectionId, subSectionId])
+  @@index([subdomainId])
+  @@index([sectionId, subSectionId])
+  @@map("section_update_trackers")
+}
+
+model SectionContent {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  subdomainId  String     @db.ObjectId
+  subdomain    Subdomain  @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  sectionId    String
+  subSectionId String
+  content      Json       @default("{}")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([subdomainId, sectionId, subSectionId])
+  @@index([subdomainId])
+  @@map("section_contents")
 }
 
 // ===== ACTIVITY LOGGING SYSTEM =====
